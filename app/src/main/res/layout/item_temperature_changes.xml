@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layout_temperature_changes"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+
+    <ImageView
+        android:id="@+id/iv_temperature_changes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin24dp"
+        android:layout_marginTop="@dimen/margin12dp"
+        android:src="@drawable/ic_temperature_down"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_upcoming_rainfall">
+
+    </ImageView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin12dp"
+        android:text="@string/temperature_changes"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_temperature_changes"
+        app:layout_constraintStart_toEndOf="@+id/iv_temperature_changes"
+        app:layout_constraintTop_toTopOf="@+id/iv_temperature_changes">
+
+    </TextView>
+
+    <CheckBox
+        android:id="@+id/checkbox_temperature_changes"
+        style="@style/CheckBoxSelector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_temperature_changes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_temperature_changes">
+
+    </CheckBox>
+
+</merge>

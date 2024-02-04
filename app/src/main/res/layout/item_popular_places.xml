@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="120dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/margin12dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_place"
+        android:layout_width="110dp"
+        android:layout_height="160dp"
+        android:layout_gravity="center"
+        tools:background="@drawable/sanfrancisco_small">
+
+    </ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/places_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="@style/TextAppearance.Weather.BodySmall"
+            tools:text="Place name">
+
+        </TextView>
+
+        <CheckBox
+            android:id="@+id/checkbox_popular_places"
+            style="@style/CheckBoxSelector"
+            android:layout_width="32dp"
+            android:layout_height="32dp">
+
+        </CheckBox>
+
+    </LinearLayout>
+
+</LinearLayout>

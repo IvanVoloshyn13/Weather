@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layout_upcoming_rainfall"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+
+    <ImageView
+        android:id="@+id/iv_upcoming_rainfall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin24dp"
+        android:layout_marginTop="@dimen/margin12dp"
+        android:src="@drawable/ic_upcoming_rainfall"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_everyday_weather">
+
+    </ImageView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin12dp"
+        android:text="@string/upcoming_rainfall"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_upcoming_rainfall"
+        app:layout_constraintStart_toEndOf="@+id/iv_upcoming_rainfall"
+        app:layout_constraintTop_toTopOf="@+id/iv_upcoming_rainfall">
+
+    </TextView>
+
+    <CheckBox
+        android:id="@+id/checkbox_upcoming_rainfall"
+        style="@style/CheckBoxSelector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_upcoming_rainfall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_upcoming_rainfall">
+
+    </CheckBox>
+
+</merge>

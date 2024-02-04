@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/welcome_screen_background">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin24dp"
+        android:layout_marginTop="@dimen/margin64dp"
+        android:layout_marginEnd="@dimen/margin24dp"
+        android:elevation="16dp"
+        app:cardBackgroundColor="@color/light_blue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin12dp"
+                android:layout_marginTop="@dimen/margin12dp"
+                android:src="@drawable/ic_wt_rainy">
+
+            </ImageView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin12dp"
+                android:layout_marginTop="@dimen/margin6dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weather"
+                    android:textAppearance="@style/TextAppearance.Weather.DisplayMedium">
+
+                </TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin6dp"
+                    android:text="@string/rainfall_warning"
+                    android:textAppearance="@style/TextAppearance.Weather.BodySmall">
+
+                </TextView>
+
+
+            </LinearLayout>
+            
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tv_forecast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin24dp"
+        android:layout_marginBottom="@dimen/margin6dp"
+        android:text="@string/you_ll_never_miss_a_forecast"
+        android:textAppearance="@style/TextAppearance.Weather.DisplayMedium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card">
+
+    </TextView>
+
+
+    <TextView
+        android:id="@+id/tv_push_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin24dp"
+        android:layout_marginBottom="@dimen/margin6dp"
+        android:text="@string/push_info"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_forecast">
+
+    </TextView>
+
+
+    <include layout="@layout/item_everyday_weather" />
+
+    <include layout="@layout/item_upcoming_rainfall" />
+
+    <include layout="@layout/item_temperature_changes" />
+
+    <include layout="@layout/item_weather_alert" />
+
+    <Button
+        android:id="@+id/btt_enable_notifications"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin24dp"
+        android:backgroundTint="@color/light_gray"
+        android:paddingTop="@dimen/margin6dp"
+        android:paddingBottom="@dimen/margin6dp"
+        android:text="@string/enable_notifications"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_weather_alert">
+
+    </Button>
+
+    <TextView
+        android:id="@+id/btt_disable_notifications"
+        android:layout_width="220dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="@dimen/margin12dp"
+        android:text="@string/no_thanks"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btt_enable_notifications">
+
+    </TextView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">Weather</string>
+    <string name="login_register">Login / Register</string>
+    <string name="tools">Tools</string>
+    <string name="settings">Settings</string>
+    <string name="current_location">Current Location</string>
+    <string name="edit_location">Edit Location</string>
+    <string name="open_nav">OPEN</string>
+    <string name="close_nav">ClOSE</string>
+    <string name="gps_dialog_explain">To get weather data you need to provide gps services to update your location</string>
+    <string name="enable_location">Enable Location</string>
+    <string name="later">Later</string>
+    <string name="turn_on_location_service">Turn on Location Service</string>
+    <string name="location_disabled">Location servers are disabled</string>
+    <string name="enabled_location">Enabled location</string>
+    <string name="no_network">Network is not available</string>
+    <string name="please_enter_city_name">Please enter city name</string>
+    <string name="show_less">Show Less</string>
+    <string name="show_more">Show More</string>
+    <string name="weather">Weather</string>
+    <string name="rainfall_warning">Rainfall warning</string>
+    <string name="you_ll_never_miss_a_forecast">You\'ll never miss a forecast</string>
+    <string name="push_info">Turn on push notifications to receive the latest weather forecasts</string>
+    <string name="upcoming_rainfall">Upcoming rainfall</string>
+    <string name="everyday_weather">Everyday weather</string>
+    <string name="temperature_changes">Temperature changes</string>
+    <string name="weather_alert">Weather alert</string>
+    <string name="enable_notifications">Enable notifications</string>
+    <string name="no_thanks">No, thanks</string>
+    <string name="add_popular_places">Add popular places</string>
+    <string name="check_the_weather">Check the weather and see beautiful photos of cities around the world</string>
+    <string name="finish">Finish</string>
 </resources>

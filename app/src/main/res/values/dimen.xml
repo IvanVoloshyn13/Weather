@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="margin12dp">12dp</dimen>
+    <dimen name="margin6dp">6dp</dimen>
+    <dimen name="margin24dp">24dp</dimen>
+    <dimen name="margin64dp">64dp</dimen>
+</resources>

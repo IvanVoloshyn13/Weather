@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_everyday_weather"
+
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+
+    <ImageView
+
+        android:id="@+id/iv_everyday_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin24dp"
+        android:layout_marginTop="@dimen/margin24dp"
+        android:src="@drawable/ic_everyday_weather"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_push_info">
+
+    </ImageView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin12dp"
+        android:text="@string/everyday_weather"
+        android:textAppearance="@style/TextAppearance.Weather.BodyLarge"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_everyday_weather"
+        app:layout_constraintStart_toEndOf="@+id/iv_everyday_weather"
+        app:layout_constraintTop_toTopOf="@+id/iv_everyday_weather">
+
+    </TextView>
+
+    <CheckBox
+        android:id="@+id/checkbox_everyday_weather"
+        style="@style/CheckBoxSelector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_everyday_weather"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_everyday_weather">
+
+    </CheckBox>
+
+</merge>

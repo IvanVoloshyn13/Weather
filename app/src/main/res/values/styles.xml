@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Text Appearance-->
+
+    <style name="TextAppearance.Weather.Base" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">@color/light_white</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="TextAppearance.Weather.DisplayMedium" parent="TextAppearance.Weather.Base">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="TextAppearance.Weather.BodyLarge" parent="TextAppearance.Weather.Base">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearance.Weather.BodySmall" parent="TextAppearance.Weather.Base">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- CheckBox-->
+
+    <style name="CheckBoxSelector" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="background">@color/transparent_blue</item>
+
+        <!--Attr buttonTint change CheckBox border color -->
+        <item name="buttonTint">@color/light_white</item>
+        <item name="android:button">@drawable/checkbox_selector</item>
+    </style>
+
+</resources>
