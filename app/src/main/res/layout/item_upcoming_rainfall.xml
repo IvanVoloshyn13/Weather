@@ -16,7 +16,8 @@
         android:layout_marginTop="@dimen/margin12dp"
         android:src="@drawable/ic_upcoming_rainfall"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_everyday_weather">
+        app:layout_constraintTop_toBottomOf="@+id/iv_everyday_weather"
+        app:tint="@color/light_white">
 
     </ImageView>
 

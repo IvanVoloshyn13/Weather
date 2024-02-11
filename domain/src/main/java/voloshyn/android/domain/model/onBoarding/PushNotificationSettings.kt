@@ -1,6 +1,6 @@
 package voloshyn.android.domain.model.onBoarding
 
-data class PushNotificationsSettings(
+data class PushNotificationSettings(
     val everydayWeather: PushNotificationStatus,
     val upcomingRainfall: PushNotificationStatus,
     val temperatureChanges: PushNotificationStatus,

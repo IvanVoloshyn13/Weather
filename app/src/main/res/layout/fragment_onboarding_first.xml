@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/welcome_screen_background">
+    android:background="@drawable/welcome_screen_background"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
@@ -95,13 +98,17 @@
     </TextView>
 
 
-    <include layout="@layout/item_everyday_weather" />
+    <include
+        layout="@layout/item_everyday_weather" />
 
-    <include layout="@layout/item_upcoming_rainfall" />
+    <include
+        layout="@layout/item_upcoming_rainfall" />
 
-    <include layout="@layout/item_temperature_changes" />
+    <include
+        layout="@layout/item_temperature_changes" />
 
-    <include layout="@layout/item_weather_alert" />
+    <include
+        layout="@layout/item_weather_alert" />
 
     <Button
         android:id="@+id/btt_enable_notifications"
