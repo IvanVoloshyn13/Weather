@@ -11,7 +11,9 @@
         tools:layout="@layout/fragment_onboarding_first">
         <action
             android:id="@+id/action_firstOnBoardingFragment_to_secondOnBoardingFragment"
-            app:destination="@id/secondOnBoardingFragment" />
+            app:destination="@id/secondOnBoardingFragment"
+            app:popUpTo="@id/firstOnBoardingFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/secondOnBoardingFragment"

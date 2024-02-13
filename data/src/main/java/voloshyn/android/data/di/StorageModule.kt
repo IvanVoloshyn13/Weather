@@ -14,7 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-const val PREFERENCE_DATA_STORE_FILE_NAME = "datastore"
+const val PREFERENCE_DATA_STORE_FILE_NAME = "datastore.preferences_pb"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,7 +29,7 @@ internal object StorageModule {
             corruptionHandler = ReplaceFileCorruptionHandler(
                 produceNewData = { emptyPreferences() }
             ),
-            produceFile = { context.dataStoreFile(PREFERENCE_DATA_STORE_FILE_NAME) },
+            produceFile = { context.dataStoreFile(PREFERENCE_DATA_STORE_FILE_NAME) }
         )
     }
 

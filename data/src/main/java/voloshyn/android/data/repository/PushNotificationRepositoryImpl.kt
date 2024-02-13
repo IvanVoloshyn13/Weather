@@ -1,5 +1,6 @@
 package voloshyn.android.data.repository
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -26,7 +27,8 @@ class PushNotificationRepositoryImpl @Inject constructor(
             with(settings) {
                 preferences[PreferencesKeys.EVERYDAY_WEATHER] = everydayWeather.toBoolean()
                 preferences[PreferencesKeys.UPCOMING_RAINFALL] = upcomingRainfall.toBoolean()
-                preferences[PreferencesKeys.TEMPERATURE_CHANGES] = temperatureChanges.toBoolean()
+                preferences[PreferencesKeys.TEMPERATURE_CHANGES] =
+                    temperatureChanges.toBoolean()
                 preferences[PreferencesKeys.WEATHER_ALERT] = weatherAlert.toBoolean()
                 preferences[PreferencesKeys.SHOW_NOTIFICATIONS] = showNotifications
             }

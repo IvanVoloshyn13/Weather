@@ -25,18 +25,22 @@ class UseCaseModule {
     @Provides
     fun provideSaveNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
-    ): SavePushNotificationSettingsUseCase =
-        SavePushNotificationSettingsUseCase(pushNotificationRepository)
+    ): SavePushNotificationSettingsUseCase {
+        return  SavePushNotificationSettingsUseCase(pushNotificationRepository)
+    }
+
 
 
     @Provides
     fun providePushNotificationSettingsUseCase(
-        pushNotificationRepository: PushNotificationRepositoryImpl
+        pushNotificationRepository: PushNotificationRepository
     ): PushNotificationSettingsUseCase = PushNotificationSettingsUseCase(pushNotificationRepository)
 
 
 }
 
+@Module
+@InstallIn(SingletonComponent::class)
 internal interface RepositoryModule {
     @Binds
     fun providePushNotificationRepository(pushNotificationRepository: PushNotificationRepositoryImpl): PushNotificationRepository
