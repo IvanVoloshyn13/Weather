@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="barcelona">Barcelona</string>
+    <string name="london">London</string>
+    <string name="new_orleans">New Orleans</string>
+    <string name="oslo">Oslo</string>
+    <string name="new_york">New York</string>
+    <string name="paris">Paris</string>
+    <string name="sydney">Sydney</string>
+    <string name="san_francisco">San Francisco</string>
+</resources>

@@ -6,7 +6,7 @@
     app:startDestination="@id/firstOnBoardingFragment">
     <fragment
         android:id="@+id/firstOnBoardingFragment"
-        android:name="voloshyn.android.weather.fragment.onBoarding.FirstOnBoardingFragment"
+        android:name="voloshyn.android.weather.fragment.onBoarding.first.OnBoardingFragmentFirst"
         android:label="FirstOnBoardingFragment"
         tools:layout="@layout/fragment_onboarding_first">
         <action
@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/secondOnBoardingFragment"
-        android:name="voloshyn.android.weather.fragment.onBoarding.SecondOnBoardingFragment"
+        android:name="voloshyn.android.weather.fragment.onBoarding.second.OnBoardingFragmentSecond"
         android:label="SecondOnBoardingFragment"
         tools:layout="@layout/fragment_onboarding_second"/>
 </navigation>

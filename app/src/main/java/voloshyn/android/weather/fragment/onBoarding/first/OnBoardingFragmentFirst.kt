@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding
+package voloshyn.android.weather.fragment.onBoarding.first
 
 import android.graphics.Color
 import android.os.Bundle
@@ -20,9 +20,9 @@ import voloshyn.android.weather.databinding.ItemWeatherAlertBinding
 import voloshyn.android.weather.viewBinding
 
 @AndroidEntryPoint
-class FirstOnBoardingFragment : Fragment(R.layout.fragment_onboarding_first) {
+class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
     private val binding by viewBinding<FragmentOnboardingFirstBinding>()
-    private val viewModel: FirstOnBoardingViewModel by viewModels()
+    private val viewModel: OnBoardingViewModel by viewModels()
     private lateinit var status: MutableStateFlow<ButtonStatus>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

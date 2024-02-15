@@ -6,10 +6,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import voloshyn.android.data.repository.PushNotificationRepositoryImpl
+import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
 import voloshyn.android.domain.repository.onBoarding.PushNotificationRepository
-import voloshyn.android.domain.useCase.onBoarding.GetPushNotificationStatusUseCase
-import voloshyn.android.domain.useCase.onBoarding.PushNotificationSettingsUseCase
-import voloshyn.android.domain.useCase.onBoarding.SavePushNotificationSettingsUseCase
+import voloshyn.android.domain.useCase.GetPushNotificationStatusUseCase
+import voloshyn.android.domain.useCase.PushNotificationSettingsUseCase
+import voloshyn.android.domain.useCase.onBoarding.first.SavePushNotificationSettingsUseCase
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,15 +27,18 @@ class UseCaseModule {
     fun provideSaveNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
     ): SavePushNotificationSettingsUseCase {
-        return  SavePushNotificationSettingsUseCase(pushNotificationRepository)
+        return SavePushNotificationSettingsUseCase(pushNotificationRepository)
     }
-
 
 
     @Provides
     fun providePushNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
     ): PushNotificationSettingsUseCase = PushNotificationSettingsUseCase(pushNotificationRepository)
+
+    @Provides
+    fun provideInMemoryPlacesRepository(): InMemoryPopularPlacesRepositoryImpl =
+        InMemoryPopularPlacesRepositoryImpl()
 
 
 }
@@ -44,4 +48,6 @@ class UseCaseModule {
 internal interface RepositoryModule {
     @Binds
     fun providePushNotificationRepository(pushNotificationRepository: PushNotificationRepositoryImpl): PushNotificationRepository
+
+
 }

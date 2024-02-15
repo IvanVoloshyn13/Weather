@@ -1,10 +1,7 @@
 package voloshyn.android.weather
 
-import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import voloshyn.android.weather.fragment.onBoarding.FirstOnBoardingFragment
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -14,4 +11,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onResume()
     }
 
+}
+
+data class City(val id: Int, val name: String, val isFavourite: Boolean)
+
+fun main() {
+    val cities = listOf(City(1, "New York", false), City(2, "London", false), City(3, "Paris", false))
+    val favoriteCities = listOf(City(1, "New York", true), City(2, "London", true))
+
+    val combinedList = (favoriteCities + cities.filterNot { it.id in favoriteCities.map { favCity -> favCity.id } })
+        .distinctBy { it.id }
+
+    combinedList.forEach { println(it) }
 }

@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding
+package voloshyn.android.weather.fragment.onBoarding.first
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,12 +8,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.model.onBoarding.PushNotificationSettings
 import voloshyn.android.domain.model.onBoarding.toPushNotificationStatus
-import voloshyn.android.domain.useCase.onBoarding.SavePushNotificationSettingsUseCase
+import voloshyn.android.domain.useCase.onBoarding.first.SavePushNotificationSettingsUseCase
 import javax.inject.Inject
 
 
 @HiltViewModel
-class FirstOnBoardingViewModel @Inject constructor(
+class OnBoardingViewModel @Inject constructor(
     private val savePushNotificationSettingsUseCase: SavePushNotificationSettingsUseCase
 ) : ViewModel() {
 

@@ -1,4 +1,4 @@
-package voloshyn.android.domain.useCase.onBoarding
+package voloshyn.android.domain.useCase
 
 import voloshyn.android.domain.repository.onBoarding.PushNotificationRepository
 
