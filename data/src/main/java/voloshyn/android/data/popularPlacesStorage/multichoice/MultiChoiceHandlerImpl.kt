@@ -29,7 +29,7 @@ class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularP
     }
 
     override fun listen(): Flow<MultiChoiceState<PopularPlace>> {
-        return stateFlow.map { this }
+        return stateFlow.map { this@MultiChoiceHandlerImpl }
     }
 
     override fun clear(item: PopularPlace) {

@@ -1,26 +1,65 @@
 package voloshyn.android.weather
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
+    override fun onStart() {
+        super.onStart()
+        checkLocationPermission()
+    }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        for (permission in permissions) {
+            if (requestCode == LOCATION_REQUEST_CODE) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    return
+                } else if (shouldShowRequestPermissionRationale(permission)) {
+                    GpsPermissionDialog().show(supportFragmentManager, null)
+                } else {
+                    return
+                }
+            }
+        }
+
+    }
+
+    companion object {
+        const val LOCATION_REQUEST_CODE = 200
+    }
+
+    private fun checkLocationPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                return
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                GpsPermissionDialog().show(supportFragmentManager, null)
+            }
+            else -> {
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_REQUEST_CODE
+                )
+            }
+        }
     }
 
 }
 
-data class City(val id: Int, val name: String, val isFavourite: Boolean)
 
-fun main() {
-    val cities = listOf(City(1, "New York", false), City(2, "London", false), City(3, "Paris", false))
-    val favoriteCities = listOf(City(1, "New York", true), City(2, "London", true))
-
-    val combinedList = (favoriteCities + cities.filterNot { it.id in favoriteCities.map { favCity -> favCity.id } })
-        .distinctBy { it.id }
-
-    combinedList.forEach { println(it) }
-}

@@ -65,10 +65,12 @@ class OnBoardingViewModel @Inject constructor(
         multiChoiceHandlerImpl.toggle(place)
     }
 
-    fun checkedItems() {
+    fun checkedItems(): Array<Int> {
         val multiChoice = multiChoiceHandlerImpl as MultiChoiceState<PopularPlace>
         val elements = multiChoice.checkedItem
-        Log.d("TAG", elements.toString())
+        val placesNameArray = Array<Int>(elements.size) { 0 }
+        elements.map { it.name }.forEachIndexed { index, name -> placesNameArray[index] = name }
+        return placesNameArray
     }
 
 }

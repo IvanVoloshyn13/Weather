@@ -19,6 +19,15 @@
         android:id="@+id/secondOnBoardingFragment"
         android:name="voloshyn.android.weather.fragment.onBoarding.second.OnBoardingFragmentSecond"
         android:label="SecondOnBoardingFragment"
-        tools:layout="@layout/fragment_onboarding_second"/>
+        tools:layout="@layout/fragment_onboarding_second">
+        <action
+            android:id="@+id/action_secondOnBoardingFragment_to_weatherFragment"
+            app:destination="@id/weatherFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/weatherFragment"
+        android:name="voloshyn.android.weather.fragment.weather.WeatherFragment"
+        android:label="fragment_weather"
+        tools:layout="@layout/fragment_weather" />
 </navigation>
 

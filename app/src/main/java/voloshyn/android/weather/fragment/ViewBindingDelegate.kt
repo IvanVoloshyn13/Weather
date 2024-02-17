@@ -1,4 +1,4 @@
-package voloshyn.android.weather
+package voloshyn.android.weather.fragment
 
 import android.view.View
 import androidx.fragment.app.Fragment

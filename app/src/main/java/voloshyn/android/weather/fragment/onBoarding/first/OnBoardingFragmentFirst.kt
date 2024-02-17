@@ -17,7 +17,7 @@ import voloshyn.android.weather.databinding.ItemEverydayWeatherBinding
 import voloshyn.android.weather.databinding.ItemTemperatureChangesBinding
 import voloshyn.android.weather.databinding.ItemUpcomingRainfallBinding
 import voloshyn.android.weather.databinding.ItemWeatherAlertBinding
-import voloshyn.android.weather.viewBinding
+import voloshyn.android.weather.fragment.viewBinding
 
 @AndroidEntryPoint
 class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
