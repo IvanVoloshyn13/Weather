@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,7 +24,7 @@ import voloshyn.android.weather.fragment.viewBinding
 class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
     private val binding by viewBinding<FragmentOnboardingFirstBinding>()
     private val viewModel: OnBoardingViewModel by viewModels()
-    private lateinit var status: MutableStateFlow<ButtonStatus>
+    private lateinit var bttEnableNotificationStatus: MutableStateFlow<NotificationButtonStatus>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -41,8 +42,8 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
         var isWeatherAlertNotificationEnabled: Boolean =
             weatherAlertBinding.checkboxWeatherAlert.isChecked
 
-        status = MutableStateFlow(
-            ButtonStatus(
+        bttEnableNotificationStatus = MutableStateFlow(
+            NotificationButtonStatus(
                 isEverydayWeatherNotificationEnabled = isEverydayWeatherNotificationEnabled,
                 isUpcomingRainfallNotificationEnabled = isUpcomingRainfallNotificationEnabled,
                 isTemperatureChangesNotificationEnabled = isTemperatureChangesNotificationEnabled,
@@ -52,7 +53,7 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
 
 
         lifecycleScope.launch {
-            status.collect {
+            bttEnableNotificationStatus.collect {
                 binding.bttEnableNotifications.isEnabled = it.status
                 if (!binding.bttEnableNotifications.isEnabled) {
                     binding.bttEnableNotifications.setBackgroundColor(Color.alpha(100))
@@ -63,25 +64,25 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
 
         everydayWeatherBinding.checkboxEverydayWeather.setOnCheckedChangeListener { _, isChecked ->
             isEverydayWeatherNotificationEnabled = isChecked
-            status.update { status ->
+            bttEnableNotificationStatus.update { status ->
                 status.copy(isEverydayWeatherNotificationEnabled = isChecked)
             }
         }
         temperatureChangesBinding.checkboxTemperatureChanges.setOnCheckedChangeListener { _, isChecked ->
             isTemperatureChangesNotificationEnabled = isChecked
-            status.update { status ->
+            bttEnableNotificationStatus.update { status ->
                 status.copy(isTemperatureChangesNotificationEnabled = isChecked)
             }
         }
         upcomingRainfallBinding.checkboxUpcomingRainfall.setOnCheckedChangeListener { _, isChecked ->
             isUpcomingRainfallNotificationEnabled = isChecked
-            status.update { status ->
+            bttEnableNotificationStatus.update { status ->
                 status.copy(isUpcomingRainfallNotificationEnabled = isChecked)
             }
         }
         weatherAlertBinding.checkboxWeatherAlert.setOnCheckedChangeListener { _, isChecked ->
             isWeatherAlertNotificationEnabled = isChecked
-            status.update { status ->
+            bttEnableNotificationStatus.update { status ->
                 status.copy(isWeatherAlertNotificationEnabled = isChecked)
             }
         }
@@ -124,21 +125,23 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                 weatherAlert = isWeatherAlertNotificationEnabled
             )
         }
-        findNavController().navigate(resId = R.id.action_firstOnBoardingFragment_to_secondOnBoardingFragment)
+        val directions =
+            OnBoardingFragmentFirstDirections.actionFirstOnBoardingFragmentToSecondOnBoardingFragment()
+        findNavController().navigate(directions,
+            navOptions {
+                anim {
+                    enter = R.anim.enter
+                    exit = R.anim.exit
+                    popEnter = R.anim.pop_enter
+                    popExit = R.anim.pop_exit
+                }
+            })
+
+
     }
 
 
-    data class ButtonStatus(
-        val isEverydayWeatherNotificationEnabled: Boolean,
-        val isUpcomingRainfallNotificationEnabled: Boolean,
-        val isTemperatureChangesNotificationEnabled: Boolean,
-        val isWeatherAlertNotificationEnabled: Boolean
-    ) {
-        val status: Boolean
-            get() = (isEverydayWeatherNotificationEnabled ||
-                    isTemperatureChangesNotificationEnabled ||
-                    isUpcomingRainfallNotificationEnabled ||
-                    isWeatherAlertNotificationEnabled)
-    }
+
+
 
 }

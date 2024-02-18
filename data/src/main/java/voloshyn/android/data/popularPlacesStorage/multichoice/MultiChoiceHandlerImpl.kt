@@ -6,18 +6,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import voloshyn.android.data.popularPlacesStorage.PopularPlace
+import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import javax.inject.Inject
 
 
-class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularPlace>,
-    MultiChoiceState<PopularPlace> {
+class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularPlaceData>,
+    MultiChoiceState<PopularPlaceData> {
 
     private val checkedIds = HashSet<Int>()
-    private var items: List<PopularPlace> = emptyList()
+    private var items: List<PopularPlaceData> = emptyList()
     private val stateFlow = MutableStateFlow(OnChanged())
 
-    override fun setItemsFlow(coroutineScope: CoroutineScope, itemsFlow: Flow<List<PopularPlace>>) {
+    override fun setItemsFlow(coroutineScope: CoroutineScope, itemsFlow: Flow<List<PopularPlaceData>>) {
         coroutineScope.launch {
             itemsFlow.collectLatest { list ->
                 items = list
@@ -28,23 +28,23 @@ class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularP
         }
     }
 
-    override fun listen(): Flow<MultiChoiceState<PopularPlace>> {
+    override fun listen(): Flow<MultiChoiceState<PopularPlaceData>> {
         return stateFlow.map { this@MultiChoiceHandlerImpl }
     }
 
-    override fun clear(item: PopularPlace) {
+    override fun clear(item: PopularPlaceData) {
         if (!exists(item)) return
         checkedIds.remove(item.name)
         notifyUpdates()
     }
 
-    override fun check(item: PopularPlace) {
+    override fun check(item: PopularPlaceData) {
         if (!exists(item)) return
         checkedIds.add(item.name)
         notifyUpdates()
     }
 
-    override fun toggle(item: PopularPlace) {
+    override fun toggle(item: PopularPlaceData) {
         if (isChecked(item)) {
             clear(item)
         } else {
@@ -52,15 +52,15 @@ class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularP
         }
     }
 
-    override fun isChecked(item: PopularPlace): Boolean {
+    override fun isChecked(item: PopularPlaceData): Boolean {
         return checkedIds.contains(item.name)
     }
 
-    private fun exists(item: PopularPlace): Boolean {
+    private fun exists(item: PopularPlaceData): Boolean {
         return items.any { it.name == item.name }
     }
 
-    override val checkedItem: List<PopularPlace>
+    override val checkedItem: List<PopularPlaceData>
         get() = items.filter { checkedIds.contains(it.name) }.
             map { element ->
                 element.copy(isChecked = true)

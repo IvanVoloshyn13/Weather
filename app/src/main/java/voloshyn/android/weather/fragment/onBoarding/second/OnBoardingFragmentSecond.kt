@@ -6,13 +6,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import voloshyn.android.data.popularPlacesStorage.PopularPlace
+import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentOnboardingSecondBinding
-import voloshyn.android.weather.databinding.ItemPopularPlacesBinding
 import voloshyn.android.weather.fragment.viewBinding
 
 @AndroidEntryPoint
@@ -20,7 +20,6 @@ class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),
     OnItemClick {
     private val viewModel by viewModels<OnBoardingViewModel>()
     private val binding by viewBinding<FragmentOnboardingSecondBinding>()
-    private val itemBinding by viewBinding<ItemPopularPlacesBinding>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val rv = binding.rvPopularPlaces
@@ -32,13 +31,24 @@ class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),
             }
         }
         binding.bttFinish.setOnClickListener {
-            val savedPlacesArray = viewModel.checkedItems()
-           findNavController().navigate(R.id.action_secondOnBoardingFragment_to_weatherFragment)
+            viewModel.save(viewModel.checkedItems())
+            val directions =
+                OnBoardingFragmentSecondDirections.actionSecondOnBoardingFragmentToWeatherFragment()
+            findNavController().navigate(directions,
+                navOptions {
+                    anim {
+                        enter = R.anim.enter
+                        exit = R.anim.exit
+                        popEnter = R.anim.pop_enter
+                        popExit = R.anim.pop_exit
+                    }
+                }
+            )
         }
     }
 
 
-    override fun onItemClick(item: PopularPlace) {
+    override fun onItemClick(item: PopularPlaceData) {
         viewModel.toggleSelection(item)
     }
 

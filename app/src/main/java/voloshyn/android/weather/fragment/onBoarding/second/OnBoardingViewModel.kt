@@ -11,16 +11,19 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
-import voloshyn.android.data.popularPlacesStorage.PopularPlace
+import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandler
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceState
+import voloshyn.android.domain.model.onBoarding.PopularPlace
+import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
 import voloshyn.android.weather.di.PlacesMultiChoice
 import javax.inject.Inject
 
 @HiltViewModel
 class OnBoardingViewModel @Inject constructor(
     private val inMemoryPopularPlacesRepositoryImpl: InMemoryPopularPlacesRepositoryImpl,
-    @PlacesMultiChoice private val multiChoiceHandlerImpl: MultiChoiceHandler<PopularPlace>
+    @PlacesMultiChoice private val multiChoiceHandlerImpl: MultiChoiceHandler<PopularPlaceData>,
+    private val saveChosenPopularPlacesUseCase: SaveChosenPopularPlacesUseCase
 ) : ViewModel() {
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.d("EXCEPTION_HANDLER", throwable.toString())
@@ -28,8 +31,9 @@ class OnBoardingViewModel @Inject constructor(
     }
     private var viewModelScope: CoroutineScope = CoroutineScope(coroutineExceptionHandler)
 
-    private val _popularPlaces: MutableStateFlow<List<PopularPlace>> = MutableStateFlow(ArrayList())
-    val popularPlace = _popularPlaces.asStateFlow()
+    private val _popularPlacesData: MutableStateFlow<List<PopularPlaceData>> =
+        MutableStateFlow(ArrayList())
+    val popularPlace = _popularPlacesData.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -43,35 +47,53 @@ class OnBoardingViewModel @Inject constructor(
                 ::merge
             )
             combinedFlow.collectLatest {
-                _popularPlaces.emit(it)
+                _popularPlacesData.emit(it)
             }
         }
     }
 
     private fun merge(
-        list: List<PopularPlace>,
-        multiChoiceState: MultiChoiceState<PopularPlace>
-    ): List<PopularPlace> {
+        list: List<PopularPlaceData>,
+        multiChoiceState: MultiChoiceState<PopularPlaceData>
+    ): List<PopularPlaceData> {
         return list.map { place ->
-            PopularPlace(
+            PopularPlaceData(
                 image = place.image,
                 name = place.name,
-                isChecked = multiChoiceState.isChecked(place)
+                isChecked = multiChoiceState.isChecked(place),
+                id = place.id,
+                country = place.country,
+                countryCode = place.countryCode,
+                latitude = place.latitude,
+                longitude = place.longitude,
+                timezone = place.timezone
             )
         }
     }
 
-    fun toggleSelection(place: PopularPlace) {
+    fun toggleSelection(place: PopularPlaceData) {
         multiChoiceHandlerImpl.toggle(place)
     }
 
-    fun checkedItems(): Array<Int> {
-        val multiChoice = multiChoiceHandlerImpl as MultiChoiceState<PopularPlace>
+    fun checkedItems(): Array<PopularPlace> {
+        val multiChoice = multiChoiceHandlerImpl as MultiChoiceState<PopularPlaceData>
         val elements = multiChoice.checkedItem
-        val placesNameArray = Array<Int>(elements.size) { 0 }
-        elements.map { it.name }.forEachIndexed { index, name -> placesNameArray[index] = name }
+        val placesNameArray =
+            Array<PopularPlace>(elements.size) { PopularPlace() }
+        elements.map { it }
+            .forEachIndexed { index, name ->
+                placesNameArray[index] =
+                    inMemoryPopularPlacesRepositoryImpl.toDomainPopularPlace(name)
+            }
         return placesNameArray
     }
+
+    fun save(array: Array<PopularPlace>) {
+        viewModelScope.launch {
+            val rez = saveChosenPopularPlacesUseCase.invoke(array)
+        }
+    }
+
 
 }
 

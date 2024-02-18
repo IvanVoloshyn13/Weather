@@ -3,12 +3,12 @@ package voloshyn.android.weather.fragment.weather
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.marginBottom
-import androidx.core.view.marginTop
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.fragment.viewBinding
@@ -17,6 +17,7 @@ const val ANDROID_ACTION_BAR = 56
 
 class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private val binding by viewBinding<FragmentWeatherBinding>()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,6 +37,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             }
             insets
         }
+        binding.toolbar.mainToolbar.setNavigationOnClickListener {
+            binding.mainDrawer.openDrawer(GravityCompat.START)
+        }
     }
 
 
@@ -50,4 +54,5 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         }
         return screenHeight - (ANDROID_ACTION_BAR * density + 0.5f).toInt() - insetsValue - layoutMeasure
     }
+
 }

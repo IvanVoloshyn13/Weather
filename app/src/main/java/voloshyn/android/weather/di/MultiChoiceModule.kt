@@ -5,7 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import voloshyn.android.data.popularPlacesStorage.PopularPlace
+import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandler
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandlerImpl
 import javax.inject.Qualifier
@@ -20,7 +20,7 @@ class MultiChoiceModule {
 
     @Provides
     @PlacesMultiChoice
-    fun provideMultiChoiceHandler(): MultiChoiceHandler<PopularPlace> {
+    fun provideMultiChoiceHandler(): MultiChoiceHandler<PopularPlaceData> {
         return MultiChoiceHandlerImpl()
     }
 

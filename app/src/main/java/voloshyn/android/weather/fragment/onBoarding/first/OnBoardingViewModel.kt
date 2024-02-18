@@ -21,7 +21,6 @@ class OnBoardingViewModel @Inject constructor(
         Log.d("EXCEPTION_HANDLER", throwable.toString())
         Log.d("EXCEPTION_HANDLER", throwable.message.toString())
     }
-
     private val viewModelScope = CoroutineScope(coroutineExceptionHandler)
 
     suspend fun savePushNotificationSettings(
