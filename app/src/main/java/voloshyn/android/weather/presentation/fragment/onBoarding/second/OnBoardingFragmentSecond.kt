@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding.second
+package voloshyn.android.weather.presentation.fragment.onBoarding.second
 
 import android.os.Bundle
 import android.view.View
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentOnboardingSecondBinding
-import voloshyn.android.weather.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.viewBinding
 
 @AndroidEntryPoint
 class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),

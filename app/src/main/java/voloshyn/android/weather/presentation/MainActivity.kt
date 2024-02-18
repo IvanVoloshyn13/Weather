@@ -1,19 +1,37 @@
-package voloshyn.android.weather
+package voloshyn.android.weather.presentation
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.PersistableBundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import voloshyn.android.weather.R
+import voloshyn.android.weather.gpsReceiver.GpsReceiver
+import voloshyn.android.weather.gpsReceiver.GpsReceiverImpl
+import voloshyn.android.weather.presentation.dialog.GpsPermissionDialog
+
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by GpsReceiverImpl() {
 
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        registerLifecycleOwner(this, this)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
         checkLocationPermission()
+        lifecycleScope.launch {
+            gpsStatus.collectLatest {
+                Toast.makeText(this@MainActivity, it.name, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -33,12 +51,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 }
             }
         }
-
     }
 
-    companion object {
-        const val LOCATION_REQUEST_CODE = 200
-    }
 
     private fun checkLocationPermission() {
         when {
@@ -48,9 +62,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             ) == PackageManager.PERMISSION_GRANTED -> {
                 return
             }
+
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 GpsPermissionDialog().show(supportFragmentManager, null)
             }
+
             else -> {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -58,6 +74,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 )
             }
         }
+    }
+
+    companion object {
+        const val LOCATION_REQUEST_CODE = 200
     }
 
 }

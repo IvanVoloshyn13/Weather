@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding.first
+package voloshyn.android.weather.presentation.fragment.onBoarding.first
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

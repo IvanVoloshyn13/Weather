@@ -7,7 +7,7 @@
     android:gravity="center"
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    tools:context=".presentation.MainActivity">
 
     <TextView
         android:layout_width="match_parent"

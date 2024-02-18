@@ -9,7 +9,7 @@
     android:layout_marginStart="18dp"
     android:layout_marginEnd="18dp"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    tools:context=".presentation.MainActivity">
 
     <TextView
         android:id="@+id/location_service"

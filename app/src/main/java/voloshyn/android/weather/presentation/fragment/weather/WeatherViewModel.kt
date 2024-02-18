@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.weather
+package voloshyn.android.weather.presentation.fragment.weather
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

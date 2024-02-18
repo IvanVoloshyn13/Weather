@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding.second
+package voloshyn.android.weather.presentation.fragment.onBoarding.second
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater

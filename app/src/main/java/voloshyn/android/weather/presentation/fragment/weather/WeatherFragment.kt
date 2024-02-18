@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.weather
+package voloshyn.android.weather.presentation.fragment.weather
 
 import android.os.Bundle
 import android.view.View
@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
-import voloshyn.android.weather.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.viewBinding
 
 const val ANDROID_ACTION_BAR = 56
 

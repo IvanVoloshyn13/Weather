@@ -1,4 +1,4 @@
-package voloshyn.android.weather.fragment.onBoarding.first
+package voloshyn.android.weather.presentation.fragment.onBoarding.first
 
 import android.graphics.Color
 import android.os.Bundle
@@ -18,7 +18,8 @@ import voloshyn.android.weather.databinding.ItemEverydayWeatherBinding
 import voloshyn.android.weather.databinding.ItemTemperatureChangesBinding
 import voloshyn.android.weather.databinding.ItemUpcomingRainfallBinding
 import voloshyn.android.weather.databinding.ItemWeatherAlertBinding
-import voloshyn.android.weather.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.onBoarding.first.OnBoardingFragmentFirstDirections
+import voloshyn.android.weather.presentation.fragment.viewBinding
 
 @AndroidEntryPoint
 class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {

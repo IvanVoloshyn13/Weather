@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/welcome_screen_background"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    tools:context=".presentation.MainActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
