@@ -8,20 +8,23 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.fragment.viewBinding
 
 const val ANDROID_ACTION_BAR = 56
 
+@AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private val binding by viewBinding<FragmentWeatherBinding>()
+    private val viewModel: WeatherViewModel by viewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        viewModel
         val displayMetrics = requireContext().resources.displayMetrics
         val density = displayMetrics.density
         val screenHeight = displayMetrics.heightPixels

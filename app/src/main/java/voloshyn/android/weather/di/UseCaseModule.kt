@@ -5,21 +5,25 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import voloshyn.android.data.location.FusedLocationProviderImpl
 import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
 import voloshyn.android.data.repository.onBoard.PopularPlacesRepositoryImpl
 import voloshyn.android.data.repository.onBoard.PushNotificationRepositoryImpl
+import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.repository.onBoarding.PopularPlacesRepository
 import voloshyn.android.domain.repository.onBoarding.PushNotificationRepository
 import voloshyn.android.domain.useCase.GetPushNotificationStatusUseCase
 import voloshyn.android.domain.useCase.PushNotificationSettingsUseCase
 import voloshyn.android.domain.useCase.onBoarding.first.SavePushNotificationSettingsUseCase
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
+import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 
 @Module
-@InstallIn(SingletonComponent::class)
-class UseCaseModule {
+@InstallIn(ViewModelComponent::class)
+internal object UseCaseModule {
 
     @Provides
     fun provideGetShowNotificationStatus(
@@ -49,6 +53,10 @@ class UseCaseModule {
     fun provideSavePopularPlacesUseCase(popularPlacesRepository: PopularPlacesRepository): SaveChosenPopularPlacesUseCase =
         SaveChosenPopularPlacesUseCase(popularPlacesRepository)
 
+    @Provides
+    fun provideGetCurrentLocationUseCase(fusedLocationProvider: FusedLocationProvider): GetCurrentLocationUseCase =
+        GetCurrentLocationUseCase(fusedLocationProvider)
+
 
 }
 
@@ -60,5 +68,8 @@ internal interface RepositoryModule {
 
     @Binds
     fun providePopularPlacesRepository(popularPlacesRepository: PopularPlacesRepositoryImpl): PopularPlacesRepository
+
+    @Binds
+    fun provideFusedLocationProvider(fusedLocationProvider: FusedLocationProviderImpl): FusedLocationProvider
 
 }

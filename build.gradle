@@ -8,6 +8,7 @@ buildscript {
     ext.nav_version = "2.7.7"
     ext.lifecycle_version = "2.7.0"
     ext.hilt_navigation_fragment_ktx_version = "1.1.0"
+    ext.gms_location_version = "21.0.1"
     dependencies {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
