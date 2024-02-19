@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.location.LocationManager
+import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -13,10 +14,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class GpsReceiverImpl : GpsReceiver, LifecycleEventObserver {
     private lateinit var locationManager: LocationManager
     private var context: Context? = null
+    private var savedInstanceState: Bundle? = null
 
-    override fun registerLifecycleOwner(context: Context, owner: LifecycleOwner) {
+    override fun registerLifecycleOwner(
+        context: Context,
+        owner: LifecycleOwner,
+        savedInstanceState: Bundle?
+    ) {
         owner.lifecycle.addObserver(this)
         this.context = context
+        this.savedInstanceState = savedInstanceState
     }
 
     override val gpsStatus = MutableStateFlow(true.toGpsStatus())
@@ -32,26 +39,40 @@ class GpsReceiverImpl : GpsReceiver, LifecycleEventObserver {
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
             Lifecycle.Event.ON_CREATE -> {
-                locationManager =
-                    context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val isGpsEnabled: Boolean =
-                    locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                gpsStatus.tryEmit(isGpsEnabled.toGpsStatus())
+                checkGpsStatus()
+                registerReceiver()
             }
 
-            Lifecycle.Event.ON_RESUME -> {
-                context?.registerReceiver(
-                    receiver,
-                    IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-                )
+            Lifecycle.Event.ON_START -> {
+                    gpsStatus.tryEmit(checkGpsStatus().toGpsStatus())
+                    registerReceiver()
+
             }
 
             Lifecycle.Event.ON_STOP -> {
                 context?.unregisterReceiver(receiver)
-                context = null
-
             }
+
+            Lifecycle.Event.ON_DESTROY -> {
+                context = null
+            }
+
             else -> Unit
         }
+    }
+
+    private fun checkGpsStatus(): Boolean {
+        locationManager =
+            context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGpsEnabled: Boolean =
+            locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        return isGpsEnabled
+    }
+
+    private fun registerReceiver() {
+        context?.registerReceiver(
+            receiver,
+            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        )
     }
 }

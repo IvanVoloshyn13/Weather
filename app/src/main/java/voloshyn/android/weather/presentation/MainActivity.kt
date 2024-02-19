@@ -3,13 +3,9 @@ package voloshyn.android.weather.presentation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import voloshyn.android.weather.R
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsReceiverImpl
@@ -20,18 +16,10 @@ import voloshyn.android.weather.presentation.dialog.GpsPermissionDialog
 class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by GpsReceiverImpl() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        registerLifecycleOwner(this, this)
         super.onCreate(savedInstanceState)
-    }
-
-    override fun onResume() {
-        super.onResume()
+        registerLifecycleOwner(this, this, savedInstanceState)
         checkLocationPermission()
-        lifecycleScope.launch {
-            gpsStatus.collectLatest {
-                Toast.makeText(this@MainActivity, it.name, Toast.LENGTH_SHORT).show()
-            }
-        }
+
     }
 
     override fun onRequestPermissionsResult(
@@ -52,7 +40,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
             }
         }
     }
-
 
     private fun checkLocationPermission() {
         when {
@@ -79,7 +66,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
     companion object {
         const val LOCATION_REQUEST_CODE = 200
     }
-
 }
 
 

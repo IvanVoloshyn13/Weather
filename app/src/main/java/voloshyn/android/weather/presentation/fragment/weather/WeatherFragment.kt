@@ -7,11 +7,18 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
+import voloshyn.android.weather.gpsReceiver.GpsReceiver
+import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.presentation.fragment.viewBinding
 
 const val ANDROID_ACTION_BAR = 56
@@ -24,7 +31,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel
+        observeGpsStatus()
         val displayMetrics = requireContext().resources.displayMetrics
         val density = displayMetrics.density
         val screenHeight = displayMetrics.heightPixels
@@ -56,6 +63,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             layoutWeatherType.measuredHeight + layoutDailyTemp.measuredHeight + tvCurrentTemp.measuredHeight
         }
         return screenHeight - (ANDROID_ACTION_BAR * density + 0.5f).toInt() - insetsValue - layoutMeasure
+    }
+
+    private fun observeGpsStatus() {
+        val fragmentAct = requireActivity() as GpsReceiver
+        var gpsUnavailableDialog: GpsUnavailableDialog? = null
+       viewLifecycleOwner.lifecycleScope.launch {
+            fragmentAct.gpsStatus.collectLatest {
+                when (it) {
+                    GpsStatus.AVAILABLE -> {
+                        gpsUnavailableDialog?.dialog?.dismiss()
+                        gpsUnavailableDialog = null
+                    }
+
+                    GpsStatus.UNAVAILABLE -> {
+                        gpsUnavailableDialog = GpsUnavailableDialog()
+                        gpsUnavailableDialog?.show(childFragmentManager, null)
+                    }
+                }
+
+
+            }
+        }
+
     }
 
 }

@@ -1,11 +1,12 @@
 package voloshyn.android.weather.gpsReceiver
 
 import android.content.Context
+import android.os.Bundle
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.Flow
 
 interface GpsReceiver {
-    fun registerLifecycleOwner(context: Context, owner: LifecycleOwner)
+    fun registerLifecycleOwner(context: Context, owner: LifecycleOwner,savedInstanceState: Bundle?)
     val gpsStatus: Flow<GpsStatus>
 }
 
