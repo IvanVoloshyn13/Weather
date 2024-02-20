@@ -1,10 +1,10 @@
-package voloshyn.android.data.repository.onBoard
+package voloshyn.android.data.repository.onBoard.second
 
 import android.util.Log
-import voloshyn.android.data.storage.AppDatabase
-import voloshyn.android.data.storage.PlaceEntity
+import voloshyn.android.data.storage.database.AppDatabase
+import voloshyn.android.data.storage.database.PlaceEntity
 import voloshyn.android.domain.model.onBoarding.PopularPlace
-import voloshyn.android.domain.repository.onBoarding.PopularPlacesRepository
+import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import javax.inject.Inject
 
 class PopularPlacesRepositoryImpl @Inject constructor(

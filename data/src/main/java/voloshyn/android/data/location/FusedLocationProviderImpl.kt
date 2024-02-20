@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.location.FusedLocationProvider
@@ -24,6 +25,7 @@ class FusedLocationProviderImpl @Inject constructor(
 ) : FusedLocationProvider {
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getCurrentUserLocation(
     ): Resource<CurrentUserLocation> {
 

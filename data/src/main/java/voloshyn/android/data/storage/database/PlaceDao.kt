@@ -1,4 +1,4 @@
-package voloshyn.android.data.storage
+package voloshyn.android.data.storage.database
 
 import androidx.room.Dao
 import androidx.room.Insert

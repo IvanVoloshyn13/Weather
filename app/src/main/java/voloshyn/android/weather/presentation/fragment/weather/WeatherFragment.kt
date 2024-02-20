@@ -7,9 +7,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +30,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeGpsStatus()
+        updateUi()
         val displayMetrics = requireContext().resources.displayMetrics
         val density = displayMetrics.density
         val screenHeight = displayMetrics.heightPixels
@@ -52,6 +51,14 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         }
     }
 
+    private fun updateUi() {
+        lifecycleScope.launch {
+            viewModel.state.collectLatest {
+                binding.toolbar.tvToolbarTitle.text = it.location
+            }
+        }
+    }
+
 
     private fun measuredCurrentWeatherWidgetMargins(
         screenHeight: Int,
@@ -68,12 +75,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private fun observeGpsStatus() {
         val fragmentAct = requireActivity() as GpsReceiver
         var gpsUnavailableDialog: GpsUnavailableDialog? = null
-       viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             fragmentAct.gpsStatus.collectLatest {
                 when (it) {
                     GpsStatus.AVAILABLE -> {
                         gpsUnavailableDialog?.dialog?.dismiss()
                         gpsUnavailableDialog = null
+                        viewModel.getCurrentLocation()
                     }
 
                     GpsStatus.UNAVAILABLE -> {

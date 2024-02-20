@@ -32,6 +32,7 @@ class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),
         }
         binding.bttFinish.setOnClickListener {
             viewModel.save(viewModel.checkedItems())
+
             val directions =
                 OnBoardingFragmentSecondDirections.actionSecondOnBoardingFragmentToWeatherFragment()
             findNavController().navigate(directions,
@@ -39,11 +40,10 @@ class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),
                     anim {
                         enter = R.anim.enter
                         exit = R.anim.exit
-                        popEnter = R.anim.pop_enter
-                        popExit = R.anim.pop_exit
                     }
                 }
             )
+
         }
     }
 

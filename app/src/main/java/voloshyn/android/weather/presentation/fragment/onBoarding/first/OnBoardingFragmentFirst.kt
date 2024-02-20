@@ -3,6 +3,7 @@ package voloshyn.android.weather.presentation.fragment.onBoarding.first
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +19,6 @@ import voloshyn.android.weather.databinding.ItemEverydayWeatherBinding
 import voloshyn.android.weather.databinding.ItemTemperatureChangesBinding
 import voloshyn.android.weather.databinding.ItemUpcomingRainfallBinding
 import voloshyn.android.weather.databinding.ItemWeatherAlertBinding
-import voloshyn.android.weather.presentation.fragment.onBoarding.first.OnBoardingFragmentFirstDirections
 import voloshyn.android.weather.presentation.fragment.viewBinding
 
 @AndroidEntryPoint
@@ -27,8 +27,11 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
     private val viewModel: OnBoardingViewModel by viewModels()
     private lateinit var bttEnableNotificationStatus: MutableStateFlow<NotificationButtonStatus>
 
+    private var someInt = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        someInt++
         val everydayWeatherBinding = ItemEverydayWeatherBinding.bind(binding.root)
         val temperatureChangesBinding = ItemTemperatureChangesBinding.bind(binding.root)
         val upcomingRainfallBinding = ItemUpcomingRainfallBinding.bind(binding.root)
@@ -51,9 +54,10 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                 isWeatherAlertNotificationEnabled = isWeatherAlertNotificationEnabled
             )
         )
+        Toast.makeText(requireContext(), someInt.toString(), Toast.LENGTH_SHORT).show()
 
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             bttEnableNotificationStatus.collect {
                 binding.bttEnableNotifications.isEnabled = it.status
                 if (!binding.bttEnableNotifications.isEnabled) {
@@ -126,6 +130,8 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                 weatherAlert = isWeatherAlertNotificationEnabled
             )
         }
+
+
         val directions =
             OnBoardingFragmentFirstDirections.actionFirstOnBoardingFragmentToSecondOnBoardingFragment()
         findNavController().navigate(directions,
@@ -133,16 +139,11 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                 anim {
                     enter = R.anim.enter
                     exit = R.anim.exit
-                    popEnter = R.anim.pop_enter
-                    popExit = R.anim.pop_exit
                 }
-            })
-
+            }
+        )
 
     }
-
-
-
 
 
 }

@@ -1,4 +1,4 @@
-package voloshyn.android.domain.repository.onBoarding
+package voloshyn.android.domain.repository.onBoarding.second
 
 import voloshyn.android.domain.model.onBoarding.PopularPlace
 

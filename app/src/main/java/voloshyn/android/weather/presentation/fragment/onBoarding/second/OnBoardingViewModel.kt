@@ -15,6 +15,7 @@ import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandler
 import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceState
 import voloshyn.android.domain.model.onBoarding.PopularPlace
+import voloshyn.android.domain.useCase.onBoarding.second.OnBoardingCompletedUseCase
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
 import voloshyn.android.weather.di.PlacesMultiChoice
 import javax.inject.Inject
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class OnBoardingViewModel @Inject constructor(
     private val inMemoryPopularPlacesRepositoryImpl: InMemoryPopularPlacesRepositoryImpl,
     @PlacesMultiChoice private val multiChoiceHandlerImpl: MultiChoiceHandler<PopularPlaceData>,
-    private val saveChosenPopularPlacesUseCase: SaveChosenPopularPlacesUseCase
+    private val saveChosenPopularPlacesUseCase: SaveChosenPopularPlacesUseCase,
+    private val onFinished: OnBoardingCompletedUseCase
 ) : ViewModel() {
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.d("EXCEPTION_HANDLER", throwable.toString())
@@ -89,8 +91,10 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun save(array: Array<PopularPlace>) {
+        val onBoardingIsFinished = true
         viewModelScope.launch {
-            val rez = saveChosenPopularPlacesUseCase.invoke(array)
+            onFinished.invoke(onBoardingIsFinished)
+            saveChosenPopularPlacesUseCase.invoke(array)
         }
     }
 

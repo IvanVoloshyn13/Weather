@@ -10,14 +10,20 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import voloshyn.android.data.location.FusedLocationProviderImpl
 import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
-import voloshyn.android.data.repository.onBoard.PopularPlacesRepositoryImpl
-import voloshyn.android.data.repository.onBoard.PushNotificationRepositoryImpl
+import voloshyn.android.data.repository.mainActivity.OnBoardingImpl
+import voloshyn.android.data.repository.onBoard.first.PushNotificationRepositoryImpl
+import voloshyn.android.data.repository.onBoard.second.OnFinishOnBoardingCompletedImpl
+import voloshyn.android.data.repository.onBoard.second.PopularPlacesRepositoryImpl
 import voloshyn.android.domain.location.FusedLocationProvider
-import voloshyn.android.domain.repository.onBoarding.PopularPlacesRepository
-import voloshyn.android.domain.repository.onBoarding.PushNotificationRepository
-import voloshyn.android.domain.useCase.GetPushNotificationStatusUseCase
-import voloshyn.android.domain.useCase.PushNotificationSettingsUseCase
+import voloshyn.android.domain.repository.mainActivity.OnBoarding
+import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepository
+import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
+import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
+import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
+import voloshyn.android.domain.useCase.mainActivity.GetPushNotificationStatusUseCase
+import voloshyn.android.domain.useCase.mainActivity.PushNotificationSettingsUseCase
 import voloshyn.android.domain.useCase.onBoarding.first.SavePushNotificationSettingsUseCase
+import voloshyn.android.domain.useCase.onBoarding.second.OnBoardingCompletedUseCase
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 
@@ -57,6 +63,16 @@ internal object UseCaseModule {
     fun provideGetCurrentLocationUseCase(fusedLocationProvider: FusedLocationProvider): GetCurrentLocationUseCase =
         GetCurrentLocationUseCase(fusedLocationProvider)
 
+    @Provides
+    fun provideShowOnBoardingScreenUseCase(onBoarding: OnBoarding): GetOnBoardingStatusUseCase {
+        return GetOnBoardingStatusUseCase(onBoarding)
+    }
+
+    @Provides
+    fun provideOnFinishedOnBoardingUseCase(onFinished: OnBoardingCompleted): OnBoardingCompletedUseCase {
+        return OnBoardingCompletedUseCase(onFinished)
+    }
+
 
 }
 
@@ -64,12 +80,18 @@ internal object UseCaseModule {
 @InstallIn(SingletonComponent::class)
 internal interface RepositoryModule {
     @Binds
-    fun providePushNotificationRepository(pushNotificationRepository: PushNotificationRepositoryImpl): PushNotificationRepository
+    fun bindPushNotificationRepository(pushNotificationRepository: PushNotificationRepositoryImpl): PushNotificationRepository
 
     @Binds
-    fun providePopularPlacesRepository(popularPlacesRepository: PopularPlacesRepositoryImpl): PopularPlacesRepository
+    fun bindPopularPlacesRepository(popularPlacesRepository: PopularPlacesRepositoryImpl): PopularPlacesRepository
 
     @Binds
-    fun provideFusedLocationProvider(fusedLocationProvider: FusedLocationProviderImpl): FusedLocationProvider
+    fun bindFusedLocationProvider(fusedLocationProvider: FusedLocationProviderImpl): FusedLocationProvider
+
+    @Binds
+    fun bindOnBoardingRepository(onBoarding: OnBoardingImpl): OnBoarding
+
+    @Binds
+    fun bindOnFinishedOnBoarding(onFinished: OnFinishOnBoardingCompletedImpl): OnBoardingCompleted
 
 }

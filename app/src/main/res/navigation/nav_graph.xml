@@ -4,6 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/firstOnBoardingFragment">
+
+    <action
+        android:id="@+id/action_to_weatherFragment"
+        app:destination="@id/weatherFragment" />
+
+    <action
+        android:id="@+id/action_to_firstOnBoardingFragment"
+        app:destination="@id/firstOnBoardingFragment" />
     <fragment
         android:id="@+id/firstOnBoardingFragment"
         android:name="voloshyn.android.weather.presentation.fragment.onBoarding.first.OnBoardingFragmentFirst"
@@ -12,8 +20,7 @@
         <action
             android:id="@+id/action_firstOnBoardingFragment_to_secondOnBoardingFragment"
             app:destination="@id/secondOnBoardingFragment"
-            app:popUpTo="@id/firstOnBoardingFragment"
-            app:popUpToInclusive="true"/>
+          />
     </fragment>
     <fragment
         android:id="@+id/secondOnBoardingFragment"
@@ -22,13 +29,16 @@
         tools:layout="@layout/fragment_onboarding_second">
         <action
             android:id="@+id/action_secondOnBoardingFragment_to_weatherFragment"
-            app:destination="@id/weatherFragment" />
+            app:destination="@id/weatherFragment"
+            app:popUpTo="@id/secondOnBoardingFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/weatherFragment"
         android:name="voloshyn.android.weather.presentation.fragment.weather.WeatherFragment"
         android:label="fragment_weather"
-        tools:layout="@layout/fragment_weather" >
+        tools:layout="@layout/fragment_weather">
+
     </fragment>
 </navigation>
 

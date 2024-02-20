@@ -1,7 +1,7 @@
 package voloshyn.android.domain.useCase.onBoarding.first
 
 import voloshyn.android.domain.model.onBoarding.PushNotificationSettings
-import voloshyn.android.domain.repository.onBoarding.PushNotificationRepository
+import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepository
 
 class SavePushNotificationSettingsUseCase(private val pushNotificationRepository: PushNotificationRepository) {
 
