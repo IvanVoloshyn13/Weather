@@ -1,9 +1,11 @@
-package voloshyn.android.weather.presentation
+package voloshyn.android.weather.presentation.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.Resource
@@ -11,12 +13,14 @@ import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(
+class SplashViewModel @Inject constructor(
     private val onBoarding: GetOnBoardingStatusUseCase
-) : ViewModel() {
+):ViewModel() {
 
-    private val _onBoardingStatus = MutableStateFlow(OnBoardingStatus(completed = false))
-    val onBoardingStatus = _onBoardingStatus.asStateFlow()
+
+    private val _onBoardingStatus = MutableSharedFlow<OnBoardingStatus>()
+
+    val onBoardingStatus = _onBoardingStatus.asSharedFlow()
 
     init {
         viewModelScope.launch {

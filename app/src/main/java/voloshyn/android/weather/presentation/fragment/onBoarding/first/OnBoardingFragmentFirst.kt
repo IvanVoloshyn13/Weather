@@ -140,6 +140,9 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                     enter = R.anim.enter
                     exit = R.anim.exit
                 }
+                popUpTo(R.id.firstOnBoardingFragment) {
+                    inclusive = true
+                }
             }
         )
 

@@ -41,6 +41,9 @@ class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),
                         enter = R.anim.enter
                         exit = R.anim.exit
                     }
+                    popUpTo(R.id.secondOnBoardingFragment) {
+                        inclusive = true
+                    }
                 }
             )
 
