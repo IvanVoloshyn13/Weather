@@ -3,6 +3,7 @@ package voloshyn.android.weather.presentation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -86,6 +87,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
             }
         }
     }
+
+
+
+
 
     companion object {
         const val LOCATION_REQUEST_CODE = 200

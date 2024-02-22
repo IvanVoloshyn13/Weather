@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal object LocationProviderModule {
+ object LocationProviderModule {
     @Provides
     @Singleton
     fun provideFusedLocationClient(@ApplicationContext context: Context): FusedLocationProviderClient {

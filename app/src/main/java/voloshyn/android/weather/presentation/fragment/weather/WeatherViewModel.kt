@@ -3,6 +3,7 @@ package voloshyn.android.weather.presentation.fragment.weather
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,20 +21,26 @@ class WeatherViewModel @Inject constructor(
     val state = _weatherState.asStateFlow()
 
 
-     fun getCurrentLocation() {
+    fun getCurrentLocation() {
         viewModelScope.launch {
             val location = getCurrentLocationUseCase.invoke()
             when (location) {
-                is Resource.Loading -> {}
                 is Resource.Success -> {
                     location.data.let { data ->
                         _weatherState.update { state ->
-                            state.copy(location = data.city)
+                            state.copy(location = data.city, isLoading = false, isError = false)
                         }
                     }
                 }
 
-                is Resource.Error -> {}
+                is Resource.Error -> {
+                    _weatherState.update { state ->
+                        state.copy(
+                            isError = true,
+                            errorMessage = location.message
+                        )
+                    }
+                }
             }
         }
     }

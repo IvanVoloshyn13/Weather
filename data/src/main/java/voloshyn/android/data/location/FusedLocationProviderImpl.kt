@@ -8,6 +8,7 @@ import android.location.LocationManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -39,20 +40,48 @@ class FusedLocationProviderImpl @Inject constructor(
 
         if (!hasPermission) {
             return Resource.Error(message = "Check permission")
-        } else if (!isGpsEnabled || !isNetworkEnabled) {
+        } else if (!isGpsEnabled && !isNetworkEnabled) {
             return Resource.Error(message = "Check Gps or Network settings")
         }
         return suspendCancellableCoroutine { continuation ->
-            var currentUserLocation: CurrentUserLocation = CurrentUserLocation.DEFAULT
+            var currentUserLocation: CurrentUserLocation
             val geocoder = Geocoder(context, Locale.getDefault())
             var latitude: Double
             var longitude: Double
-
-            fusedLocationProviderClient.lastLocation.addOnSuccessListener { locationNullable ->
-                locationNullable?.let { location ->
-                    latitude = location.latitude
-                    longitude = location.longitude
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                fusedLocationProviderClient.getCurrentLocation(
+                    Priority.PRIORITY_HIGH_ACCURACY,
+                    null
+                ).addOnSuccessListener { locationNullable ->
+                    locationNullable?.let { location ->
+                        latitude = location.latitude
+                        longitude = location.longitude
+                        @Suppress("DEPRECATION")
+                        val address = geocoder.getFromLocation(latitude, longitude, 1)
+                        if (!address.isNullOrEmpty()) {
+                            currentUserLocation = CurrentUserLocation(
+                                latitude = latitude,
+                                longitude = longitude,
+                                city = address[0].locality,
+                                timeZoneID = ""
+                            )
+                            continuation.resume(Resource.Success(data = currentUserLocation)) {
+                                continuation.resumeWithException(it)
+                            }
+                        }
+                    } ?: continuation.resume(Resource.Error(message = "Cant get a user location"))
+                }
+                    .addOnCanceledListener {
+                        continuation.resume(Resource.Error(message = "Gps cancelling"))
+                    }
+                    .addOnFailureListener {
+                        continuation.resume(Resource.Error(message = it.message))
+                    }
+            } else {
+                fusedLocationProviderClient.lastLocation.addOnSuccessListener { locationNullable ->
+                    locationNullable?.let { location ->
+                        latitude = location.latitude
+                        longitude = location.longitude
                         geocoder.getFromLocation(
                             latitude,
                             longitude,
@@ -70,30 +99,17 @@ class FusedLocationProviderImpl @Inject constructor(
                                 }
                             }
                         }
-                    } else {
-                        @Suppress("DEPRECATION")
-                        val address = geocoder.getFromLocation(latitude, longitude, 1)
-                        if (!address.isNullOrEmpty()) {
-                            currentUserLocation = CurrentUserLocation(
-                                latitude = latitude,
-                                longitude = longitude,
-                                city = address[0].locality,
-                                timeZoneID = ""
-                            )
-                            continuation.resume(Resource.Success(data = currentUserLocation)) {
-                                continuation.resumeWithException(it)
-                            }
-                        }
+                    }?:continuation.resume(Resource.Error(message = "Cant get a user location"))
+                }
+                    .addOnCanceledListener {
+                        continuation.resume(Resource.Error(message = "Gps cancelling"))
                     }
-                }
+                    .addOnFailureListener {
+                        continuation.resume(Resource.Error(message = it.message)) }
             }
-                .addOnCanceledListener {
-                    continuation.resume(Resource.Error(message = "Gps cancelling"))
-                }
-                .addOnFailureListener {
-                    continuation.resume(Resource.Error(message = it.message))
-                }
         }
+
+
     }
 }
 
@@ -107,3 +123,4 @@ fun Context.checkLocationPermission(): Boolean {
     ) == PackageManager.PERMISSION_GRANTED)
     return hasPermission
 }
+

@@ -17,6 +17,7 @@ import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
+import voloshyn.android.weather.presentation.fragment.renderSimpleResult
 import voloshyn.android.weather.presentation.fragment.viewBinding
 
 const val ANDROID_ACTION_BAR = 56
@@ -30,7 +31,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeGpsStatus()
-        updateUi()
         val displayMetrics = requireContext().resources.displayMetrics
         val density = displayMetrics.density
         val screenHeight = displayMetrics.heightPixels
@@ -49,12 +49,22 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         binding.toolbar.mainToolbar.setNavigationOnClickListener {
             binding.mainDrawer.openDrawer(GravityCompat.START)
         }
+        updateUi()
+
     }
 
     private fun updateUi() {
         lifecycleScope.launch {
             viewModel.state.collectLatest {
-                binding.toolbar.tvToolbarTitle.text = it.location
+                renderSimpleResult(binding.scroll, it.isError, it.isLoading,
+                    onLoading = {
+                        //      binding.progressBar.visibility = View.VISIBLE
+                    }, onError = {
+                        binding.errorDialog.errorDialog.visibility = View.VISIBLE
+                    }
+                ) {
+                    binding.errorDialog.errorDialog.visibility = View.GONE
+                }
             }
         }
     }
@@ -69,7 +79,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         val layoutMeasure = with(binding) {
             layoutWeatherType.measuredHeight + layoutDailyTemp.measuredHeight + tvCurrentTemp.measuredHeight
         }
-        return screenHeight - (ANDROID_ACTION_BAR * density + 0.5f).toInt() - insetsValue - layoutMeasure
+        return screenHeight - insetsValue - layoutMeasure
     }
 
     private fun observeGpsStatus() {
