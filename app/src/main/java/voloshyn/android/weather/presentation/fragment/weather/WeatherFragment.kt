@@ -32,7 +32,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         super.onViewCreated(view, savedInstanceState)
         observeGpsStatus()
         val displayMetrics = requireContext().resources.displayMetrics
-        val density = displayMetrics.density
         val screenHeight = displayMetrics.heightPixels
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -40,7 +39,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             binding.layoutWeatherType.updateLayoutParams<MarginLayoutParams> {
                 topMargin = measuredCurrentWeatherWidgetMargins(
                     screenHeight = screenHeight,
-                    density = density,
                     systemBarInsets = systemBarInsets
                 )
             }
@@ -72,7 +70,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private fun measuredCurrentWeatherWidgetMargins(
         screenHeight: Int,
-        density: Float,
         systemBarInsets: androidx.core.graphics.Insets
     ): Int {
         val insetsValue = systemBarInsets.top + systemBarInsets.bottom
@@ -89,6 +86,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             fragmentAct.gpsStatus.collectLatest {
                 when (it) {
                     GpsStatus.AVAILABLE -> {
+                        viewModel.getCurrentLocation()
                         gpsUnavailableDialog?.dialog?.dismiss()
                         gpsUnavailableDialog = null
                         viewModel.getCurrentLocation()

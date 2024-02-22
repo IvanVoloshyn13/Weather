@@ -1,11 +1,12 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'dagger.hilt.android.plugin'
     id 'com.google.devtools.ksp'
 }
 
 android {
-    namespace 'voloshyn.android.network'
+    namespace 'com.example.http'
     compileSdk 34
 
     defaultConfig {
@@ -22,9 +23,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+
     kotlinOptions {
         jvmTarget = '1.8' // Set the JVM version to match your Java version
     }
+
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(17)
@@ -35,9 +39,17 @@ android {
 dependencies {
 
     implementation "androidx.core:core-ktx:$core_ktx"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    ksp "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
+    implementation("com.squareup.okhttp3:logging-interceptor:$logging_interceptor_version")
+    api "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.moshi:moshi:$moshi_version"
+    implementation "com.squareup.retrofit2:converter-moshi:$converter_moshi_version"
+    ksp"com.squareup.moshi:moshi-kotlin-codegen:$moshi_kotlin_codegen_version"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
+    api"com.slack.eithernet:eithernet:$eithernet_version"
+
+
+
 }
