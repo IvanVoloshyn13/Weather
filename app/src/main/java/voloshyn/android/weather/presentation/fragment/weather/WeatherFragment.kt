@@ -3,6 +3,7 @@ package voloshyn.android.weather.presentation.fragment.weather
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,10 +14,12 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import voloshyn.android.domain.model.NetworkStatus
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
+import voloshyn.android.weather.networkObserver.NetworkObserver
 import voloshyn.android.weather.presentation.fragment.renderSimpleResult
 import voloshyn.android.weather.presentation.fragment.viewBinding
 
@@ -31,6 +34,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeGpsStatus()
+        observeNetworkStatus()
         val displayMetrics = requireContext().resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
 
@@ -97,11 +101,45 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                         gpsUnavailableDialog?.show(childFragmentManager, null)
                     }
                 }
-
-
             }
         }
+    }
 
+    private fun observeNetworkStatus() {
+        val fragmentAct = requireActivity() as NetworkObserver
+        viewLifecycleOwner.lifecycleScope.launch {
+            fragmentAct.networkStatusFlow.collectLatest { network ->
+                network?.let {
+                    when (it) {
+                        NetworkStatus.AVAILABLE -> {
+                            Toast.makeText(
+                                requireContext(),
+                                it.name,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        NetworkStatus.LOST -> {
+                            Toast.makeText(
+                                requireContext(),
+                                it.name,
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                        }
+
+                        NetworkStatus.UNAVAILABLE -> {
+                            Toast.makeText(
+                                requireContext(),
+                                it.name,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.Flow
 
 interface GpsReceiver {
-    fun registerLifecycleOwner(context: Context, owner: LifecycleOwner,savedInstanceState: Bundle?)
+    fun registerLifecycleOwner(context: Context, owner: LifecycleOwner)
     val gpsStatus: Flow<GpsStatus>
 }
 

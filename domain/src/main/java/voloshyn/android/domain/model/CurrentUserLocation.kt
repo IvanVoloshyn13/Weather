@@ -1,4 +1,4 @@
-package voloshyn.android.domain.model.weather
+package voloshyn.android.domain.model
 
 data class CurrentUserLocation(
     val latitude: Double,

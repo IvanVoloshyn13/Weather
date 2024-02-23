@@ -3,7 +3,6 @@ package voloshyn.android.weather.presentation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -13,11 +12,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import voloshyn.android.weather.R
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsReceiverImpl
+import voloshyn.android.weather.networkObserver.NetworkObserver
+import voloshyn.android.weather.networkObserver.NetworkObserverImpl
 import voloshyn.android.weather.presentation.dialog.GpsPermissionDialog
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by GpsReceiverImpl() {
+class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by GpsReceiverImpl(),
+    NetworkObserver by NetworkObserverImpl() {
 
     private lateinit var navController: NavController
     private val args: MainActivityArgs by navArgs()
@@ -25,7 +27,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerLifecycleOwner(this, this, savedInstanceState)
+        registerLifecycleOwner(this, this,)
+        registerNetworkLifecycleOwner(this, this)
         checkLocationPermission()
         val completed = args.completed
 
@@ -66,6 +69,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
         }
     }
 
+
     private fun checkLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -91,10 +95,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
 
 
 
-
     companion object {
         const val LOCATION_REQUEST_CODE = 200
     }
+
 }
 
 

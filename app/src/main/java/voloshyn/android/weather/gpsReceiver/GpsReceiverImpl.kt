@@ -14,16 +14,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class GpsReceiverImpl : GpsReceiver, LifecycleEventObserver {
     private lateinit var locationManager: LocationManager
     private var context: Context? = null
-    private var savedInstanceState: Bundle? = null
 
     override fun registerLifecycleOwner(
         context: Context,
-        owner: LifecycleOwner,
-        savedInstanceState: Bundle?
+        owner: LifecycleOwner
     ) {
         owner.lifecycle.addObserver(this)
         this.context = context
-        this.savedInstanceState = savedInstanceState
+
     }
 
     override val gpsStatus = MutableStateFlow(true.toGpsStatus())
@@ -35,17 +33,11 @@ class GpsReceiverImpl : GpsReceiver, LifecycleEventObserver {
         }
     }
 
-
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
-            Lifecycle.Event.ON_CREATE -> {
-                gpsStatus.tryEmit(checkGpsStatus().toGpsStatus())
+            Lifecycle.Event.ON_RESUME -> {
                 registerReceiver()
-            }
-
-            Lifecycle.Event.ON_START -> {
-                    gpsStatus.tryEmit(checkGpsStatus().toGpsStatus())
-                    registerReceiver()
+                gpsStatus.tryEmit(checkGpsStatus().toGpsStatus())
 
             }
 

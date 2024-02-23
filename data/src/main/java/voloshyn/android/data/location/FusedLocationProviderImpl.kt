@@ -14,7 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.location.FusedLocationProvider
-import voloshyn.android.domain.model.weather.CurrentUserLocation
+import voloshyn.android.domain.model.CurrentUserLocation
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -49,6 +49,7 @@ class FusedLocationProviderImpl @Inject constructor(
             var latitude: Double
             var longitude: Double
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+
                 fusedLocationProviderClient.getCurrentLocation(
                     Priority.PRIORITY_HIGH_ACCURACY,
                     null
