@@ -30,7 +30,6 @@ suspend fun <T> executeApiCall  (
         }
         val nextDelay = attempt * attempt * defaultDelay
         delay(nextDelay)
-
     }
     throw IllegalStateException("Unknown exception from executeWithRetry.")
 }

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "voloshyn.android.weather"
-        minSdk 24
+        minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -63,5 +63,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+
+    implementation("io.coil-kt:coil:$coil_version")
 
 }

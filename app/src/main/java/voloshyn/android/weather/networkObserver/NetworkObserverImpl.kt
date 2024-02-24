@@ -18,8 +18,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.model.NetworkStatus
 
-class NetworkObserverImpl(
-) : NetworkObserver, LifecycleEventObserver {
+class NetworkObserverImpl : NetworkObserver, LifecycleEventObserver {
     private var context: Context? = null
     private var connectivityManager: ConnectivityManager? = null
     private var networkJob: Job? = null
