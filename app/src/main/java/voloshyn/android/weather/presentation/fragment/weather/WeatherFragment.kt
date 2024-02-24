@@ -42,8 +42,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private lateinit var hourlyAdapter: HourlyAdapter
     private lateinit var dailyAdapter: DailyAdapter
 
-    private val imageState = MutableStateFlow("")
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -84,162 +82,159 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                             tvToolbarTitle.text = state.location
                         }
                         if (state.backgroundImage.isNotEmpty()) {
-                            if (checkForImageUpdate(state.backgroundImage)) {
-                                val request = ImageRequest.Builder(requireContext())
-                                    .data(state.backgroundImage)
-                                    .target {
-                                        binding.mainDrawer.background = it
-                                    }
-                                    .build()
-                                requireContext().imageLoader.enqueue(request)
-                            }
-                        } else {
-                            binding.mainDrawer.background =
-                                requireContext().getDrawable(R.drawable.splash)
-                        }
-                        if (state.isLoading) {
-                            //     binding.progressBar.visibility = View.VISIBLE
-                        } else {
-                            //    binding.progressBar.visibility = View.GONE
-                        }
+                            val request = ImageRequest.Builder(requireContext())
+                                .data(state.backgroundImage)
+                                .target {
+                                    mainDrawer.background = it
+                                }
+                                .build()
+                            requireContext().imageLoader.enqueue(request)
+                        } else mainDrawer.background =
+                            requireContext().getDrawable(R.drawable.splash)
+
+
+
+                    if (state.isLoading) {
+                        //     binding.progressBar.visibility = View.VISIBLE
+                    } else {
+                        //    binding.progressBar.visibility = View.GONE
                     }
-                    // savedLocationAdapter.submitList(state.cities)
                 }
-            }
-        }
-
-    }
-
-    private fun updateWidgetForecast(state: WeatherState) {
-        dailyAdapter.submitList(state.dailyForecast as List<DailyForecast>)
-        hourlyAdapter.submitList(state.hourlyForecast as List<HourlyForecast>)
-    }
-
-    private fun updateMainWeatherWidget(state: MainWeatherInfo) {
-        binding.apply {
-            tvCurrentTemp.text =
-                state.currentTemperature.toString()
-            tvMaxTemp.text =
-                state.maxTemperature.toString()
-            tvMinTemp.text =
-                state.minTemperature.toString()
-            tvWeatherTypeDesc.text =
-                WeatherTypeRepository.fromWHO(state.weatherCode).weatherType
-            ivWeatherTypeIcon.setImageResource(WeatherTypeRepository.fromWHO(state.weatherCode).weatherIcon)
-        }
-
-    }
-
-    private fun renderUi() {
-        lifecycleScope.launch {
-            viewModel.state.collectLatest {
-                renderSimpleResult(binding.scroll, it.isError, it.isLoading,
-                    onLoading = {
-                        //      binding.progressBar.visibility = View.VISIBLE
-                    }, onError = {
-                        binding.errorDialog.errorDialog.visibility = View.VISIBLE
-                    }
-                ) {
-                    binding.errorDialog.errorDialog.visibility = View.GONE
-                }
+                // savedLocationAdapter.submitList(state.cities)
             }
         }
     }
 
+}
 
-    private fun measuredCurrentWeatherWidgetMargins(
-        screenHeight: Int,
-        systemBarInsets: androidx.core.graphics.Insets
-    ): Int {
-        val insetsValue = systemBarInsets.top + systemBarInsets.bottom
-        val layoutMeasure = with(binding) {
-            layoutWeatherType.measuredHeight + layoutDailyTemp.measuredHeight + tvCurrentTemp.measuredHeight
+private fun updateWidgetForecast(state: WeatherState) {
+    dailyAdapter.submitList(state.dailyForecast as List<DailyForecast>)
+    hourlyAdapter.submitList(state.hourlyForecast as List<HourlyForecast>)
+}
+
+private fun updateMainWeatherWidget(state: MainWeatherInfo) {
+    binding.apply {
+        tvCurrentTemp.text =
+            state.currentTemperature.toString()
+        tvMaxTemp.text =
+            state.maxTemperature.toString()
+        tvMinTemp.text =
+            state.minTemperature.toString()
+        tvWeatherTypeDesc.text =
+            WeatherTypeRepository.fromWHO(state.weatherCode).weatherType
+        ivWeatherTypeIcon.setImageResource(WeatherTypeRepository.fromWHO(state.weatherCode).weatherIcon)
+    }
+
+}
+
+private fun renderUi() {
+    lifecycleScope.launch {
+        viewModel.state.collectLatest {
+            renderSimpleResult(binding.scroll, it.isError, it.isLoading,
+                onLoading = {
+                    //      binding.progressBar.visibility = View.VISIBLE
+                }, onError = {
+                    binding.errorDialog.errorDialog.visibility = View.VISIBLE
+                }
+            ) {
+                binding.errorDialog.errorDialog.visibility = View.GONE
+            }
         }
-        return screenHeight - insetsValue - layoutMeasure
     }
+}
 
-    private fun initHourlyRecycler() {
-        widgetForecastBinding.rvHourlyForecast.adapter = hourlyAdapter
-        widgetForecastBinding.rvHourlyForecast.layoutManager =
-            LinearLayoutManager(
-                this@WeatherFragment.requireContext(),
-                RecyclerView.HORIZONTAL, false
-            )
+
+private fun measuredCurrentWeatherWidgetMargins(
+    screenHeight: Int,
+    systemBarInsets: androidx.core.graphics.Insets
+): Int {
+    val insetsValue = systemBarInsets.top + systemBarInsets.bottom
+    val layoutMeasure = with(binding) {
+        layoutWeatherType.measuredHeight + layoutDailyTemp.measuredHeight + tvCurrentTemp.measuredHeight
     }
+    return screenHeight - insetsValue - layoutMeasure
+}
 
-    private fun initDailyRecycler() {
-        widgetForecastBinding.rvDaily.adapter = dailyAdapter
-        widgetForecastBinding.rvDaily.layoutManager =
-            LinearLayoutManager(
-                this@WeatherFragment.requireContext(),
-                RecyclerView.VERTICAL, false
-            )
+private fun initHourlyRecycler() {
+    widgetForecastBinding.rvHourlyForecast.adapter = hourlyAdapter
+    widgetForecastBinding.rvHourlyForecast.layoutManager =
+        LinearLayoutManager(
+            this@WeatherFragment.requireContext(),
+            RecyclerView.HORIZONTAL, false
+        )
+}
+
+private fun initDailyRecycler() {
+    widgetForecastBinding.rvDaily.adapter = dailyAdapter
+    widgetForecastBinding.rvDaily.layoutManager =
+        LinearLayoutManager(
+            this@WeatherFragment.requireContext(),
+            RecyclerView.VERTICAL, false
+        )
+}
+
+
+private fun observeGpsStatus() {
+    val fragmentAct = requireActivity() as GpsReceiver
+    var gpsUnavailableDialog: GpsUnavailableDialog? = null
+    lifecycleScope.launch {
+        fragmentAct.gpsStatus.collectLatest {
+            when (it) {
+                GpsStatus.AVAILABLE -> {
+                    gpsUnavailableDialog?.dialog?.dismiss()
+                    gpsUnavailableDialog = null
+                    viewModel.onIntent(UpdateGpsStatus(it))
+                }
+
+                GpsStatus.UNAVAILABLE -> {
+                    gpsUnavailableDialog = GpsUnavailableDialog()
+                    gpsUnavailableDialog?.show(childFragmentManager, null)
+                }
+            }
+        }
     }
+}
 
-    private fun checkForImageUpdate(image: String): Boolean {
-        return if (imageState.value != image) {
-            imageState.value = image
-            true
-        } else false
-    }
 
-    private fun observeGpsStatus() {
-        val fragmentAct = requireActivity() as GpsReceiver
-        var gpsUnavailableDialog: GpsUnavailableDialog? = null
-        lifecycleScope.launch {
-            fragmentAct.gpsStatus.collectLatest {
+
+
+private fun observeNetworkStatus() {
+    val fragmentAct = requireActivity() as NetworkObserver
+    viewLifecycleOwner.lifecycleScope.launch {
+        fragmentAct.networkStatusFlow.collectLatest { network ->
+            network?.let {
                 when (it) {
-                    GpsStatus.AVAILABLE -> {
-                        gpsUnavailableDialog?.dialog?.dismiss()
-                        gpsUnavailableDialog = null
-                        viewModel.onIntent(GetWeatherByCurrentLocation)
+                    NetworkStatus.AVAILABLE -> {
+                        Toast.makeText(
+                            requireContext(),
+                            it.name,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        viewModel.onIntent(UpdateNetworkStatus(it))
                     }
 
-                    GpsStatus.UNAVAILABLE -> {
-                        gpsUnavailableDialog = GpsUnavailableDialog()
-                        gpsUnavailableDialog?.show(childFragmentManager, null)
+                    NetworkStatus.LOST -> {
+                        Toast.makeText(
+                            requireContext(),
+                            it.name,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        viewModel.onIntent(UpdateNetworkStatus(it))
                     }
+
+                    NetworkStatus.UNAVAILABLE -> {
+                        Toast.makeText(
+                            requireContext(),
+                            it.name,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        viewModel.onIntent(UpdateNetworkStatus(it))
+                    }
+
                 }
             }
         }
     }
-
-
-    private fun observeNetworkStatus() {
-        val fragmentAct = requireActivity() as NetworkObserver
-        viewLifecycleOwner.lifecycleScope.launch {
-            fragmentAct.networkStatusFlow.collectLatest { network ->
-                network?.let {
-                    when (it) {
-                        NetworkStatus.AVAILABLE -> {
-                            Toast.makeText(
-                                requireContext(),
-                                it.name,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                        NetworkStatus.LOST -> {
-                            Toast.makeText(
-                                requireContext(),
-                                it.name,
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                        }
-
-                        NetworkStatus.UNAVAILABLE -> {
-                            Toast.makeText(
-                                requireContext(),
-                                it.name,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                    }
-                }
-            }
-        }
-    }
+}
 
 }

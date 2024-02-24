@@ -21,6 +21,7 @@ import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCa
 import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
+import voloshyn.android.weather.gpsReceiver.GpsStatus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +46,7 @@ class WeatherViewModel @Inject constructor(
     val state = _weatherState.asStateFlow()
 
 
+
     fun onIntent(intent: WeatherScreenIntent) {
         when (intent) {
             GetWeatherByCurrentLocation -> {
@@ -57,6 +59,14 @@ class WeatherViewModel @Inject constructor(
             }
 
             is GetSavedLocationsList -> {
+            }
+
+            is UpdateNetworkStatus -> {
+                updateNetworkStatus(intent.networkStatus)
+            }
+
+            is UpdateGpsStatus -> {
+                updateGpsStatus(intent.gpsStatus)
             }
 
             is ShowMoreCities -> {
@@ -90,7 +100,7 @@ class WeatherViewModel @Inject constructor(
                 } else {
                     getTimeForLocation(timeZoneId = timezoneId)
                 }
-                  getCityImage(location.city)
+                getCityImage(location.city)
             }
             _weatherState.update {
                 it.copy(isLoading = false)
@@ -203,6 +213,25 @@ class WeatherViewModel @Inject constructor(
                         currentTime = time ?: ""
                     )
                 }
+            }
+        }
+    }
+
+    private fun updateGpsStatus(gps: GpsStatus) {
+        viewModelScope.launch {
+            if(_weatherState.value.gpsStatus!=gps){
+                getDataByCurrentUserLocation()
+            }
+            _weatherState.update { state ->
+                state.copy(gpsStatus = gps)
+            }
+        }
+    }
+
+    private fun updateNetworkStatus(network: NetworkStatus) {
+        viewModelScope.launch {
+            _weatherState.update { state ->
+                state.copy(networkStatus = network)
             }
         }
     }
