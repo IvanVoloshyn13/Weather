@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,15 @@ import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUse
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetLocationById
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedLocationsList
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
+import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessCities
+import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMoreCities
+import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
+import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
+import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenIntent
+import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +43,13 @@ class WeatherViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.d("EXCEPTION_HANDLER", throwable.message.toString())
+        Log.d("EXCEPTION_HANDLER", "$throwable,  ${throwable.message}")
+        _weatherState.update {
+            it.copy(
+                isLoading = false,
+                isError = true
+            )
+        }
     }
     private var locationTimeJob: Job? = null
 
@@ -45,6 +61,9 @@ class WeatherViewModel @Inject constructor(
         )
     val state = _weatherState.asStateFlow()
 
+    init {
+        getDataByCurrentUserLocation()
+    }
 
 
     fun onIntent(intent: WeatherScreenIntent) {
@@ -85,27 +104,61 @@ class WeatherViewModel @Inject constructor(
             }
             val location = getCurrentLocation()
             if (location != null) {
-                val timezoneId =
+                val weatherComponents = async {
                     getWeatherByLocation(
                         location.latitude,
                         location.longitude,
                         NetworkStatus.AVAILABLE
-                    ) ?: ""
+                    )
+                }.await()
 
                 if (locationTimeJob != null) {
                     stopTimeObserve()
                     if (locationTimeJob?.isCompleted == true) {
-                        getTimeForLocation(timeZoneId = timezoneId)
+                        weatherComponents?.let {
+                            getTimeForLocation(timeZoneId = it.timezone ?: "")
+                        }
                     }
                 } else {
-                    getTimeForLocation(timeZoneId = timezoneId)
+                    weatherComponents?.let {
+                        getTimeForLocation(timeZoneId = it.timezone ?: "")
+                    }
                 }
-                getCityImage(location.city)
+                val imageUrl = async { getCityImage(location.city) }.await()
+                if (weatherComponents != null) {
+                    updateUiState(
+                        location = location,
+                        weatherComponents = weatherComponents,
+                        cityImage = imageUrl
+                    )
+                }
             }
+
+        }
+    }
+
+    private fun updateUiState(
+        location: CurrentUserLocation,
+        weatherComponents: WeatherComponents,
+        cityImage: String
+    ) {
+        val dailyForecast = weatherComponents.dailyForecast
+        val hourlyForecast = weatherComponents.hourlyForecast
+        val mainWeatherInfo = weatherComponents.mainWeatherInfo
+        viewModelScope.launch {
             _weatherState.update {
-                it.copy(isLoading = false)
+                it.copy(
+                    location = location.city,
+                    mainWeatherInfo = mainWeatherInfo,
+                    hourlyForecast = hourlyForecast,
+                    dailyForecast = dailyForecast,
+                    backgroundImage = cityImage,
+                    isLoading = false,
+                    isError = false
+                )
             }
         }
+
     }
 
 
@@ -113,14 +166,6 @@ class WeatherViewModel @Inject constructor(
         val result = getCurrentLocationUseCase.invoke()
         return when (result) {
             is Resource.Success -> {
-                result.data.let { currentUserLocation ->
-                    _weatherState.update {
-                        it.copy(
-                            location = currentUserLocation.city,
-
-                            )
-                    }
-                }
                 result.data
             }
 
@@ -141,7 +186,7 @@ class WeatherViewModel @Inject constructor(
         latitude: Double,
         longitude: Double,
         networkStatus: NetworkStatus
-    ): String? {
+    ): WeatherComponents? {
         val weatherResource = weatherForCurrentLocation.invoke(
             latitude = latitude,
             longitude = longitude,
@@ -149,20 +194,7 @@ class WeatherViewModel @Inject constructor(
         )
         return when (weatherResource) {
             is Resource.Success -> {
-                weatherResource.data.let { weatherData ->
-                    val dailyForecast = weatherData.dailyForecast
-                    val hourlyForecast = weatherData.hourlyForecast
-                    val mainWeatherInfo = weatherData.mainWeatherInfo
-                    _weatherState.update {
-                        it.copy(
-                            mainWeatherInfo = mainWeatherInfo,
-                            dailyForecast = dailyForecast,
-                            hourlyForecast = hourlyForecast,
-
-                            )
-                    }
-                }
-                weatherResource.data.timezone
+                weatherResource.data
             }
 
             is Resource.Error -> {
@@ -176,23 +208,16 @@ class WeatherViewModel @Inject constructor(
                             )
                     }
                 }
-                ""
+                null
             }
         }
     }
 
-    private suspend fun getCityImage(cityName: String) {
-
+    private suspend fun getCityImage(cityName: String): String {
         val cityResource = unsplashImageByCityNameUseCase.invoke(cityName)
-        when (cityResource) {
+        return when (cityResource) {
             is Resource.Success -> {
-                if (cityResource.data.cityImageUrl.isNotEmpty()) {
-                    _weatherState.update {
-                        it.copy(
-                            backgroundImage = cityResource.data.cityImageUrl
-                        )
-                    }
-                }
+                    cityResource.data.cityImageUrl
             }
 
             is Resource.Error -> {
@@ -201,6 +226,7 @@ class WeatherViewModel @Inject constructor(
                         isError = true
                     )
                 }
+                ""
             }
         }
     }
@@ -218,21 +244,28 @@ class WeatherViewModel @Inject constructor(
     }
 
     private fun updateGpsStatus(gps: GpsStatus) {
-        viewModelScope.launch {
-            if(_weatherState.value.gpsStatus!=gps){
-                getDataByCurrentUserLocation()
-            }
-            _weatherState.update { state ->
-                state.copy(gpsStatus = gps)
-            }
+        _weatherState.update { state ->
+            state.copy(gpsStatus = gps)
         }
+//        onChange()
     }
 
     private fun updateNetworkStatus(network: NetworkStatus) {
-        viewModelScope.launch {
-            _weatherState.update { state ->
-                state.copy(networkStatus = network)
-            }
+        _weatherState.update { state ->
+            state.copy(
+                networkStatus = network,
+            )
+        }
+        // onChange()
+
+    }
+
+    private fun onChange() {
+        if (_weatherState.value.hourlyForecast?.isEmpty() == true &&
+            _weatherState.value.networkStatus == NetworkStatus.AVAILABLE &&
+            _weatherState.value.gpsStatus == GpsStatus.AVAILABLE
+        ) {
+            getDataByCurrentUserLocation()
         }
     }
 

@@ -1,4 +1,4 @@
-package voloshyn.android.weather.presentation.fragment.weather
+package voloshyn.android.weather.presentation.fragment.weather.mvi
 
 import voloshyn.android.domain.model.NetworkStatus
 import voloshyn.android.domain.model.weather.DailyForecast
@@ -7,7 +7,7 @@ import voloshyn.android.domain.model.weather.MainWeatherInfo
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 
 data class WeatherState(
-    val location: String = "Location",
+    val location: String = "",
     val mainWeatherInfo: MainWeatherInfo = MainWeatherInfo(),
     val hourlyForecast: List<HourlyForecast>? = ArrayList(),
     val dailyForecast: List<DailyForecast>? = ArrayList(),

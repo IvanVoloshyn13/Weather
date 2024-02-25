@@ -1,4 +1,4 @@
-package voloshyn.android.http.interceptors.connectivity
+package voloshyn.android.network.http.interceptors.connectivity
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -6,6 +6,7 @@ import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.Interceptor
 import okhttp3.Response
+import voloshyn.android.http.interceptors.connectivity.NoConnectivityException
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")

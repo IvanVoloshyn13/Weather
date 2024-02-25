@@ -113,8 +113,9 @@
 
         <include
             android:id="@+id/error_dialog"
-            layout="@layout/error_dialog_global"
-             />
+            layout="@layout/error_dialog_global" />
+
+        <include layout="@layout/progress_bar" />
     </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView

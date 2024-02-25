@@ -33,7 +33,6 @@ class SplashViewModel @Inject constructor(
 
     private suspend fun isOnBoardingCompleted() {
         val completed = onBoarding.invoke()
-        delay(1500)
         when (completed) {
             is Resource.Success -> {
                 completed.data.let { completed ->

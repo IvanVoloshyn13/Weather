@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import voloshyn.android.weather.R
 
-@SuppressLint("CustomSplashScreen")
 @AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,8 +14,5 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("OnDestroy","Activity")
-    }
+
 }

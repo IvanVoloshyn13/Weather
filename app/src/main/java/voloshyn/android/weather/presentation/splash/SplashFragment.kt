@@ -2,10 +2,13 @@ package voloshyn.android.weather.presentation.splash
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -26,22 +29,22 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         super.onViewCreated(view, savedInstanceState)
         renderAnimations()
         lifecycleScope.launch {
-            viewModel.onBoardingStatus.collectLatest {
-                renderSimpleResult(
-                    binding.root,
-                    isError = it.isError,
-                    isLoading = it.isLoading,
-                    onError = {
-                        binding.errorDialog.errorDialog.visibility = View.VISIBLE
-                    },
-                    onLoading = {
-                        Unit
-                    }) {
-                    launchMainScreen(it.completed)
+                viewModel.onBoardingStatus.collectLatest {
+                    renderSimpleResult(
+                        binding.root,
+                        isError = it.isError,
+                        isLoading = it.isLoading,
+                        onError = {
+                            binding.errorDialog.errorDialog.visibility = View.VISIBLE
+                        },
+                        onLoading = {
+                            Unit
+                        }) {
+                        launchMainScreen(it.completed)
+
+                    }
                 }
             }
-        }
-
     }
 
     private fun launchMainScreen(completed: Boolean) {
@@ -50,7 +53,10 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         val args = MainActivityArgs(completed)
         intent.putExtras(args.toBundle())
         startActivity(intent)
+
     }
+
+
 
     private fun renderAnimations() {
         binding.loadingIndicator.alpha = 0f

@@ -9,7 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import voloshyn.android.http.interceptors.connectivity.ConnectivityInterceptor
+import voloshyn.android.network.http.interceptors.connectivity.ConnectivityInterceptor
 import voloshyn.android.http.interceptors.emptyBody.EmptyBodyInterceptor
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -38,8 +38,8 @@ internal object HttpModule {
             .connectTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .readTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .writeTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS)
-            .addInterceptor(loggingInterceptor)
             .addNetworkInterceptor(connectivityInterceptor)
+            .addInterceptor(loggingInterceptor)
             .addInterceptor(emptyBodyInterceptor)
             .cache(Cache(File(context.cacheDir, "http_cache"), 50 * 1024 * 1024))
             .build()

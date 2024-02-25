@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface GpsReceiver {
     fun registerLifecycleOwner(context: Context, owner: LifecycleOwner)
-    val gpsStatus: Flow<GpsStatus>
+    val gpsStatus: Flow<GpsStatus?>
 }
 
 fun Boolean.toGpsStatus(): GpsStatus {
