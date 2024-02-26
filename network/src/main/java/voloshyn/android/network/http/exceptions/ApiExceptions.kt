@@ -1,4 +1,4 @@
-package voloshyn.android.http.exceptions
+package voloshyn.android.network.http.exceptions
 
 class ApiException(val code: Int, message: String?) : Exception(message) {
 
@@ -6,3 +6,8 @@ class ApiException(val code: Int, message: String?) : Exception(message) {
 
     fun isServerError(): Boolean = code >= 500
 }
+
+sealed class ApiExceptions : Exception()
+object ClientException : ApiExceptions()
+object ServerException : ApiExceptions()
+object UnknownException : ApiExceptions()

@@ -12,7 +12,10 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
+import voloshyn.android.data.mappers.toCustomError
 import voloshyn.android.domain.Resource
+import voloshyn.android.domain.customError.LocationProviderError
+import voloshyn.android.domain.customError.NoLocationPermissionError
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.model.CurrentUserLocation
 import java.util.Locale
@@ -39,9 +42,11 @@ class FusedLocationProviderImpl @Inject constructor(
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!hasPermission) {
-            return Resource.Error(message = "Check permission")
+            return Resource.Error( e = NoLocationPermissionError())
         } else if (!isGpsEnabled && !isNetworkEnabled) {
-            return Resource.Error(message = "Check Gps or Network settings")
+            return Resource.Error(
+                e = LocationProviderError()
+            )
         }
         return suspendCancellableCoroutine { continuation ->
             var currentUserLocation: CurrentUserLocation
@@ -70,13 +75,25 @@ class FusedLocationProviderImpl @Inject constructor(
                                 continuation.resumeWithException(it)
                             }
                         }
-                    } ?: continuation.resume(Resource.Error(message = "Cant get a user location"))
+                    } ?: continuation.resume(
+                        Resource.Error(
+                            e = LocationProviderError()
+                        )
+                    )
                 }
                     .addOnCanceledListener {
-                        continuation.resume(Resource.Error(message = "Gps cancelling"))
+                        continuation.resume(
+                            Resource.Error(
+                                e = LocationProviderError()
+                            )
+                        )
                     }
                     .addOnFailureListener {
-                        continuation.resume(Resource.Error(message = it.message))
+                        continuation.resume(
+                            Resource.Error(
+                                e = LocationProviderError()
+                            )
+                        )
                     }
             } else {
                 fusedLocationProviderClient.lastLocation.addOnSuccessListener { locationNullable ->
@@ -100,13 +117,26 @@ class FusedLocationProviderImpl @Inject constructor(
                                 }
                             }
                         }
-                    }?:continuation.resume(Resource.Error(message = "Cant get a user location"))
+                    } ?: continuation.resume(
+                        Resource.Error(
+                            e = LocationProviderError()
+                        )
+                    )
                 }
                     .addOnCanceledListener {
-                        continuation.resume(Resource.Error(message = "Gps cancelling"))
+                        continuation.resume(
+                            Resource.Error(
+                                e = LocationProviderError()
+                            )
+                        )
                     }
                     .addOnFailureListener {
-                        continuation.resume(Resource.Error(message = it.message)) }
+                        continuation.resume(
+                            Resource.Error(
+                                e = LocationProviderError()
+                            )
+                        )
+                    }
             }
         }
 

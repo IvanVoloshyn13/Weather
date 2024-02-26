@@ -46,13 +46,13 @@ class SplashViewModel @Inject constructor(
             }
 
             is Resource.Error -> {
-                completed.message.let { message ->
+                completed.e.let { exception ->
                     _onBoardingStatus.emit(
                         OnBoardingStatus(
                             isError = true,
                             completed = false,
                             isLoading = false,
-                            errorMessage = message
+                            errorMessage = exception.message
                         )
                     )
                 }

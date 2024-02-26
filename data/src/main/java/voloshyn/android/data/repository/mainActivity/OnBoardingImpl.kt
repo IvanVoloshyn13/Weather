@@ -1,7 +1,6 @@
 package voloshyn.android.data.repository.mainActivity
 
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.delay
@@ -11,7 +10,6 @@ import voloshyn.android.data.storage.datastorePreferences.DatastoreHelpers
 import voloshyn.android.data.storage.datastorePreferences.PreferencesKeys
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.repository.mainActivity.OnBoarding
-import java.io.IOException
 import javax.inject.Inject
 
 

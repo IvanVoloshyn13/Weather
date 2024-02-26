@@ -1,7 +1,7 @@
 package voloshyn.android.data.storage.datastorePreferences
 
-import android.util.Log
 import voloshyn.android.domain.Resource
+import voloshyn.android.domain.customError.IOError
 import java.io.IOException
 
 object DatastoreHelpers {
@@ -10,7 +10,7 @@ object DatastoreHelpers {
             block()
         } catch (e: Exception) {
             if (e is IOException) {
-                Resource.Error(message = e.message)
+                Resource.Error(e = IOException())
             } else {
                 throw e
             }

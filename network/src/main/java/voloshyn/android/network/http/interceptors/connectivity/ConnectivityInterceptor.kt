@@ -6,7 +6,6 @@ import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.Interceptor
 import okhttp3.Response
-import voloshyn.android.http.interceptors.connectivity.NoConnectivityException
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")

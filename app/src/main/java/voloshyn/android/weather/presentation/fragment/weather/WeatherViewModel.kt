@@ -8,13 +8,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.Resource
+import voloshyn.android.domain.customError.CustomError
 import voloshyn.android.domain.model.CurrentUserLocation
 import voloshyn.android.domain.model.NetworkStatus
 import voloshyn.android.domain.model.weather.WeatherComponents
@@ -28,6 +31,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedLocati
 import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessCities
 import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMoreCities
+import voloshyn.android.weather.presentation.fragment.weather.mvi.SideEffects
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenIntent
@@ -61,6 +65,9 @@ class WeatherViewModel @Inject constructor(
         )
     val state = _weatherState.asStateFlow()
 
+    private val _sideEffectsState = MutableSharedFlow<SideEffects>()
+    val sideEffects = _sideEffectsState.asSharedFlow()
+
     init {
         getDataByCurrentUserLocation()
     }
@@ -75,9 +82,11 @@ class WeatherViewModel @Inject constructor(
             }
 
             is GetLocationById -> {
+                TODO()
             }
 
             is GetSavedLocationsList -> {
+                TODO()
             }
 
             is UpdateNetworkStatus -> {
@@ -89,10 +98,11 @@ class WeatherViewModel @Inject constructor(
             }
 
             is ShowMoreCities -> {
+                TODO()
             }
 
             is ShowLessCities -> {
-
+                TODO()
             }
         }
     }
@@ -100,15 +110,19 @@ class WeatherViewModel @Inject constructor(
     private fun getDataByCurrentUserLocation() {
         viewModelScope.launch {
             _weatherState.update {
-                it.copy(isLoading = true)
+                it.copy(
+                    isLoading = true,
+                    isError = false,
+                )
             }
             val location = getCurrentLocation()
             if (location != null) {
+                Log.d("WEATHER", "ViewModel")
                 val weatherComponents = async {
                     getWeatherByLocation(
                         location.latitude,
                         location.longitude,
-                        NetworkStatus.AVAILABLE
+                        _weatherState.value.networkStatus ?: NetworkStatus.LOST
                     )
                 }.await()
 
@@ -164,21 +178,15 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun getCurrentLocation(): CurrentUserLocation? {
         val result = getCurrentLocationUseCase.invoke()
-        return when (result) {
-            is Resource.Success -> {
-                result.data
+        return try {
+            result.toResult()
+        } catch (e: Exception) {
+            _weatherState.update {
+                it.copy(
+                    location = CurrentUserLocation.DEFAULT.city,
+                )
             }
-
-            is Resource.Error -> {
-                result.message?.let { message ->
-                    _weatherState.update {
-                        it.copy(
-                            location = CurrentUserLocation.DEFAULT.city
-                        )
-                    }
-                }
-                null
-            }
+            null
         }
     }
 
@@ -192,43 +200,21 @@ class WeatherViewModel @Inject constructor(
             longitude = longitude,
             networkStatus = networkStatus
         )
-        return when (weatherResource) {
-            is Resource.Success -> {
-                weatherResource.data
-            }
-
-            is Resource.Error -> {
-                weatherResource.message?.let { message ->
-                    _weatherState.update {
-                        it.copy(
-                            mainWeatherInfo = WeatherComponents().mainWeatherInfo,
-                            dailyForecast = WeatherComponents().dailyForecast,
-                            hourlyForecast = WeatherComponents().hourlyForecast,
-
-                            )
-                    }
-                }
-                null
-            }
+        return try {
+            weatherResource.toResult()
+        } catch (e: CustomError) {
+            null
         }
     }
 
     private suspend fun getCityImage(cityName: String): String {
         val cityResource = unsplashImageByCityNameUseCase.invoke(cityName)
-        return when (cityResource) {
-            is Resource.Success -> {
-                    cityResource.data.cityImageUrl
-            }
-
-            is Resource.Error -> {
-                _weatherState.update {
-                    it.copy(
-                        isError = true
-                    )
-                }
-                ""
-            }
+        return try {
+            cityResource.toResult().cityImageUrl
+        } catch (e: Exception) {
+            e.message ?: ""
         }
+
     }
 
     private fun getTimeForLocation(timeZoneId: String) {
@@ -236,7 +222,7 @@ class WeatherViewModel @Inject constructor(
             currentTime.invoke(timeZoneId, true).cancellable().collectLatest { time ->
                 _weatherState.update {
                     it.copy(
-                        currentTime = time ?: ""
+                        currentTime = time
                     )
                 }
             }
@@ -247,31 +233,50 @@ class WeatherViewModel @Inject constructor(
         _weatherState.update { state ->
             state.copy(gpsStatus = gps)
         }
-//        onChange()
+        if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
     }
 
     private fun updateNetworkStatus(network: NetworkStatus) {
-        _weatherState.update { state ->
-            state.copy(
-                networkStatus = network,
-            )
-        }
-        // onChange()
-
+            _weatherState.update { state ->
+                state.copy(
+                    networkStatus = network,
+                )
+            }
+            if (network == NetworkStatus.AVAILABLE && _weatherState.value.dailyForecast.isEmpty()) onChange()
     }
 
     private fun onChange() {
-        if (_weatherState.value.hourlyForecast?.isEmpty() == true &&
-            _weatherState.value.networkStatus == NetworkStatus.AVAILABLE &&
-            _weatherState.value.gpsStatus == GpsStatus.AVAILABLE
-        ) {
-            getDataByCurrentUserLocation()
-        }
+        getDataByCurrentUserLocation()
     }
 
     private suspend fun stopTimeObserve() {
         locationTimeJob?.cancelAndJoin()
     }
 
+    private fun <T> Resource<T>.toResult(): T {
+        return when (this) {
+            is Resource.Success -> data
+            is Resource.Error -> {
+                _weatherState.update {
+                    it.copy(
+                        isLoading = false,
+                        isError = e !is CustomError,
+                        errorMessage = e.message ?: ""
+                    )
+                }
+                viewModelScope.launch {
+                    _sideEffectsState.emit(
+                        SideEffects(
+                            showErrorMessage = true,
+                            errorMessage = e.message ?: ""
+                        )
+                    )
+                }
+
+                throw e
+            }
+        }
+    }
 
 }
+

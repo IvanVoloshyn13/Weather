@@ -1,4 +1,4 @@
-package voloshyn.android.http.interceptors.emptyBody
+package voloshyn.android.network.http.interceptors.emptyBody
 
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType

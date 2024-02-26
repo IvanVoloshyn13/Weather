@@ -10,7 +10,7 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import voloshyn.android.network.http.interceptors.connectivity.ConnectivityInterceptor
-import voloshyn.android.http.interceptors.emptyBody.EmptyBodyInterceptor
+import voloshyn.android.network.http.interceptors.emptyBody.EmptyBodyInterceptor
 import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton

@@ -9,13 +9,13 @@ import voloshyn.android.weather.gpsReceiver.GpsStatus
 data class WeatherState(
     val location: String = "",
     val mainWeatherInfo: MainWeatherInfo = MainWeatherInfo(),
-    val hourlyForecast: List<HourlyForecast>? = ArrayList(),
-    val dailyForecast: List<DailyForecast>? = ArrayList(),
+    val hourlyForecast: List<HourlyForecast> = ArrayList(),
+    val dailyForecast: List<DailyForecast> = ArrayList(),
     val currentTime: String = "00:00",
     val backgroundImage: String = "",
     val gpsStatus: GpsStatus? = null,
     val networkStatus: NetworkStatus? = null,
     val isLoading: Boolean = true,
     val isError: Boolean = false,
-    val errorMessage: String? = "",
+    val errorMessage: String = "",
 )

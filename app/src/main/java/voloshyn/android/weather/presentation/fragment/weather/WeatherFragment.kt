@@ -103,6 +103,17 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                     } else mainDrawer.background =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.splash)
                     // savedLocationAdapter.submitList(state.cities)
+
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.sideEffects.collectLatest {
+                if (it.showErrorMessage) {
+                    Toast.makeText(requireContext(), it.errorMessage, Toast.LENGTH_SHORT)
+                        .show()
+
                 }
             }
         }
@@ -149,6 +160,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                     },
                     onError = {
                         binding.errorDialog.errorDialog.visibility = View.VISIBLE
+                        binding.errorDialog.tvError.text = state.errorMessage
                         progressBarBinding.progressBar.visibility = View.GONE
                     }
                 ) {
@@ -226,11 +238,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                         }
 
                         NetworkStatus.LOST, NetworkStatus.UNAVAILABLE -> {
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.no_network),
-                                Toast.LENGTH_SHORT
-                            ).show()
                             viewModel.onIntent(UpdateNetworkStatus(NetworkStatus.UNAVAILABLE))
                         }
                     }

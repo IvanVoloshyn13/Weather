@@ -5,10 +5,11 @@ import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toResourceError
 import voloshyn.android.domain.Resource
+import voloshyn.android.domain.customError.EmptyBodyError
 import voloshyn.android.domain.model.CurrentLocationImage
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
-import voloshyn.android.http.exceptions.ApiException
 import voloshyn.android.network.http.ApiResult
+import voloshyn.android.network.http.exceptions.ApiException
 import voloshyn.android.network.http.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiUnsplashService
 import voloshyn.android.network.retrofit.models.unsplash.UnsplashApiResponse
@@ -31,12 +32,12 @@ class UnsplashImageRepositoryImpl @Inject constructor(
                         if (result.data.imageList.isNotEmpty()) {
                             Resource.Success(data = result.data.toCityImage())
                         } else {
-                            Resource.Error(message = "Cant load image")
+                            Resource.Error(e = EmptyBodyError())
                         }
                     }
 
                     is ApiResult.Error -> {
-                        Resource.Error(message = result.message)
+                        Resource.Error(e = result.e)
                     }
                 }
             } catch (e: ApiException) {
