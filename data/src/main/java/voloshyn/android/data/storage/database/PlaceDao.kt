@@ -14,10 +14,10 @@ interface PlaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveNewPlace(place: PlaceEntity): Long
 
-    @Query("SELECT * FROM cities")
+    @Query("SELECT * FROM places")
     suspend fun getAllPlaces(): List<PlaceEntity>
 
-    @Query("SELECT * FROM cities WHERE id=:placeId ")
+    @Query("SELECT * FROM places WHERE id=:placeId ")
     suspend fun getPlaceById(placeId: Int): PlaceEntity?
 
 

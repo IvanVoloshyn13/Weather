@@ -3,8 +3,8 @@ package voloshyn.android.data.storage.database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-internal const val CITIES_TABLE_NAME="cities"
-@Entity(tableName = CITIES_TABLE_NAME)
+internal const val PLACES_TABLE_NAME="places"
+@Entity(tableName = PLACES_TABLE_NAME)
 data class PlaceEntity(
     @PrimaryKey
     val id: Int,

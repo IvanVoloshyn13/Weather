@@ -1,5 +1,6 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
@@ -11,8 +12,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
@@ -22,8 +25,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import voloshyn.android.data.repository.weather.WeatherTypeRepository
 import voloshyn.android.domain.model.NetworkStatus
-import voloshyn.android.domain.model.weather.DailyForecast
-import voloshyn.android.domain.model.weather.HourlyForecast
+import voloshyn.android.domain.model.addSearchPlace.Place
 import voloshyn.android.domain.model.weather.MainWeatherInfo
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
@@ -37,6 +39,10 @@ import voloshyn.android.weather.presentation.fragment.renderSimpleResult
 import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
+import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceClickListener
+import voloshyn.android.weather.presentation.fragment.weather.adapter.SavedPlacesAdapter
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetPlaceById
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedPlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
@@ -44,7 +50,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 
 
 @AndroidEntryPoint
-class WeatherFragment : Fragment(R.layout.fragment_weather) {
+class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener {
     private val binding by viewBinding<FragmentWeatherBinding>()
     private lateinit var widgetForecastBinding: WidgetForecastBinding
     private lateinit var headerBinding: HeaderLayoutBinding
@@ -53,17 +59,19 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
     private val viewModel: WeatherViewModel by viewModels()
     private lateinit var hourlyAdapter: HourlyAdapter
     private lateinit var dailyAdapter: DailyAdapter
+    private lateinit var savedPlacesAdapter: SavedPlacesAdapter
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        observeGpsStatus()
+        observeNetworkStatus()
+
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         widgetForecastBinding = WidgetForecastBinding.bind(binding.root)
         progressBarBinding = ProgressBarBinding.bind(binding.root)
-        drawerLayout = binding.mainDrawer
-        val header = binding.mainNavView.getHeaderView(0)
-        headerBinding = HeaderLayoutBinding.bind(header)
-        hourlyAdapter = HourlyAdapter()
-        dailyAdapter = DailyAdapter()
         val displayMetrics = requireContext().resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
 
@@ -77,11 +85,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             }
             insets
         }
+
+        drawerLayout = binding.mainDrawer
+        val header = binding.mainNavView.getHeaderView(0)
+        headerBinding = HeaderLayoutBinding.bind(header)
+        hourlyAdapter = HourlyAdapter()
+        dailyAdapter = DailyAdapter()
+        savedPlacesAdapter= SavedPlacesAdapter(this)
         initDailyRecycler()
-        observeGpsStatus()
-        observeNetworkStatus()
         initHourlyRecycler()
         renderUi()
+        setupViewListeners()
+        updateUi()
+
+        setFragmentResultListener("locationId") { _, bundle ->
+            val cityId = bundle.getInt("bundle_key")
+            if (cityId != null) {
+                viewModel.onIntent(GetPlaceById(cityId))
+              //  viewModel.onIntent(GetSavedPlaces)
+            }
+        }
+    }
+
+    private fun updateUi() {
         lifecycleScope.launch {
             viewModel.state.collectLatest { state ->
                 updateMainWeatherWidget(state.mainWeatherInfo)
@@ -102,8 +128,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                         requireContext().imageLoader.enqueue(request)
                     } else mainDrawer.background =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.splash)
-                    // savedLocationAdapter.submitList(state.cities)
-
+                     savedPlacesAdapter.submitList(state.places)
                 }
             }
         }
@@ -117,7 +142,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                 }
             }
         }
+    }
 
+    private fun setupViewListeners() {
         binding.toolbar.mainToolbar.setNavigationOnClickListener {
             binding.mainDrawer.openDrawer(GravityCompat.START)
         }
@@ -126,11 +153,14 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
             drawerLayout.close()
         }
 
+        binding.toolbar.bttAddNewCity.setOnClickListener {
+            findNavController().navigate(R.id.action_weatherFragment_to_addSearchFragment)
+        }
     }
 
     private fun updateWidgetForecast(state: WeatherState) {
-        dailyAdapter.submitList(state.dailyForecast as List<DailyForecast>)
-        hourlyAdapter.submitList(state.hourlyForecast as List<HourlyForecast>)
+        dailyAdapter.submitList(state.dailyForecast)
+        hourlyAdapter.submitList(state.hourlyForecast)
     }
 
     private fun updateMainWeatherWidget(state: MainWeatherInfo) {
@@ -229,7 +259,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private fun observeNetworkStatus() {
         val fragmentAct = requireActivity() as NetworkObserver
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             fragmentAct.networkStatusFlow.collectLatest { network ->
                 network?.let {
                     when (it) {
@@ -244,6 +274,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                 }
             }
         }
+    }
+
+    override fun onClick(city: Place) {
+        drawerLayout.close()
+     //   viewModel.onIntent(GetWeather(city))
     }
 
 }

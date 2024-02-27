@@ -20,17 +20,20 @@ import voloshyn.android.domain.Resource
 import voloshyn.android.domain.customError.CustomError
 import voloshyn.android.domain.model.CurrentUserLocation
 import voloshyn.android.domain.model.NetworkStatus
+import voloshyn.android.domain.model.addSearchPlace.Place
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
+import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
+import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetLocationById
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedLocationsList
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetPlaceById
+import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedPlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
-import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessCities
-import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMoreCities
+import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessPlaces
+import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMorePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.SideEffects
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
@@ -38,12 +41,16 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenI
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
 
+const val INITIAL_CITIES_LIST_SIZE = 4
+
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
     private val weatherForCurrentLocation: FetchWeatherForCurrentLocationUseCase,
     private val currentTime: GetTimeForLocationUseCase,
-    private val unsplashImageByCityNameUseCase: FetchUnsplashImageByCityNameUseCase
+    private val unsplashImageByCityNameUseCase: FetchUnsplashImageByCityNameUseCase,
+    private val getPlaceById: GetPlaceByIdUseCase,
+    private val getSavedPlaces: GetSavedPlacesUseCase
 ) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -81,11 +88,12 @@ class WeatherViewModel @Inject constructor(
                 }
             }
 
-            is GetLocationById -> {
-                TODO()
+            is GetPlaceById -> {
+                viewModelScope.launch { getPlaceById(intent.id) }
+
             }
 
-            is GetSavedLocationsList -> {
+            is GetSavedPlaces -> {
                 TODO()
             }
 
@@ -97,11 +105,11 @@ class WeatherViewModel @Inject constructor(
                 updateGpsStatus(intent.gpsStatus)
             }
 
-            is ShowMoreCities -> {
+            is ShowMorePlaces -> {
                 TODO()
             }
 
-            is ShowLessCities -> {
+            is ShowLessPlaces -> {
                 TODO()
             }
         }
@@ -141,18 +149,69 @@ class WeatherViewModel @Inject constructor(
                 val imageUrl = async { getCityImage(location.city) }.await()
                 if (weatherComponents != null) {
                     updateUiState(
-                        location = location,
+                        placeName = location.city,
                         weatherComponents = weatherComponents,
                         cityImage = imageUrl
                     )
                 }
             }
+        }
+    }
 
+    private suspend fun getPlaceById(id: Int) {
+        val cityResource = getPlaceById.invoke(id)
+        when (cityResource) {
+            is Resource.Success -> {
+                getDataBySearchedPlace(
+                    cityResource.data
+                )
+            }
+
+            is Resource.Error -> {}
+        }
+    }
+
+    private fun getDataBySearchedPlace(place: Place) {
+        viewModelScope.launch {
+            _weatherState.update {
+                it.copy(
+                    isLoading = true,
+                    location = place.name
+                )
+            }
+            val weatherComponents = async {
+                getWeatherByLocation(
+                    place.latitude,
+                    place.longitude,
+                    _weatherState.value.networkStatus ?: NetworkStatus.LOST
+                )
+            }.await()
+
+            if (locationTimeJob != null) {
+                stopTimeObserve()
+                if (locationTimeJob?.isCompleted == true) {
+                    weatherComponents?.let {
+                        getTimeForLocation(timeZoneId = it.timezone ?: "")
+                    }
+                }
+            } else {
+                weatherComponents?.let {
+                    getTimeForLocation(timeZoneId = it.timezone ?: "")
+                }
+            }
+            val imageUrl = async { getCityImage(place.name) }.await()
+            if (weatherComponents != null) {
+                updateUiState(
+                    placeName = place.name,
+                    weatherComponents = weatherComponents,
+                    cityImage = imageUrl
+                )
+            }
         }
     }
 
     private fun updateUiState(
-        location: CurrentUserLocation,
+        placeName: String,
         weatherComponents: WeatherComponents,
         cityImage: String
     ) {
@@ -162,7 +221,7 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             _weatherState.update {
                 it.copy(
-                    location = location.city,
+                    location = placeName,
                     mainWeatherInfo = mainWeatherInfo,
                     hourlyForecast = hourlyForecast,
                     dailyForecast = dailyForecast,
@@ -233,16 +292,16 @@ class WeatherViewModel @Inject constructor(
         _weatherState.update { state ->
             state.copy(gpsStatus = gps)
         }
-        if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
+      //  if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
     }
 
     private fun updateNetworkStatus(network: NetworkStatus) {
-            _weatherState.update { state ->
-                state.copy(
-                    networkStatus = network,
-                )
-            }
-            if (network == NetworkStatus.AVAILABLE && _weatherState.value.dailyForecast.isEmpty()) onChange()
+        _weatherState.update { state ->
+            state.copy(
+                networkStatus = network,
+            )
+        }
+      // if (network == NetworkStatus.AVAILABLE && _weatherState.value.dailyForecast.isEmpty()) onChange()
     }
 
     private fun onChange() {

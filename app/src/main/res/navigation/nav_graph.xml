@@ -32,6 +32,18 @@
         android:label="fragment_weather"
         tools:layout="@layout/fragment_weather">
 
+        <action
+            android:id="@+id/action_weatherFragment_to_addSearchFragment"
+            app:destination="@id/addSearchFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/addSearchFragment"
+        android:name="voloshyn.android.weather.presentation.fragment.addSearchPlaces.AddSearchPlaceFragment"
+        android:label="fragment_place_search"
+        tools:layout="@layout/fragment_place_search">
+
+    </fragment>
+
 </navigation>
 

@@ -43,15 +43,15 @@
 
     <include
         android:id="@+id/current_location"
-        layout="@layout/item_cities" />
+        layout="@layout/item_places" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_cities"
+        android:id="@+id/rv_places"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_cities">
+        tools:listitem="@layout/item_places">
 
     </androidx.recyclerview.widget.RecyclerView>
 

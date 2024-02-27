@@ -8,13 +8,19 @@ import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
 import voloshyn.android.domain.location.FusedLocationProvider
+import voloshyn.android.domain.repository.addSearch.SavePlaceRepository
+import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
 import voloshyn.android.domain.repository.mainActivity.OnBoarding
 import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepository
 import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
 import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import voloshyn.android.domain.repository.weather.CurrentLocationWeatherRepository
+import voloshyn.android.domain.repository.weather.GetPlaceByIdRepository
+import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
 import voloshyn.android.domain.repository.weather.LocationTimeRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
+import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
+import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
 import voloshyn.android.domain.useCase.mainActivity.GetPushNotificationStatusUseCase
 import voloshyn.android.domain.useCase.mainActivity.PushNotificationSettingsUseCase
@@ -24,6 +30,8 @@ import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlaces
 import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
+import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
+import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
 
 @Module
@@ -85,6 +93,26 @@ internal object UseCaseModule {
     @Provides
     fun provideFetchUnsplashImage(unsplash: UnsplashImageRepository): FetchUnsplashImageByCityNameUseCase {
         return FetchUnsplashImageByCityNameUseCase(unsplash)
+    }
+
+    @Provides
+    fun provideSearchLocationUseCase(searchLocation: SearchPlaceRepository): SearchPlaceByNameUseCase {
+        return SearchPlaceByNameUseCase(searchLocation)
+    }
+
+    @Provides
+    fun provideSaveLocationUseCase(saveLocation: SavePlaceRepository): SavePlaceUseCase {
+        return SavePlaceUseCase(saveLocation)
+    }
+
+    @Provides
+    fun provideGetPlaceByUseCase(repository: GetPlaceByIdRepository): GetPlaceByIdUseCase {
+        return GetPlaceByIdUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetSavedPlacesUseCase(repository: GetSavedPlacesRepository): GetSavedPlacesUseCase {
+        return GetSavedPlacesUseCase(repository)
     }
 }
 
