@@ -20,7 +20,6 @@ import voloshyn.android.domain.Resource
 import voloshyn.android.domain.customError.CustomError
 import voloshyn.android.domain.model.CurrentUserLocation
 import voloshyn.android.domain.model.NetworkStatus
-import voloshyn.android.domain.model.addSearchPlace.Place
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
@@ -29,9 +28,9 @@ import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetPlaceById
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedPlaces
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessPlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMorePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.SideEffects
@@ -76,21 +75,22 @@ class WeatherViewModel @Inject constructor(
     val sideEffects = _sideEffectsState.asSharedFlow()
 
     init {
-        getDataByCurrentUserLocation()
+        viewModelScope.launch {
+            fetchWeatherForCurrentUserLocation()
+        }
     }
 
 
     fun onIntent(intent: WeatherScreenIntent) {
         when (intent) {
-            GetWeatherByCurrentLocation -> {
+            FetchWeatherForCurrentLocation -> {
                 viewModelScope.launch {
-                    getDataByCurrentUserLocation()
+                    fetchWeatherForCurrentUserLocation()
                 }
             }
 
-            is GetPlaceById -> {
-                viewModelScope.launch { getPlaceById(intent.id) }
-
+            is FetchWeatherForSavedPlace -> {
+                viewModelScope.launch { fetchWeatherForSavedPlace(intent.id) }
             }
 
             is GetSavedPlaces -> {
@@ -115,8 +115,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private fun getDataByCurrentUserLocation() {
-        viewModelScope.launch {
+    private suspend fun fetchWeatherForCurrentUserLocation() {
             _weatherState.update {
                 it.copy(
                     isLoading = true,
@@ -126,64 +125,50 @@ class WeatherViewModel @Inject constructor(
             val location = getCurrentLocation()
             if (location != null) {
                 Log.d("WEATHER", "ViewModel")
-                val weatherComponents = async {
-                    getWeatherByLocation(
-                        location.latitude,
-                        location.longitude,
-                        _weatherState.value.networkStatus ?: NetworkStatus.LOST
-                    )
-                }.await()
-
-                if (locationTimeJob != null) {
-                    stopTimeObserve()
-                    if (locationTimeJob?.isCompleted == true) {
-                        weatherComponents?.let {
-                            getTimeForLocation(timeZoneId = it.timezone ?: "")
-                        }
-                    }
-                } else {
-                    weatherComponents?.let {
-                        getTimeForLocation(timeZoneId = it.timezone ?: "")
-                    }
-                }
-                val imageUrl = async { getCityImage(location.city) }.await()
-                if (weatherComponents != null) {
-                    updateUiState(
-                        placeName = location.city,
-                        weatherComponents = weatherComponents,
-                        cityImage = imageUrl
-                    )
-                }
-            }
-        }
-    }
-
-    private suspend fun getPlaceById(id: Int) {
-        val cityResource = getPlaceById.invoke(id)
-        when (cityResource) {
-            is Resource.Success -> {
-                getDataBySearchedPlace(
-                    cityResource.data
+                loadData(
+                    location.city,
+                    location.latitude,
+                    location.longitude,
+                    _weatherState.value.networkStatus ?: NetworkStatus.LOST
                 )
             }
 
-            is Resource.Error -> {}
+    }
+
+    private suspend fun fetchWeatherForSavedPlace(id: Int) {
+        _weatherState.update {
+            it.copy(
+                isLoading = true,
+                isError = false
+            )
+        }
+        val placeResource = getPlaceById.invoke(id)
+        try {
+            val place = placeResource.toResult()
+            loadData(
+                place.name,
+                place.latitude,
+                place.longitude,
+                _weatherState.value.networkStatus ?: NetworkStatus.LOST
+            )
+        } catch (e: CustomError) {
+            //TODO()
         }
     }
 
-    private fun getDataBySearchedPlace(place: Place) {
+
+    private fun loadData(
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        network: NetworkStatus
+    ) {
         viewModelScope.launch {
-            _weatherState.update {
-                it.copy(
-                    isLoading = true,
-                    location = place.name
-                )
-            }
             val weatherComponents = async {
                 getWeatherByLocation(
-                    place.latitude,
-                    place.longitude,
-                    _weatherState.value.networkStatus ?: NetworkStatus.LOST
+                    latitude,
+                    longitude,
+                    network
                 )
             }.await()
 
@@ -191,18 +176,18 @@ class WeatherViewModel @Inject constructor(
                 stopTimeObserve()
                 if (locationTimeJob?.isCompleted == true) {
                     weatherComponents?.let {
-                        getTimeForLocation(timeZoneId = it.timezone ?: "")
+                        updateTime(timeZoneId = it.timezone ?: "")
                     }
                 }
             } else {
                 weatherComponents?.let {
-                    getTimeForLocation(timeZoneId = it.timezone ?: "")
+                    updateTime(timeZoneId = it.timezone ?: "")
                 }
             }
-            val imageUrl = async { getCityImage(place.name) }.await()
+            val imageUrl = async { fetchCityImage(name) }.await()
             if (weatherComponents != null) {
                 updateUiState(
-                    placeName = place.name,
+                    placeName = name,
                     weatherComponents = weatherComponents,
                     cityImage = imageUrl
                 )
@@ -218,7 +203,6 @@ class WeatherViewModel @Inject constructor(
         val dailyForecast = weatherComponents.dailyForecast
         val hourlyForecast = weatherComponents.hourlyForecast
         val mainWeatherInfo = weatherComponents.mainWeatherInfo
-        viewModelScope.launch {
             _weatherState.update {
                 it.copy(
                     location = placeName,
@@ -230,8 +214,6 @@ class WeatherViewModel @Inject constructor(
                     isError = false
                 )
             }
-        }
-
     }
 
 
@@ -266,17 +248,16 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getCityImage(cityName: String): String {
+    private suspend fun fetchCityImage(cityName: String): String {
         val cityResource = unsplashImageByCityNameUseCase.invoke(cityName)
         return try {
             cityResource.toResult().cityImageUrl
         } catch (e: Exception) {
             e.message ?: ""
         }
-
     }
 
-    private fun getTimeForLocation(timeZoneId: String) {
+    private suspend fun updateTime(timeZoneId: String) {
         locationTimeJob = viewModelScope.launch {
             currentTime.invoke(timeZoneId, true).cancellable().collectLatest { time ->
                 _weatherState.update {
@@ -292,7 +273,7 @@ class WeatherViewModel @Inject constructor(
         _weatherState.update { state ->
             state.copy(gpsStatus = gps)
         }
-      //  if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
+        //  if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
     }
 
     private fun updateNetworkStatus(network: NetworkStatus) {
@@ -301,11 +282,11 @@ class WeatherViewModel @Inject constructor(
                 networkStatus = network,
             )
         }
-      // if (network == NetworkStatus.AVAILABLE && _weatherState.value.dailyForecast.isEmpty()) onChange()
+        // if (network == NetworkStatus.AVAILABLE && _weatherState.value.dailyForecast.isEmpty()) onChange()
     }
 
     private fun onChange() {
-        getDataByCurrentUserLocation()
+       // fetchWeatherForCurrentUserLocation()
     }
 
     private suspend fun stopTimeObserve() {
@@ -331,7 +312,6 @@ class WeatherViewModel @Inject constructor(
                         )
                     )
                 }
-
                 throw e
             }
         }

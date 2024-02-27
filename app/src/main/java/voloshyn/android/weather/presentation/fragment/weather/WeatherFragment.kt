@@ -41,9 +41,8 @@ import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapt
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceClickListener
 import voloshyn.android.weather.presentation.fragment.weather.adapter.SavedPlacesAdapter
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetPlaceById
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedPlaces
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetWeatherByCurrentLocation
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
@@ -101,7 +100,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
         setFragmentResultListener("locationId") { _, bundle ->
             val cityId = bundle.getInt("bundle_key")
             if (cityId != null) {
-                viewModel.onIntent(GetPlaceById(cityId))
+                viewModel.onIntent(FetchWeatherForSavedPlace(cityId))
               //  viewModel.onIntent(GetSavedPlaces)
             }
         }
@@ -149,7 +148,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
             binding.mainDrawer.openDrawer(GravityCompat.START)
         }
         headerBinding.currentLocation.cityLayout.setOnClickListener {
-            viewModel.onIntent(GetWeatherByCurrentLocation)
+            viewModel.onIntent(FetchWeatherForCurrentLocation)
             drawerLayout.close()
         }
 
@@ -276,7 +275,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
         }
     }
 
-    override fun onClick(city: Place) {
+    override fun onClick(place: Place) {
         drawerLayout.close()
      //   viewModel.onIntent(GetWeather(city))
     }

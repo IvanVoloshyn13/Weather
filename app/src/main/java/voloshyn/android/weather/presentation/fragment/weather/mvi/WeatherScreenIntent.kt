@@ -5,9 +5,9 @@ import voloshyn.android.weather.gpsReceiver.GpsStatus
 
 
 sealed class WeatherScreenIntent
-object GetWeatherByCurrentLocation : WeatherScreenIntent()
+object FetchWeatherForCurrentLocation : WeatherScreenIntent()
 object GetSavedPlaces : WeatherScreenIntent()
-class GetPlaceById(val id: Int) : WeatherScreenIntent()
+class FetchWeatherForSavedPlace(val id: Int) : WeatherScreenIntent()
 object ShowMorePlaces : WeatherScreenIntent()
 object ShowLessPlaces : WeatherScreenIntent()
 class UpdateGpsStatus(val gpsStatus: GpsStatus) : WeatherScreenIntent()
