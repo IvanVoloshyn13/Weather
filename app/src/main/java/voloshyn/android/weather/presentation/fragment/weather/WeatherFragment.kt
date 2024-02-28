@@ -2,6 +2,7 @@ package voloshyn.android.weather.presentation.fragment.weather
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
@@ -274,6 +275,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
             }
         }
     }
+
+  
 
     override fun onClick(place: Place) {
         drawerLayout.close()

@@ -14,8 +14,16 @@ class GpsUnavailableDialog : DialogFragment(R.layout.dialog_no_gps) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val dialog = dialog
+        dialog?.apply {
+            setCanceledOnTouchOutside(false)
+            setCancelable(false)
+        }
         binding.bttEnabledLocation.setOnClickListener {
             showAppSettings()
+        }
+        binding.bttClose.setOnClickListener {
+            dialog?.dismiss()
         }
     }
 
@@ -23,4 +31,6 @@ class GpsUnavailableDialog : DialogFragment(R.layout.dialog_no_gps) {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
         startActivity(intent)
     }
+
+
 }
