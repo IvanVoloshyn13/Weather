@@ -12,7 +12,7 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import voloshyn.android.data.mappers.toCustomError
+import voloshyn.android.data.R
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.customError.LocationProviderError
 import voloshyn.android.domain.customError.NoLocationPermissionError
@@ -42,10 +42,10 @@ class FusedLocationProviderImpl @Inject constructor(
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!hasPermission) {
-            return Resource.Error( e = NoLocationPermissionError())
+            return Resource.Error( e = NoLocationPermissionError(context.getString(R.string.no_location_permission)))
         } else if (!isGpsEnabled && !isNetworkEnabled) {
             return Resource.Error(
-                e = LocationProviderError()
+                e = LocationProviderError(context.getString(R.string.provider_error))
             )
         }
         return suspendCancellableCoroutine { continuation ->
@@ -77,21 +77,21 @@ class FusedLocationProviderImpl @Inject constructor(
                         }
                     } ?: continuation.resume(
                         Resource.Error(
-                            e = LocationProviderError()
+                            e = LocationProviderError(context.getString(R.string.provider_error))
                         )
                     )
                 }
                     .addOnCanceledListener {
                         continuation.resume(
                             Resource.Error(
-                                e = LocationProviderError()
+                                e = LocationProviderError(context.getString(R.string.provider_error))
                             )
                         )
                     }
                     .addOnFailureListener {
                         continuation.resume(
                             Resource.Error(
-                                e = LocationProviderError()
+                                e = LocationProviderError(context.getString(R.string.provider_error))
                             )
                         )
                     }
@@ -119,21 +119,21 @@ class FusedLocationProviderImpl @Inject constructor(
                         }
                     } ?: continuation.resume(
                         Resource.Error(
-                            e = LocationProviderError()
+                            e = LocationProviderError(context.getString(R.string.provider_error))
                         )
                     )
                 }
                     .addOnCanceledListener {
                         continuation.resume(
                             Resource.Error(
-                                e = LocationProviderError()
+                                e = LocationProviderError(context.getString(R.string.provider_error))
                             )
                         )
                     }
                     .addOnFailureListener {
                         continuation.resume(
                             Resource.Error(
-                                e = LocationProviderError()
+                                e = LocationProviderError(context.getString(R.string.provider_error))
                             )
                         )
                     }

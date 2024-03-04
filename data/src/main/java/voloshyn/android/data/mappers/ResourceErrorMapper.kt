@@ -1,31 +1,20 @@
 package voloshyn.android.data.mappers
 
+import android.content.Context
+import voloshyn.android.data.R
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.customError.ClientError
-import voloshyn.android.domain.customError.CustomError
 import voloshyn.android.domain.customError.ServerError
 import voloshyn.android.domain.customError.UnknownError
 import voloshyn.android.network.http.exceptions.ApiException
-import voloshyn.android.network.http.exceptions.ApiExceptions
-import voloshyn.android.network.http.exceptions.ClientException
-import voloshyn.android.network.http.exceptions.ServerException
-import voloshyn.android.network.http.exceptions.UnknownException
 
-fun <T> ApiException.toResourceError(): Resource.Error<T> {
+fun <T> ApiException.toResourceError(context: Context): Resource.Error<T> {
     return if (this.isClientError()) {
-        Resource.Error(e = ClientException.toCustomError())
+        Resource.Error(e = ClientError(message = context.getString(R.string.client_error)))
     } else if (this.isServerError()) {
-        Resource.Error(e = ServerException.toCustomError())
+        Resource.Error(e = ServerError(message = context.getString(R.string.server_error)))
     } else {
-        Resource.Error(e = UnknownException.toCustomError())
+        Resource.Error(e = UnknownError(message = context.getString(R.string.unknown_error)))
     }
 }
 
-fun ApiExceptions.toCustomError(): CustomError {
-    return when (this) {
-        is ClientException -> ClientError()
-        is ServerException -> ServerError()
-        is UnknownException -> UnknownError()
-
-    }
-}

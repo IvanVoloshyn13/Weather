@@ -1,7 +1,10 @@
 package voloshyn.android.data.repository.weather
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import voloshyn.android.data.R
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toResourceError
 import voloshyn.android.domain.Resource
@@ -18,6 +21,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 class UnsplashImageRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     @UnsplashApi private val apiUnsplashService: ApiUnsplashService,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : UnsplashImageRepository {
@@ -32,7 +36,7 @@ class UnsplashImageRepositoryImpl @Inject constructor(
                         if (result.data.imageList.isNotEmpty()) {
                             Resource.Success(data = result.data.toCityImage())
                         } else {
-                            Resource.Error(e = EmptyBodyError())
+                            Resource.Error(e = EmptyBodyError(context.getString(R.string.data_not_found)))
                         }
                     }
 
@@ -41,7 +45,7 @@ class UnsplashImageRepositoryImpl @Inject constructor(
                     }
                 }
             } catch (e: ApiException) {
-                return@withContext e.toResourceError()
+                return@withContext e.toResourceError(context)
             }
         }
 

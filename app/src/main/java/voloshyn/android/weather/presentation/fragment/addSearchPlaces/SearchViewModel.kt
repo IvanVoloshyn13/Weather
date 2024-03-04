@@ -31,26 +31,17 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.emit(true)
             if (query.length >= 3) {
-                val list = searchPlaceByNameUseCase.invoke(query)
-                when (list) {
-                    // TODO()
-                    is Resource.Success -> {
-                        _places.emit(list.data)
-                        _isLoading.emit(false)
-                    }
-
-                    is Resource.Error -> {
-                        Log.d("CITY_ERROR", list.e.message.toString())
-                    }
-
-
+                try {
+                    val list = searchPlaceByNameUseCase.invoke(query)
+                    _places.emit(list)
+                    _isLoading.emit(false)
+                }catch (e:Exception){
+                    Log.d("CITY_ERROR", e.message.toString())
+                    _places.emit(ArrayList())
+                    _isLoading.emit(false)
                 }
-            } else {
-                _places.emit(ArrayList())
-                _isLoading.emit(false)
             }
         }
-
     }
 
     fun saveCity(city: Place) {
