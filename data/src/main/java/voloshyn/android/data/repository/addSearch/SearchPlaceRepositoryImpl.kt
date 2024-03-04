@@ -1,5 +1,7 @@
 package voloshyn.android.data.repository.addSearch
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
@@ -18,6 +20,7 @@ import javax.inject.Inject
 
 
 class SearchPlaceRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val searchCityService: ApiSearchCityService,
     @IoDispatcher val dispatcher: CoroutineDispatcher
 ) : SearchPlaceRepository {
@@ -38,7 +41,7 @@ class SearchPlaceRepositoryImpl @Inject constructor(
                     }
                 }
             } catch (e: ApiException) {
-                return@withContext e.toResourceError()
+                return@withContext e.toResourceError(context)
             }
         }
 }

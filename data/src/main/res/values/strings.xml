@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Favourite places names -->
     <string name="barcelona">Barcelona</string>
     <string name="london">London</string>
     <string name="new_orleans">New Orleans</string>
@@ -8,4 +9,15 @@
     <string name="paris">Paris</string>
     <string name="sydney">Sydney</string>
     <string name="san_francisco">San Francisco</string>
+
+    <!-- Error Message -->
+    <string name="data_not_found">Data not found</string>
+    <string name="no_location_permission">Check location permission</string>
+    <string name="provider_error">Check Gps or Network settings</string>
+    <string name="client_error">The requested resource was not found</string>
+    <string name="server_error">An unexpected error occurred on the server</string>
+    <string name="network_error">Check your network connection</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="io_error">IO error</string>
+
 </resources>

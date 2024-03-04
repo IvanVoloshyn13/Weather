@@ -1,8 +1,11 @@
 package voloshyn.android.data.repository.weather
 
+import android.content.Context
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import voloshyn.android.data.R
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toResourceError
 import voloshyn.android.data.mappers.toWeatherComponents
@@ -18,6 +21,7 @@ import voloshyn.android.network.retrofit.apiServices.ApiWeatherService
 import javax.inject.Inject
 
 class CurrentLocationWeatherRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val apiWeatherService: ApiWeatherService,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : CurrentLocationWeatherRepository {
@@ -47,12 +51,12 @@ class CurrentLocationWeatherRepositoryImpl @Inject constructor(
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is ApiException -> return@withContext e.toResourceError()
+                    is ApiException -> return@withContext e.toResourceError(context)
                     else -> throw Exception()
                 }
             }
         } else {
-            return@withContext Resource.Error(e = NoNetworkError())
+            return@withContext Resource.Error(e = NoNetworkError(context.getString(R.string.network_error)))
         }
     }
 

@@ -8,6 +8,6 @@ data class CurrentUserLocation(
 
 ) {
     companion object {
-        val DEFAULT = CurrentUserLocation(0.0, 0.0, "", "")
+        val DEFAULT = CurrentUserLocation(0.0, 0.0, "", "Something goes wrong")
     }
 }
