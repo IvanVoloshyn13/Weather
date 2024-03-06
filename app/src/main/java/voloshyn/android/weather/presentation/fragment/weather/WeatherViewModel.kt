@@ -227,6 +227,16 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
+    fun updateWeatherWidgetVisibility(value: Double) {
+        viewModelScope.launch {
+            _weatherState.update {
+                it.copy(
+                    weatherWidgetVisibility = value
+                )
+            }
+        }
+    }
+
     private fun updateGpsStatus(gps: GpsStatus) {
         _weatherState.update { state ->
             state.copy(gpsStatus = gps)

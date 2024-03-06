@@ -20,4 +20,5 @@ data class WeatherState(
     val isLoading: Boolean = true,
     val isError: Boolean = false,
     val errorMessage: String = "",
+    val weatherWidgetVisibility: Double = 0.0,
 )
