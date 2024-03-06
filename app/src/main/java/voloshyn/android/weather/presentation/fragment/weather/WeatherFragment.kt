@@ -1,10 +1,11 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
 import android.content.Context
+import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.GravityCompat
@@ -19,8 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import coil.imageLoader
-import coil.request.ImageRequest
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -42,15 +41,15 @@ import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapt
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceClickListener
 import voloshyn.android.weather.presentation.fragment.weather.adapter.SavedPlacesAdapter
-import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 
 
 @AndroidEntryPoint
-class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener {
+class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListener {
     private val binding by viewBinding<FragmentWeatherBinding>()
     private lateinit var widgetForecastBinding: WidgetForecastBinding
     private lateinit var headerBinding: HeaderLayoutBinding
@@ -86,12 +85,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
             insets
         }
 
+        calculateVisibilityPercentage()
         drawerLayout = binding.mainDrawer
         val header = binding.mainNavView.getHeaderView(0)
         headerBinding = HeaderLayoutBinding.bind(header)
         hourlyAdapter = HourlyAdapter()
         dailyAdapter = DailyAdapter()
-        savedPlacesAdapter= SavedPlacesAdapter(this)
+        savedPlacesAdapter = SavedPlacesAdapter(this)
         initDailyRecycler()
         initHourlyRecycler()
         renderUi()
@@ -102,9 +102,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
             val cityId = bundle.getInt("bundle_key")
             if (cityId != null) {
                 viewModel.onIntent(FetchWeatherForSavedPlace(cityId))
-              //  viewModel.onIntent(GetSavedPlaces)
+                //  viewModel.onIntent(GetSavedPlaces)
             }
         }
+
+
     }
 
     private fun updateUi() {
@@ -119,17 +121,32 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
                         tvToolbarTitle.text = state.location
                     }
                     if (state.backgroundImage.isNotEmpty()) {
-                        val request = ImageRequest.Builder(requireContext())
-                            .data(state.backgroundImage)
-                            .target {
-                                mainDrawer.background = it
-                            }
-                            .build()
-                        requireContext().imageLoader.enqueue(request)
-                    } else mainDrawer.background =
-                        AppCompatResources.getDrawable(requireContext(), R.drawable.splash)
-                     savedPlacesAdapter.submitList(state.places)
+//                        val request = ImageRequest.Builder(requireContext())
+//                            .data(state.backgroundImage)
+//                            .target {
+//                                backgroundImage.setImageDrawable(it)
+//                                backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
+//                            }
+//                            .build()
+//                        requireContext().imageLoader.enqueue(request)
+                        BlurUtil.setBlurredImageFromUrl(
+                            binding.backgroundImage.context,
+                            binding.backgroundImage,
+                            state.backgroundImage,
+                            (state.weatherWidgetVisibility.toFloat() + 0.1f) / 4.1f
+                        )
+                    } else {
+                        backgroundImage.setImageDrawable(
+                            AppCompatResources.getDrawable(
+                                requireContext(),
+                                R.drawable.splash
+                            )
+                        )
+                        backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
+                    }
+                    savedPlacesAdapter.submitList(state.places)
                 }
+
             }
         }
 
@@ -143,6 +160,40 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
             }
         }
     }
+
+    private fun calculateVisibilityPercentage() {
+        var percentage = 0.0
+        val calculateView = widgetForecastBinding.widgetForecast
+        binding.scroll.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            val scrollBounds = Rect()
+            v.getDrawingRect(scrollBounds)
+            val topOfView = calculateView.y
+            val bottomOfView = topOfView + calculateView.height
+            val topOfScrollView = scrollBounds.top
+            val bottomOfScrollView = scrollBounds.bottom
+            if (topOfScrollView <= topOfView && bottomOfScrollView >= bottomOfView) {
+                percentage = 100.0
+            } else if ((topOfScrollView >= topOfView && topOfScrollView <= bottomOfView) ||
+                (bottomOfScrollView >= topOfView && bottomOfScrollView <= bottomOfView)
+            ) {
+                // at this point our concerned child is visible
+                // now lets get the percentage
+                percentage = if (calculateView.height > v.height) {
+                    // child height is more than NestedScrollView
+                    val percentageCalculation =
+                        (((bottomOfView - bottomOfScrollView) / widgetForecastBinding.widgetForecast.height) * 100)
+                    if (percentageCalculation > 0) {
+                        100 - percentageCalculation.toDouble()
+                    } else 100.0
+                } else {
+                    // child height is more than NestedScrollView
+                    (((bottomOfScrollView - topOfView) / calculateView.height) * 100).toDouble()
+                }
+            }
+            viewModel.updateWeatherWidgetVisibility(percentage)
+        }
+    }
+
 
     private fun setupViewListeners() {
         binding.toolbar.mainToolbar.setNavigationOnClickListener {
@@ -276,11 +327,10 @@ class WeatherFragment : Fragment(R.layout.fragment_weather),OnPlaceClickListener
         }
     }
 
-  
 
     override fun onClick(place: Place) {
         drawerLayout.close()
-     //   viewModel.onIntent(GetWeather(city))
+        //   viewModel.onIntent(GetWeather(city))
     }
 
 }
