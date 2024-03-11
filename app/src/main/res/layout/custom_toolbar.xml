@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_menu"
-        tools:background="@color/black">
+        tools:background="@color/white">
 
     </androidx.appcompat.widget.Toolbar>
 

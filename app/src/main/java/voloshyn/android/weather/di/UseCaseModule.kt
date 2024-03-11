@@ -52,7 +52,6 @@ internal object UseCaseModule {
         return SavePushNotificationSettingsUseCase(pushNotificationRepository)
     }
 
-
     @Provides
     fun providePushNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
@@ -96,8 +95,8 @@ internal object UseCaseModule {
     }
 
     @Provides
-    fun provideSearchLocationUseCase(searchLocation: SearchPlaceRepository): SearchPlaceByNameUseCase {
-        return SearchPlaceByNameUseCase(searchLocation)
+    fun provideSearchPlacesUseCase(searchPlace: SearchPlaceRepository): SearchPlaceByNameUseCase {
+        return SearchPlaceByNameUseCase(searchPlace)
     }
 
     @Provides

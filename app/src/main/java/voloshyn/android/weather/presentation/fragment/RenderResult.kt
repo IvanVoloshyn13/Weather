@@ -5,13 +5,13 @@ import android.view.ViewGroup
 import androidx.core.view.children
 import voloshyn.android.weather.R
 
-fun renderSimpleResult(
+suspend fun renderSimpleResult(
     root: ViewGroup,
     isError: Boolean,
     isLoading: Boolean,
     onLoading: () -> Unit,
-    onError: () -> Unit,
-    onSuccess: () -> Unit,
+    onError: suspend () -> Unit,
+    onSuccess: suspend () -> Unit,
 
     ) {
     renderResult(
@@ -33,10 +33,10 @@ fun renderSimpleResult(
 }
 
 
-private fun renderResult(
+private suspend fun renderResult(
     root: ViewGroup, isError: Boolean, isLoading: Boolean,
-    onError: () -> Unit,
-    onSuccess: () -> Unit,
+    onError: suspend () -> Unit,
+    onSuccess: suspend () -> Unit,
     onLoading: () -> Unit,
 ) {
     root.children

@@ -41,7 +41,6 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
                             Unit
                         }) {
                         launchMainScreen(it.completed)
-
                     }
                 }
             }
