@@ -1,6 +1,7 @@
 package voloshyn.android.weather.presentation.fragment.weather.mvi
 
 import voloshyn.android.domain.model.NetworkStatus
+import voloshyn.android.domain.model.addSearchPlace.ListSizeState
 import voloshyn.android.domain.model.addSearchPlace.Place
 import voloshyn.android.domain.model.weather.DailyForecast
 import voloshyn.android.domain.model.weather.HourlyForecast
@@ -13,8 +14,8 @@ data class WeatherState(
     val hourlyForecast: List<HourlyForecast> = ArrayList(),
     val dailyForecast: List<DailyForecast> = ArrayList(),
     val places: List<Place> = ArrayList(),
-    val currentTime: String = "00:00",
-    val backgroundImage: String = "",
+    val placesState: ListSizeState = ListSizeState.DEFAULT,
+    val imageUrl: String = "",
     val gpsStatus: GpsStatus? = null,
     val networkStatus: NetworkStatus? = null,
     val isLoading: Boolean = true,

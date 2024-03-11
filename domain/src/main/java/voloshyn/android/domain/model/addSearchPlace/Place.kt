@@ -16,3 +16,6 @@ data class Place(
 
 
 }
+enum class ListSizeState{
+    FULL,TRIM,DEFAULT
+}

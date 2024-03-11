@@ -2,10 +2,12 @@ package voloshyn.android.weather.presentation.fragment.weather
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import android.util.Log
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
@@ -13,6 +15,10 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 
 object BlurUtil {
+
+    private var imageUrl = ""
+    private lateinit var imageDrawable: Drawable
+    private lateinit var bitmap: Bitmap
 
     fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
         val rs = RenderScript.create(context)
@@ -26,14 +32,15 @@ object BlurUtil {
         )
         val output = Allocation.createTyped(rs, input.type)
         val script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs))
-
-        script.setRadius(blurRadius)
+        if (blurRadius > 0)
+            script.setRadius(blurRadius)
         script.setInput(input)
         script.forEach(output)
         output.copyTo(blurredBitmap)
 
         rs.destroy()
         return blurredBitmap
+
     }
 
     fun convertBitmap(bitmap: Bitmap): Bitmap {
@@ -46,19 +53,42 @@ object BlurUtil {
         imageUrl: String,
         blurRadius: Float
     ) {
-        val imageLoader = ImageLoader.Builder(context)
-            .crossfade(true)
-            .build()
+        Log.d("IMAGE", this.imageUrl)
+        if (imageUrl != this.imageUrl) {
+            Log.d("IMAGE1", this.imageUrl)
+            this.imageUrl = imageUrl
+            val imageLoader = ImageLoader.Builder(context)
+                .crossfade(true)
+                .build()
 
-        val request = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .build()
+            val request = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .build()
+            imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
+            bitmap = imageDrawable.toBitmap()
 
-        val bitmap = (imageLoader.execute(request) as SuccessResult).drawable.toBitmap()
-
-        val convertedBitmap = convertBitmap(bitmap)
-        val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
-        imageView.setImageBitmap(blurredBitmap)
-        imageView.scaleType = ImageView.ScaleType.FIT_XY
+            Log.d("IMAGE", "BITMAP1")
+            val convertedBitmap = convertBitmap(bitmap)
+            if (blurRadius > 0f) {
+                val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
+                imageView.setImageBitmap(blurredBitmap)
+                imageView.scaleType = ImageView.ScaleType.FIT_XY
+            } else {
+                imageView.setImageDrawable(imageDrawable)
+                imageView.scaleType = ImageView.ScaleType.FIT_XY
+            }
+        } else {
+            Log.d("IMAGE", "BITMAP2")
+            val convertedBitmap = convertBitmap(bitmap)
+            if (blurRadius > 0f) {
+                val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
+                imageView.setImageBitmap(blurredBitmap)
+                imageView.scaleType = ImageView.ScaleType.FIT_XY
+            } else {
+                imageView.setImageDrawable(imageDrawable)
+                imageView.scaleType = ImageView.ScaleType.FIT_XY
+            }
+        }
     }
 }
+

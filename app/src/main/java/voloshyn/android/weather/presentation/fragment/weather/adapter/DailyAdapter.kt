@@ -11,7 +11,7 @@ import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemDailyForecastBinding
 
 class DailyAdapter : RecyclerView.Adapter<DailyAdapter.DailyViewHolder>() {
-    private var dailyForecast = ArrayList<DailyForecast>()
+    private val dailyForecast = ArrayList<DailyForecast>()
 
     inner class DailyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val binding = ItemDailyForecastBinding.bind(itemView)

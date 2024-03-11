@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.model.CurrentUserLocation
 import voloshyn.android.domain.model.NetworkStatus
+import voloshyn.android.domain.model.addSearchPlace.ListSizeState
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
@@ -28,17 +29,14 @@ import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
-import voloshyn.android.weather.presentation.fragment.weather.mvi.GetSavedPlaces
-import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowLessPlaces
-import voloshyn.android.weather.presentation.fragment.weather.mvi.ShowMorePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.SideEffects
+import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenIntent
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
 
-const val INITIAL_CITIES_LIST_SIZE = 4
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -69,8 +67,12 @@ class WeatherViewModel @Inject constructor(
     private val _sideEffectsState = MutableSharedFlow<SideEffects>()
     val sideEffects = _sideEffectsState.asSharedFlow()
 
+    private val _time = MutableStateFlow<String>("")
+    val time = _time.asStateFlow()
+
     init {
         viewModelScope.launch {
+            getSavedPlaces(ListSizeState.DEFAULT)
             fetchWeather(null)
         }
     }
@@ -87,10 +89,6 @@ class WeatherViewModel @Inject constructor(
                 viewModelScope.launch { fetchWeather(intent.id) }
             }
 
-            is GetSavedPlaces -> {
-                TODO()
-            }
-
             is UpdateNetworkStatus -> {
                 updateNetworkStatus(intent.networkStatus)
             }
@@ -99,15 +97,30 @@ class WeatherViewModel @Inject constructor(
                 updateGpsStatus(intent.gpsStatus)
             }
 
-            is ShowMorePlaces -> {
-                TODO()
-            }
+            is TogglePlaces -> {
+                viewModelScope.launch {
+                    when (_weatherState.value.placesState) {
+                        ListSizeState.FULL -> {
+                            getSavedPlaces(ListSizeState.TRIM)
+                            _weatherState.update {
+                                it.copy(placesState = ListSizeState.TRIM)
+                            }
+                        }
 
-            is ShowLessPlaces -> {
-                TODO()
+                        else -> {
+                            getSavedPlaces(ListSizeState.FULL)
+                            _weatherState.update {
+                                it.copy(placesState = ListSizeState.FULL)
+                            }
+                        }
+
+                    }
+                }
+
             }
         }
     }
+
 
     private suspend fun fetchWeather(
         id: Int?
@@ -119,8 +132,11 @@ class WeatherViewModel @Inject constructor(
             )
         }
         try {
-            val location = if (id == null) getCurrentLocationUseCase.invoke()
-                .toResult() else getPlaceById.invoke(id)
+            val location = if (id == null) {
+                getCurrentLocationUseCase.invoke().toResult()
+            } else {
+                getPlaceById.invoke(id)
+            }
 
             loadData(
                 location.name,
@@ -191,7 +207,7 @@ class WeatherViewModel @Inject constructor(
                 mainWeatherInfo = mainWeatherInfo,
                 hourlyForecast = hourlyForecast,
                 dailyForecast = dailyForecast,
-                backgroundImage = cityImage,
+                imageUrl = cityImage,
                 isLoading = false,
                 isError = false
             )
@@ -212,20 +228,31 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun fetchCityImage(cityName: String): String {
         val data = unsplashImageByCityNameUseCase.invoke(cityName).toResult()
-        return data.cityImageUrl
+        return data.url
     }
 
     private suspend fun updateTime(timeZoneId: String) {
         locationTimeJob = viewModelScope.launch {
             currentTime.invoke(timeZoneId, true).cancellable().collectLatest { time ->
-                _weatherState.update {
-                    it.copy(
-                        currentTime = time
-                    )
-                }
+                _time.emit(time)
             }
         }
     }
+
+    private suspend fun getSavedPlaces(listSizeState: ListSizeState) {
+        try {
+            val places = getSavedPlaces.invoke(listSizeState)
+            _weatherState.update {
+                it.copy(
+                    places = places,
+                )
+            }
+
+        } catch (e: Exception) {
+
+        }
+    }
+
 
     fun updateWeatherWidgetVisibility(value: Double) {
         viewModelScope.launch {

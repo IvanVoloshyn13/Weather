@@ -25,6 +25,5 @@ class GetSavedPlacesRepositoryImpl @Inject constructor(
         } catch (e: IOException) {
             Resource.Error(e = e)
         }
-
     }
 }

@@ -9,7 +9,7 @@ import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toResourceError
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.customError.EmptyBodyError
-import voloshyn.android.domain.model.CurrentLocationImage
+import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
 import voloshyn.android.network.http.ApiResult
 import voloshyn.android.network.http.exceptions.ApiException
@@ -25,7 +25,7 @@ class UnsplashImageRepositoryImpl @Inject constructor(
     @UnsplashApi private val apiUnsplashService: ApiUnsplashService,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : UnsplashImageRepository {
-    override suspend fun fetchUnsplashCityImageByName(cityName: String): Resource<CurrentLocationImage> =
+    override suspend fun fetchUnsplashCityImageByName(cityName: String): Resource<UnsplashImage> =
         withContext(dispatcher) {
             try {
                 val result = executeApiCall(
@@ -51,10 +51,10 @@ class UnsplashImageRepositoryImpl @Inject constructor(
 
 }
 
-fun UnsplashApiResponse.toCityImage(): CurrentLocationImage {
+fun UnsplashApiResponse.toCityImage(): UnsplashImage {
     val randomImageNumber = this.imageList.size.toRandomNumber()
     val imageUrl = this.imageList[randomImageNumber].imageUrls.small
-    return CurrentLocationImage(cityImageUrl = imageUrl)
+    return UnsplashImage(url = imageUrl)
 }
 
 fun Int.toRandomNumber(): Int {
