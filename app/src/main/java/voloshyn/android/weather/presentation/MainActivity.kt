@@ -9,15 +9,12 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import voloshyn.android.weather.R
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsReceiverImpl
 import voloshyn.android.weather.networkObserver.NetworkObserver
 import voloshyn.android.weather.networkObserver.NetworkObserverImpl
 import voloshyn.android.weather.presentation.dialog.GpsPermissionDialog
-import kotlin.system.measureTimeMillis
 
 
 @AndroidEntryPoint
@@ -30,9 +27,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerLifecycleOwner(this, this)
-        registerNetworkLifecycleOwner(this, this)
-        checkLocationPermission()
+
+            registerLifecycleOwner(this, this)
+            registerNetworkLifecycleOwner(this, this)
+            checkLocationPermission()
         val completed = args.completed
 
         val navHost =
