@@ -130,12 +130,19 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                     onLoading = {
                         progressBarBinding.progressBar.visibility = View.VISIBLE
                         binding.errorDialog.errorDialog.visibility = View.GONE
+                        binding.backgroundImage.setImageDrawable(
+                            AppCompatResources.getDrawable(
+                                requireContext(),
+                                R.drawable.splash
+                            )
+                        )
+                        binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
                     },
                     onError = {
                         binding.errorDialog.errorDialog.visibility = View.VISIBLE
                         binding.errorDialog.tvError.text = state.errorMessage
                         progressBarBinding.progressBar.visibility = View.GONE
-                        updateUi(state)
+
 
                     }, onSuccess = {
                         updateUi(state)
@@ -172,19 +179,17 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                 )
                 backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
             }
-//TODO() need to add list size to state for updating button visibility
 
-//            if (state.places.size <= 4) {
-//                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
-//            } else {
-//                headerBinding.bttTogglePlacesSize.visibility = View.GONE
-//            }
-            savedPlacesAdapter.submitList(state.places)
+            if (state.places.first <= 4) {
+                headerBinding.bttTogglePlacesSize.visibility = View.GONE
+            } else {
+                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
+            }
+            savedPlacesAdapter.submitList(state.places.second)
 
         }
-
-
     }
+
 
     private fun updateHeader(placesState: ListSizeState) {
         when (placesState) {

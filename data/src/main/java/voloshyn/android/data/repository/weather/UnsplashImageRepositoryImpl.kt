@@ -53,7 +53,7 @@ class UnsplashImageRepositoryImpl @Inject constructor(
 
 fun UnsplashApiResponse.toCityImage(): UnsplashImage {
     val randomImageNumber = this.imageList.size.toRandomNumber()
-    val imageUrl = this.imageList[randomImageNumber].imageUrls.small
+    val imageUrl = this.imageList[randomImageNumber].imageUrls.regular
     return UnsplashImage(url = imageUrl)
 }
 

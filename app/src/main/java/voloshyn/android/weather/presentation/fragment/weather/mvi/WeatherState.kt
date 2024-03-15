@@ -13,7 +13,7 @@ data class WeatherState(
     val mainWeatherInfo: MainWeatherInfo = MainWeatherInfo(),
     val hourlyForecast: List<HourlyForecast> = ArrayList(),
     val dailyForecast: List<DailyForecast> = ArrayList(),
-    val places: List<Place> = ArrayList(),
+    val places: Pair<Int, List<Place>> = Pair(0, ArrayList()),
     val placesState: ListSizeState = ListSizeState.DEFAULT,
     val imageUrl: String = "",
     val gpsStatus: GpsStatus? = null,
