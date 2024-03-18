@@ -53,9 +53,7 @@ object BlurUtil {
         imageUrl: String,
         blurRadius: Float
     ) {
-        Log.d("IMAGE", this.imageUrl)
         if (imageUrl != this.imageUrl) {
-            Log.d("IMAGE1", this.imageUrl)
             this.imageUrl = imageUrl
             val imageLoader = ImageLoader.Builder(context)
                 .crossfade(true)
@@ -67,7 +65,6 @@ object BlurUtil {
             imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
             bitmap = imageDrawable.toBitmap()
 
-            Log.d("IMAGE", "BITMAP1")
             val convertedBitmap = convertBitmap(bitmap)
             if (blurRadius > 0f) {
                 val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
@@ -78,7 +75,6 @@ object BlurUtil {
                 imageView.scaleType = ImageView.ScaleType.FIT_XY
             }
         } else {
-            Log.d("IMAGE", "BITMAP2")
             val convertedBitmap = convertBitmap(bitmap)
             if (blurRadius > 0f) {
                 val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
