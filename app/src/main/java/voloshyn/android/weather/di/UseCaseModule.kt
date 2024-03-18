@@ -19,6 +19,8 @@ import voloshyn.android.domain.repository.weather.GetPlaceByIdRepository
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
 import voloshyn.android.domain.repository.weather.LocationTimeRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
+import voloshyn.android.domain.repository.weather.pager.SavedPlacesLocationRepository
+import voloshyn.android.domain.repository.weather.pager.WeatherDataRepository
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
@@ -33,6 +35,8 @@ import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
+import voloshyn.android.domain.useCase.weather.pager.FetchMultipleWeatherDataUseCase
+import voloshyn.android.domain.useCase.weather.pager.GetSavedPlacesLocationUseCase
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -112,6 +116,16 @@ internal object UseCaseModule {
     @Provides
     fun provideGetSavedPlacesUseCase(repository: GetSavedPlacesRepository): GetSavedPlacesUseCase {
         return GetSavedPlacesUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetSavedLocationsUseCase(repository: SavedPlacesLocationRepository): GetSavedPlacesLocationUseCase {
+        return GetSavedPlacesLocationUseCase(repository)
+    }
+
+    @Provides
+    fun provideWeatherDataUseCase(repository: WeatherDataRepository): FetchMultipleWeatherDataUseCase {
+        return FetchMultipleWeatherDataUseCase(repository)
     }
 }
 

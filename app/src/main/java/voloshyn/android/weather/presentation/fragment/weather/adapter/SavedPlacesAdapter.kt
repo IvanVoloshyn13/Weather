@@ -59,5 +59,5 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
 }
 
 interface OnPlaceClickListener {
-    fun onClick(city: Place)
+    fun onClick(place: Place)
 }

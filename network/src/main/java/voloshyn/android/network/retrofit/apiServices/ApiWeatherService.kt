@@ -13,6 +13,12 @@ interface ApiWeatherService {
         @Query("longitude") longitude: Double
     ): Response<WeatherResponse>
 
+    @GET(WEATHER_ENDPOINT)
+    suspend fun fetchWeatherDataForMultipleLocation(
+        @Query("latitude") latitude: Array<Double>,
+        @Query("longitude") longitude: Array<Double>
+    ): Response<List<WeatherResponse>>
+
     companion object {
         const val WEATHER_ENDPOINT = "v1/forecast?&hourly=temperature_2m," +
                 "weathercode&daily=weathercode" + ",temperature_2m_max,temperature_2m_min," +

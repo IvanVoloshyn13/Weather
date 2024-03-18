@@ -48,6 +48,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
+import voloshyn.android.weather.presentation.fragment.weather.pager.PagerFragment
 
 
 @AndroidEntryPoint
@@ -153,6 +154,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             }
 
         }
+
 
     }
 

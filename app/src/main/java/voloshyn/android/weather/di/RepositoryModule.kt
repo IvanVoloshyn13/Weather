@@ -16,6 +16,8 @@ import voloshyn.android.data.repository.weather.GetPlaceByIdRepositoryImpl
 import voloshyn.android.data.repository.weather.GetSavedPlacesRepositoryImpl
 import voloshyn.android.data.repository.weather.LocationTimeRepositoryImpl
 import voloshyn.android.data.repository.weather.UnsplashImageRepositoryImpl
+import voloshyn.android.data.repository.weather.pager.SavedPlacesLocationRepositoryImpl
+import voloshyn.android.data.repository.weather.pager.WeatherDataRepositoryImpl
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.repository.addSearch.SavePlaceRepository
 import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
@@ -28,6 +30,8 @@ import voloshyn.android.domain.repository.weather.GetPlaceByIdRepository
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
 import voloshyn.android.domain.repository.weather.LocationTimeRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
+import voloshyn.android.domain.repository.weather.pager.SavedPlacesLocationRepository
+import voloshyn.android.domain.repository.weather.pager.WeatherDataRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -76,4 +80,9 @@ internal interface RepositoryModule {
         repository: GetSavedPlacesRepositoryImpl
     ): GetSavedPlacesRepository
 
+    @Binds
+    fun bindSavedLocationsRepository(repository: SavedPlacesLocationRepositoryImpl): SavedPlacesLocationRepository
+
+    @Binds
+    fun bindWeatherDataRepository(repository: WeatherDataRepositoryImpl): WeatherDataRepository
 }
