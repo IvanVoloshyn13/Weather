@@ -1,8 +1,8 @@
 package voloshyn.android.data.repository.onBoard.second
 
 import android.util.Log
-import voloshyn.android.data.storage.database.AppDatabase
-import voloshyn.android.data.storage.database.PlaceEntity
+import voloshyn.android.data.dataSource.local.database.AppDatabase
+import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.domain.model.onBoarding.PopularPlace
 import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import javax.inject.Inject
@@ -11,13 +11,9 @@ class PopularPlacesRepositoryImpl @Inject constructor(
     private val db: AppDatabase
 ) : PopularPlacesRepository {
 
-    override suspend fun savePlaces(places: Array<PopularPlace>): List<Long> {
-        val resultLong = db.getCityDao().savePopularPlaces(places = places.toPlaceEntityArray())
-        resultLong.forEach {
-            Log.d("DATABASE", it.toString())
-        }
+    override suspend fun savePlaces(places: Array<PopularPlace>) {
+        db.getPlaceDao().storePopularPlaces(places = places.toPlaceEntityArray())
 
-        return resultLong
     }
 }
 

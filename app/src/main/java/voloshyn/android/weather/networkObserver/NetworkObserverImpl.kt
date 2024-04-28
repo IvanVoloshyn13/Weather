@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.model.NetworkStatus
+import voloshyn.android.domain.NetworkStatus
 
 class NetworkObserverImpl : NetworkObserver, LifecycleEventObserver {
     private var context: Context? = null

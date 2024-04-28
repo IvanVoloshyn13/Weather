@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,16 +16,15 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.model.CurrentUserLocation
-import voloshyn.android.domain.model.NetworkStatus
-import voloshyn.android.domain.model.addSearchPlace.ListSizeState
-import voloshyn.android.domain.model.weather.WeatherComponents
-import voloshyn.android.domain.useCase.weather.FetchUnsplashImageByCityNameUseCase
-import voloshyn.android.domain.useCase.weather.FetchWeatherForCurrentLocationUseCase
+import voloshyn.android.domain.NetworkStatus
+import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.error.LocationProviderError
+import voloshyn.android.domain.model.ListSizeState
+import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
-import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
-import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
+import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
@@ -37,33 +36,34 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenI
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
 
+const val CURRENT_LOCATION_DEFAULT_ID = 0
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val getCurrentLocationUseCase: GetCurrentLocationUseCase,
-    private val weatherForCurrentLocation: FetchWeatherForCurrentLocationUseCase,
-    private val currentTime: GetTimeForLocationUseCase,
-    private val unsplashImageByCityNameUseCase: FetchUnsplashImageByCityNameUseCase,
-    private val getPlaceById: GetPlaceByIdUseCase,
-    private val getSavedPlaces: GetSavedPlacesUseCase
+    private val currentTime: GetTimeForSelectedPlaceUseCase,
+    private val getSavedPlaces: GetSavedPlacesUseCase,
+    private val weatherAndImage: FetchWeatherAndImageDataUseCase
 ) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.d("EXCEPTION_HANDLER", "$throwable,  ${throwable.message}")
-        _weatherState.update {
+        _state.update {
             it.copy(
-                isLoading = false,
-                isError = true
+                isLoading = false
             )
         }
+        return@CoroutineExceptionHandler
     }
+
     private var locationTimeJob: Job? = null
-    private val viewModelScope = CoroutineScope(exceptionHandler)
-    private val _weatherState =
+    private val viewModelScope = CoroutineScope(SupervisorJob() + exceptionHandler)
+    private val _state =
         MutableStateFlow<WeatherState>(
             WeatherState()
         )
-    val state = _weatherState.asStateFlow()
+    val state = _state.asStateFlow()
+
     private val _sideEffectsState = MutableSharedFlow<SideEffects>()
     val sideEffects = _sideEffectsState.asSharedFlow()
 
@@ -72,21 +72,53 @@ class WeatherViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getSavedPlaces(ListSizeState.DEFAULT)
-            fetchWeather(null)
+            /** #1 Main function to get weather data */
+            fetchWeatherData(Place())
+        }
+    }
+
+    /**
+     *This is the function which is trigger all the rest function with necessary data for weatherState
+     * */
+    private suspend fun fetchWeatherData(_place: Place) {
+        _state.emit(WeatherState(isLoading = true))
+        val place = when (_place.id) {
+            CURRENT_LOCATION_DEFAULT_ID -> {
+                getCurrentUserLocation()
+            }
+
+            else -> {
+                _place
+            }
+        }
+        when (place) {
+            Place.EMPTY_PLACE_ERROR -> TODO()
+            else -> {
+                getWeatherAndImage(
+                    place
+                )
+                observeTime(_state.value.timeZone)
+                _state.update {
+                    it.copy(
+                        isLoading = false
+                    )
+                }
+            }
         }
     }
 
     fun onIntent(intent: WeatherScreenIntent) {
         when (intent) {
             FetchWeatherForCurrentLocation -> {
+                Log.d("Model", "Intent")
                 viewModelScope.launch {
-                    fetchWeather(null)
+                    Log.d("Model", "Intent1")
+                    fetchWeatherData(Place())
                 }
             }
 
             is FetchWeatherForSavedPlace -> {
-                viewModelScope.launch { fetchWeather(intent.id) }
+                viewModelScope.launch { fetchWeatherData(intent.place) }
             }
 
             is UpdateNetworkStatus -> {
@@ -99,21 +131,20 @@ class WeatherViewModel @Inject constructor(
 
             is TogglePlaces -> {
                 viewModelScope.launch {
-                    when (_weatherState.value.placesState) {
+                    when (_state.value.placesState) {
                         ListSizeState.FULL -> {
                             getSavedPlaces(ListSizeState.TRIM)
-                            _weatherState.update {
+                            _state.update {
                                 it.copy(placesState = ListSizeState.TRIM)
                             }
                         }
 
                         else -> {
                             getSavedPlaces(ListSizeState.FULL)
-                            _weatherState.update {
+                            _state.update {
                                 it.copy(placesState = ListSizeState.FULL)
                             }
                         }
-
                     }
                 }
 
@@ -122,141 +153,136 @@ class WeatherViewModel @Inject constructor(
     }
 
 
-    private suspend fun fetchWeather(
-        id: Int?
-    ) {
-        _weatherState.update {
-            it.copy(
-                isLoading = true,
-                isError = false
-            )
-        }
-        try {
-            val location = if (id == null) {
-                getCurrentLocationUseCase.invoke().toResult()
-            } else {
-                getPlaceById.invoke(id)
+    private suspend fun observeTime(timeZone: String) {
+        if (locationTimeJob != null) {
+            stopTimeObserve()
+            if (locationTimeJob?.isCompleted == true) {
+                updateTime(timeZone = timeZone)
             }
-
-            loadData(
-                location.name,
-                location.latitude,
-                location.longitude,
-                _weatherState.value.networkStatus ?: NetworkStatus.LOST
-            )
-        } catch (e: Exception) {
-            _weatherState.update {
-                it.copy(
-                    location = CurrentUserLocation.DEFAULT.city,
-                    isLoading = false,
-                    isError = true,
-                    errorMessage = e.message ?: ""
-                )
-            }
-            //TODO()
+        } else {
+            updateTime(timeZone = timeZone)
         }
     }
 
-    private suspend fun loadData(
-        name: String,
-        latitude: Double,
-        longitude: Double,
-        network: NetworkStatus
-    ) {
-        viewModelScope.launch {
-            val weatherComponents = async {
-                getWeatherByLocation(
-                    latitude,
-                    longitude,
-                    network
-                )
-            }.await()
 
-            if (locationTimeJob != null) {
-                stopTimeObserve()
-                if (locationTimeJob?.isCompleted == true) {
-                    weatherComponents?.let {
-                        updateTime(timeZoneId = it.timezone ?: "")
+    /** When app is started it is default location for weather data. So if locationProvider will be disabled or
+     * user denied permission we cant fetch weather data fo current location but we still can
+     * search for favourite places and fetch weather data for them*/
+    private suspend fun getCurrentUserLocation(): Place {
+        val result = getCurrentLocationUseCase.invoke()
+        return when (result) {
+            is AppResult.Error -> {
+                when (result.error) {
+                    LocationProviderError.NO_LOCATION -> {
+                        _state.update {
+                            it.copy(
+                                placeName = Place.EMPTY_PLACE_ERROR.name,
+                                locationProviderError = Pair(true, TODO("Create text resources"))
+                            )
+                        }
+                        Place.EMPTY_PLACE_ERROR
+                    }
+
+                    LocationProviderError.PROVIDER_ERROR -> {
+                        _state.update {
+                            it.copy(
+                                placeName = Place.EMPTY_PLACE_ERROR.name,
+                                locationProviderError = Pair(true, TODO("Create text resources"))
+                            )
+                        }
+                        Place.EMPTY_PLACE_ERROR
+                    }
+
+                    LocationProviderError.NO_PERMISSION -> {
+                        _state.update {
+                            it.copy(
+                                placeName = Place.EMPTY_PLACE_ERROR.name,
+                                locationProviderError = Pair(true, TODO("Create text resources"))
+                            )
+                        }
+                        Place.EMPTY_PLACE_ERROR
                     }
                 }
-            } else {
-                weatherComponents.let {
-                    updateTime(timeZoneId = it.timezone ?: "")
+            }
+
+            is AppResult.Success -> {
+                _state.update {
+                    it.copy(
+                        placeName = result.data.name,
+                        locationProviderError = Pair(false, WeatherState.NO_ERROR)
+                    )
+                }
+                Place(
+                    name = result.data.name,
+                    latitude = result.data.latitude,
+                    longitude = result.data.longitude
+                )
+            }
+        }
+    }
+
+    /** This function fetch weather for both current place from FusedLocationProvider
+     * or saved place  */
+    private suspend fun getWeatherAndImage(
+        place: Place
+    ) {
+        val result = weatherAndImage.invoke(
+            place
+        )
+        when (result) {
+            is AppResult.Error -> {}
+            is AppResult.Success -> {
+                val dailyForecast = result.data.weatherComponents.dailyForecast
+                val hourlyForecast = result.data.weatherComponents.hourlyForecast
+                val mainWeatherInfo = result.data.weatherComponents.currentForecast
+                _state.update {
+                    it.copy(
+                        currentForecast = mainWeatherInfo,
+                        hourlyForecast = hourlyForecast,
+                        dailyForecast = dailyForecast,
+                        timeZone = result.data.weatherComponents.timezone ?: ""
+                    )
                 }
             }
-            val imageUrl = async { fetchCityImage(name) }.await()
-            updateUiState(
-                placeName = name,
-                weatherComponents = weatherComponents,
-                cityImage = imageUrl
-            )
         }
     }
 
-    private fun updateUiState(
-        placeName: String,
-        weatherComponents: WeatherComponents,
-        cityImage: String
-    ) {
-        val dailyForecast = weatherComponents.dailyForecast
-        val hourlyForecast = weatherComponents.hourlyForecast
-        val mainWeatherInfo = weatherComponents.mainWeatherInfo
-        _weatherState.update {
-            it.copy(
-                location = placeName,
-                mainWeatherInfo = mainWeatherInfo,
-                hourlyForecast = hourlyForecast,
-                dailyForecast = dailyForecast,
-                imageUrl = cityImage,
-                isLoading = false,
-                isError = false
+
+    private suspend fun processNoNetwork() {
+        _sideEffectsState.emit(
+            SideEffects(
+                showErrorMessage = true,
+                errorMessage = "No network connection"
             )
-        }
+        )
     }
 
-    private suspend fun getWeatherByLocation(
-        latitude: Double,
-        longitude: Double,
-        networkStatus: NetworkStatus
-    ): WeatherComponents {
-        return weatherForCurrentLocation.invoke(
-            latitude = latitude,
-            longitude = longitude,
-            networkStatus = networkStatus
-        ).toResult()
-    }
 
-    private suspend fun fetchCityImage(cityName: String): String {
-        val data = unsplashImageByCityNameUseCase.invoke(cityName).toResult()
-        return data.url
-    }
-
-    private suspend fun updateTime(timeZoneId: String) {
+    private suspend fun updateTime(timeZone: String) {
         locationTimeJob = viewModelScope.launch {
-            currentTime.invoke(timeZoneId, true).cancellable().collectLatest { time ->
+            currentTime.invoke(timeZone, true).cancellable().collectLatest { time ->
                 _time.emit(time)
             }
         }
     }
 
     private suspend fun getSavedPlaces(listSizeState: ListSizeState) {
-        try {
-            val places = getSavedPlaces.invoke(listSizeState)
-            _weatherState.update {
+        val result = getSavedPlaces.invoke(listSizeState)
+
+        result.collectLatest {list->
+            _state.update {
                 it.copy(
-                    places = places,
+                    places =Pair(list.size,list )
                 )
             }
-
-        } catch (e: Exception) {
-
         }
+
     }
 
 
     fun updateWeatherWidgetVisibility(value: Double) {
         viewModelScope.launch {
-            _weatherState.update {
+            _state.update {
                 it.copy(
                     weatherWidgetVisibility = value
                 )
@@ -265,14 +291,14 @@ class WeatherViewModel @Inject constructor(
     }
 
     private fun updateGpsStatus(gps: GpsStatus) {
-        _weatherState.update { state ->
+        _state.update { state ->
             state.copy(gpsStatus = gps)
         }
         //  if (gps == GpsStatus.AVAILABLE && _weatherState.value.location.isEmpty()) onChange()
     }
 
     private fun updateNetworkStatus(network: NetworkStatus) {
-        _weatherState.update { state ->
+        _state.update { state ->
             state.copy(
                 networkStatus = network,
             )
@@ -295,15 +321,6 @@ class WeatherViewModel @Inject constructor(
                 errorMessage = message ?: "Cant load data"
             )
         )
-    }
-
-    private suspend fun <T> T.toResult(): T {
-        return try {
-            this
-        } catch (e: Exception) {
-            emitError(e.message)
-            throw e
-        }
     }
 
 }

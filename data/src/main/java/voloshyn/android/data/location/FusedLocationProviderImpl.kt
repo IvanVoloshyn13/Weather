@@ -12,12 +12,11 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import voloshyn.android.data.R
-import voloshyn.android.domain.Resource
-import voloshyn.android.domain.customError.LocationProviderError
-import voloshyn.android.domain.customError.NoLocationPermissionError
+import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.error.LocationProviderError
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.model.CurrentUserLocation
+import voloshyn.android.domain.model.Place
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -28,10 +27,9 @@ class FusedLocationProviderImpl @Inject constructor(
     @ApplicationContext val context: Context
 ) : FusedLocationProvider {
 
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getCurrentUserLocation(
-    ): Resource<CurrentUserLocation> {
+    ): AppResult<Place, LocationProviderError> {
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -42,10 +40,10 @@ class FusedLocationProviderImpl @Inject constructor(
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!hasPermission) {
-            return Resource.Error( e = NoLocationPermissionError(context.getString(R.string.no_location_permission)))
+            return AppResult.Error(error = LocationProviderError.NO_PERMISSION)
         } else if (!isGpsEnabled && !isNetworkEnabled) {
-            return Resource.Error(
-                e = LocationProviderError(context.getString(R.string.provider_error))
+            return AppResult.Error(
+                error = LocationProviderError.PROVIDER_ERROR
             )
         }
         return suspendCancellableCoroutine { continuation ->
@@ -68,31 +66,24 @@ class FusedLocationProviderImpl @Inject constructor(
                             currentUserLocation = CurrentUserLocation(
                                 latitude = latitude,
                                 longitude = longitude,
-                                city = address[0].locality,
-                                timeZoneID = ""
+                                city = address[0].locality
                             )
-                            continuation.resume(Resource.Success(data = currentUserLocation)) {
+                            continuation.resume(AppResult.Success(data = currentUserLocation.toPlace())) {
                                 continuation.resumeWithException(it)
                             }
                         }
                     } ?: continuation.resume(
-                        Resource.Error(
-                            e = LocationProviderError(context.getString(R.string.provider_error))
-                        )
+                        AppResult.Error(error = LocationProviderError.NO_LOCATION)
                     )
                 }
                     .addOnCanceledListener {
                         continuation.resume(
-                            Resource.Error(
-                                e = LocationProviderError(context.getString(R.string.provider_error))
-                            )
+                            AppResult.Error(error = LocationProviderError.NO_LOCATION)
                         )
                     }
                     .addOnFailureListener {
                         continuation.resume(
-                            Resource.Error(
-                                e = LocationProviderError(context.getString(R.string.provider_error))
-                            )
+                            AppResult.Error(error = LocationProviderError.NO_LOCATION)
                         )
                     }
             } else {
@@ -109,37 +100,31 @@ class FusedLocationProviderImpl @Inject constructor(
                                 currentUserLocation = CurrentUserLocation(
                                     latitude = it[0].latitude,
                                     longitude = it[0].longitude,
-                                    city = it[0].locality,
-                                    timeZoneID = ""
+                                    city = it[0].locality
                                 )
-                                continuation.resume(Resource.Success(data = currentUserLocation)) { exception ->
+                                continuation.resume(AppResult.Success(data = currentUserLocation.toPlace())) { exception ->
                                     continuation.resumeWithException(exception)
                                 }
                             }
                         }
                     } ?: continuation.resume(
-                        Resource.Error(
-                            e = LocationProviderError(context.getString(R.string.provider_error))
-                        )
+                        AppResult.Error(error = LocationProviderError.NO_LOCATION)
                     )
                 }
                     .addOnCanceledListener {
                         continuation.resume(
-                            Resource.Error(
-                                e = LocationProviderError(context.getString(R.string.provider_error))
-                            )
+                            AppResult.Error(error = LocationProviderError.NO_LOCATION)
                         )
                     }
                     .addOnFailureListener {
                         continuation.resume(
-                            Resource.Error(
-                                e = LocationProviderError(context.getString(R.string.provider_error))
+                            AppResult.Error(
+                                error = LocationProviderError.NO_LOCATION
                             )
                         )
                     }
             }
         }
-
 
     }
 }
@@ -153,5 +138,14 @@ fun Context.checkLocationPermission(): Boolean {
         Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED)
     return hasPermission
+}
+
+fun CurrentUserLocation.toPlace(): Place {
+    return Place(
+        name = this.city,
+        latitude = this.latitude,
+        longitude = this.longitude
+
+    )
 }
 

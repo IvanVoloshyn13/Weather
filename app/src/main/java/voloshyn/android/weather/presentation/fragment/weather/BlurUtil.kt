@@ -7,7 +7,6 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
-import android.util.Log
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
@@ -20,7 +19,7 @@ object BlurUtil {
     private lateinit var imageDrawable: Drawable
     private lateinit var bitmap: Bitmap
 
-    fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
+    private fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
         val rs = RenderScript.create(context)
         var blurredBitmap = bitmap.copy(bitmap.config, false)
 
@@ -43,7 +42,7 @@ object BlurUtil {
 
     }
 
-    fun convertBitmap(bitmap: Bitmap): Bitmap {
+    private fun convertBitmap(bitmap: Bitmap): Bitmap {
         return bitmap.copy(Bitmap.Config.ARGB_8888, true)
     }
 
@@ -64,6 +63,7 @@ object BlurUtil {
                 .build()
             imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
             bitmap = imageDrawable.toBitmap()
+<<<<<<< HEAD
 
             val convertedBitmap = convertBitmap(bitmap)
             if (blurRadius > 0f) {
@@ -84,6 +84,27 @@ object BlurUtil {
                 imageView.setImageDrawable(imageDrawable)
                 imageView.scaleType = ImageView.ScaleType.FIT_XY
             }
+=======
+            setBlurredImage( blurRadius, imageView, context)
+        } else {
+            setBlurredImage( blurRadius, imageView, context)
+        }
+    }
+
+    private fun setBlurredImage(
+        blurRadius: Float,
+        imageView: ImageView,
+        context: Context
+    ) {
+        val convertedBitmap = convertBitmap(bitmap)
+        if (blurRadius > 0f) {
+            val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
+            imageView.setImageBitmap(blurredBitmap)
+            imageView.scaleType = ImageView.ScaleType.FIT_XY
+        } else {
+            imageView.setImageDrawable(imageDrawable)
+            imageView.scaleType = ImageView.ScaleType.FIT_XY
+>>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
         }
     }
 }

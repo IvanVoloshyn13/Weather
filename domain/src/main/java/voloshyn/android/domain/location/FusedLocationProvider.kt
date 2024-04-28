@@ -1,12 +1,13 @@
 package voloshyn.android.domain.location
 
 
-import voloshyn.android.domain.Resource
-import voloshyn.android.domain.model.CurrentUserLocation
+import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.error.LocationProviderError
+import voloshyn.android.domain.model.Place
 
 
 interface FusedLocationProvider {
 
-    suspend fun getCurrentUserLocation(): Resource<CurrentUserLocation>
+    suspend fun getCurrentUserLocation(): AppResult<Place, LocationProviderError>
 
 }

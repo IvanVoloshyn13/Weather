@@ -7,8 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.Resource
-import voloshyn.android.domain.model.addSearchPlace.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import javax.inject.Inject
@@ -19,8 +18,8 @@ class SearchViewModel @Inject constructor(
     private val savePlaceUseCase: SavePlaceUseCase
 ) : ViewModel() {
 
-    private val _places: MutableStateFlow<List<Place>> =
-        MutableStateFlow(ArrayList<Place>())
+    private val _places: MutableStateFlow<List<SearchPlace>> =
+        MutableStateFlow(ArrayList<SearchPlace>())
     val places = _places.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -44,7 +43,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun saveCity(city: Place) {
+    fun saveCity(city: SearchPlace) {
         viewModelScope.launch {
             _isLoading.emit(true)
             savePlaceUseCase.invoke(city)
