@@ -3,8 +3,8 @@ package voloshyn.android.data.repository.onBoard.second
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import voloshyn.android.data.storage.datastorePreferences.DatastoreHelpers
-import voloshyn.android.data.storage.datastorePreferences.PreferencesKeys
+import voloshyn.android.data.dataSource.local.datastorePreferences.DatastoreHelpers
+import voloshyn.android.data.dataSource.local.datastorePreferences.PreferencesKeys
 import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
 import javax.inject.Inject
 

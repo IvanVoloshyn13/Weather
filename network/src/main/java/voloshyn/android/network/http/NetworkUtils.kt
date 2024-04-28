@@ -6,6 +6,7 @@ import com.squareup.moshi.Moshi
 import kotlinx.coroutines.delay
 import retrofit2.Response
 import voloshyn.android.network.http.exceptions.ApiException
+import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
 import java.io.IOException
 
 
@@ -19,11 +20,12 @@ suspend fun <T> executeApiCall(
     repeat(maxAttempts) { attempt ->
         try {
             return call().toResult(errorHandler)
+        } catch (e:NoConnectivityException){
+            throw e
         } catch (e: Exception) {
             if (attempt == (maxAttempts - 1) || !shouldRetry(e)) {
                 if (e is JsonDataException) {
                     Log.e("APICall", e.toString())
-
                 }
                 throw e
             }

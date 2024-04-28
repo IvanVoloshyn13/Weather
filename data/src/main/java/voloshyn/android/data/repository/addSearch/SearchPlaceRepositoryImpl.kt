@@ -5,9 +5,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.data.mappers.toResourceError
+import voloshyn.android.data.mappers.toResultError
 import voloshyn.android.domain.Resource
-import voloshyn.android.domain.model.addSearchPlace.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.domain.repository.addSearch.PlacesList
 import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
 import voloshyn.android.network.http.ApiResult
@@ -41,14 +41,14 @@ class SearchPlaceRepositoryImpl @Inject constructor(
                     }
                 }
             } catch (e: ApiException) {
-                return@withContext e.toResourceError(context)
+                return@withContext Resource.Error(e)
             }
         }
 }
 
-fun PlacesSearchResponse.toSearchedCityList(): ArrayList<Place> {
+fun PlacesSearchResponse.toSearchedCityList(): ArrayList<SearchPlace> {
     return this.citiesList.map { location: SearchedPlaces ->
-        Place(
+        SearchPlace(
             id = location.id,
             name = location.name,
             latitude = location.latitude,
@@ -57,6 +57,6 @@ fun PlacesSearchResponse.toSearchedCityList(): ArrayList<Place> {
             country = location.country,
             countryCode = location.countyCode
         )
-    } as ArrayList<Place>
+    } as ArrayList<SearchPlace>
 
 }

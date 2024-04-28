@@ -5,7 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.domain.model.addSearchPlace.Place
+import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemPlacesBinding
 
@@ -15,9 +16,9 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
 
     inner class CitiesItemViewHolde(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val binding = ItemPlacesBinding.bind(itemView)
-        fun bind(data: Place) {
+        fun bind(place: Place) {
             binding.apply {
-                tvName.text = data.name
+                tvName.text = place.name
                 ivIcon.setImageResource(R.drawable.ic_current_location)
             }
         }
@@ -28,8 +29,8 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
     }
 
     override fun onClick(v: View) {
-        val city = v.tag as Place
-        listener.onClick(city)
+        val place = v.tag as Place
+        listener.onClick(place)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitiesItemViewHolde {
@@ -44,9 +45,9 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
     }
 
     override fun onBindViewHolder(holder: CitiesItemViewHolde, position: Int) {
-        val city = citiesList[position]
-        holder.bind(city)
-        holder.itemView.tag = city
+        val place = citiesList[position]
+        holder.bind(place)
+        holder.itemView.tag = place
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -59,5 +60,5 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
 }
 
 interface OnPlaceClickListener {
-    fun onClick(city: Place)
+    fun onClick(place: Place)
 }

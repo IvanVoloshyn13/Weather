@@ -3,7 +3,7 @@ package voloshyn.android.weather.networkObserver
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.Flow
-import voloshyn.android.domain.model.NetworkStatus
+import voloshyn.android.domain.NetworkStatus
 
 
 interface NetworkObserver {

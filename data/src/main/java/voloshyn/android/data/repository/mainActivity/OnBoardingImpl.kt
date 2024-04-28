@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import voloshyn.android.data.storage.datastorePreferences.DatastoreHelpers
-import voloshyn.android.data.storage.datastorePreferences.PreferencesKeys
+import voloshyn.android.data.dataSource.local.datastorePreferences.DatastoreHelpers
+import voloshyn.android.data.dataSource.local.datastorePreferences.PreferencesKeys
 import voloshyn.android.domain.Resource
 import voloshyn.android.domain.repository.mainActivity.OnBoarding
 import javax.inject.Inject

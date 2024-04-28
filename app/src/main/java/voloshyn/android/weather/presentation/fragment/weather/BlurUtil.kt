@@ -7,7 +7,6 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
-import android.util.Log
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
@@ -20,7 +19,7 @@ object BlurUtil {
     private lateinit var imageDrawable: Drawable
     private lateinit var bitmap: Bitmap
 
-    fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
+    private fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
         val rs = RenderScript.create(context)
         var blurredBitmap = bitmap.copy(bitmap.config, false)
 
@@ -43,7 +42,7 @@ object BlurUtil {
 
     }
 
-    fun convertBitmap(bitmap: Bitmap): Bitmap {
+    private fun convertBitmap(bitmap: Bitmap): Bitmap {
         return bitmap.copy(Bitmap.Config.ARGB_8888, true)
     }
 
@@ -53,9 +52,7 @@ object BlurUtil {
         imageUrl: String,
         blurRadius: Float
     ) {
-        Log.d("IMAGE", this.imageUrl)
         if (imageUrl != this.imageUrl) {
-            Log.d("IMAGE1", this.imageUrl)
             this.imageUrl = imageUrl
             val imageLoader = ImageLoader.Builder(context)
                 .crossfade(true)
@@ -66,28 +63,25 @@ object BlurUtil {
                 .build()
             imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
             bitmap = imageDrawable.toBitmap()
-
-            Log.d("IMAGE", "BITMAP1")
-            val convertedBitmap = convertBitmap(bitmap)
-            if (blurRadius > 0f) {
-                val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
-                imageView.setImageBitmap(blurredBitmap)
-                imageView.scaleType = ImageView.ScaleType.FIT_XY
-            } else {
-                imageView.setImageDrawable(imageDrawable)
-                imageView.scaleType = ImageView.ScaleType.FIT_XY
-            }
+            setBlurredImage( blurRadius, imageView, context)
         } else {
-            Log.d("IMAGE", "BITMAP2")
-            val convertedBitmap = convertBitmap(bitmap)
-            if (blurRadius > 0f) {
-                val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
-                imageView.setImageBitmap(blurredBitmap)
-                imageView.scaleType = ImageView.ScaleType.FIT_XY
-            } else {
-                imageView.setImageDrawable(imageDrawable)
-                imageView.scaleType = ImageView.ScaleType.FIT_XY
-            }
+            setBlurredImage( blurRadius, imageView, context)
+        }
+    }
+
+    private fun setBlurredImage(
+        blurRadius: Float,
+        imageView: ImageView,
+        context: Context
+    ) {
+        val convertedBitmap = convertBitmap(bitmap)
+        if (blurRadius > 0f) {
+            val blurredBitmap = blurBitmap(context, convertedBitmap, blurRadius)
+            imageView.setImageBitmap(blurredBitmap)
+            imageView.scaleType = ImageView.ScaleType.FIT_XY
+        } else {
+            imageView.setImageDrawable(imageDrawable)
+            imageView.scaleType = ImageView.ScaleType.FIT_XY
         }
     }
 }
