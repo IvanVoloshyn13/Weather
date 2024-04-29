@@ -7,8 +7,8 @@ import voloshyn.android.data.mappers.toWeatherComponents
 import voloshyn.android.data.dataSource.local.database.WeatherEntity
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.repository.weather.WeatherRepository
-import voloshyn.android.network.http.ApiResult
-import voloshyn.android.network.http.executeApiCall
+import voloshyn.android.network.http.utils.ApiResult
+import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiWeatherService
 import javax.inject.Inject
 

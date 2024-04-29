@@ -1,4 +1,4 @@
-package voloshyn.android.network.http
+package voloshyn.android.network.http.utils
 
 import android.util.Log
 import com.squareup.moshi.JsonDataException

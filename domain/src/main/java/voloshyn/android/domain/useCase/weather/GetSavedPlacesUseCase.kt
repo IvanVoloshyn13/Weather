@@ -1,8 +1,6 @@
 package voloshyn.android.domain.useCase.weather
 
 import kotlinx.coroutines.flow.Flow
-import voloshyn.android.domain.error.AppError
-import voloshyn.android.domain.error.AppResult
 import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository

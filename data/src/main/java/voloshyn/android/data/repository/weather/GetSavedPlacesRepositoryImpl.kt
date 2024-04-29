@@ -6,13 +6,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.dataSource.local.database.AppDatabase
 import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
-import voloshyn.android.domain.error.AppError
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.DataError
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
 import java.io.IOException
