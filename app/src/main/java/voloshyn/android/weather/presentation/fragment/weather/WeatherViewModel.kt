@@ -212,11 +212,19 @@ class WeatherViewModel @Inject constructor(
                         locationProviderError = Pair(false, WeatherState.NO_ERROR)
                     )
                 }
-                Place(
-                    name = result.data.name,
-                    latitude = result.data.latitude,
-                    longitude = result.data.longitude
-                )
+                with(result.data) {
+                    Place(
+                        name = name,
+                        latitude = latitude,
+                        longitude = longitude,
+                        id = id,
+                        timezone = timezone,
+                        country = country,
+                        countryCode = countryCode
+
+                    )
+                }
+
             }
         }
     }
@@ -269,10 +277,10 @@ class WeatherViewModel @Inject constructor(
     private suspend fun getSavedPlaces(listSizeState: ListSizeState) {
         val result = getSavedPlaces.invoke(listSizeState)
 
-        result.collectLatest {list->
+        result.collectLatest { list ->
             _state.update {
                 it.copy(
-                    places =Pair(list.size,list )
+                    places = Pair(list.size, list)
                 )
             }
         }

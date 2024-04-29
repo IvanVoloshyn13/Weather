@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemPlacesBinding
 

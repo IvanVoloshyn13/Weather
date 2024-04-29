@@ -16,14 +16,7 @@ import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
 import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
-<<<<<<< HEAD
-import voloshyn.android.domain.repository.weather.LocationTimeRepository
-import voloshyn.android.domain.repository.weather.UnsplashImageRepository
-import voloshyn.android.domain.repository.weather.pager.SavedPlacesLocationRepository
-import voloshyn.android.domain.repository.weather.pager.WeatherDataRepository
-=======
 import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
@@ -35,13 +28,8 @@ import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlaces
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
-<<<<<<< HEAD
-import voloshyn.android.domain.useCase.weather.GetTimeForLocationUseCase
-import voloshyn.android.domain.useCase.weather.pager.FetchMultipleWeatherDataUseCase
-import voloshyn.android.domain.useCase.weather.pager.GetSavedPlacesLocationUseCase
-=======
 import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
+
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -113,18 +101,9 @@ internal object UseCaseModule {
     }
 
     @Provides
-<<<<<<< HEAD
-    fun provideGetSavedLocationsUseCase(repository: SavedPlacesLocationRepository): GetSavedPlacesLocationUseCase {
-        return GetSavedPlacesLocationUseCase(repository)
+    fun provideFetchWeatherAndImageUseCase(repository: FetchWeatherAndImageRepository): FetchWeatherAndImageDataUseCase {
+        return FetchWeatherAndImageDataUseCase(repository)
     }
 
-    @Provides
-    fun provideWeatherDataUseCase(repository: WeatherDataRepository): FetchMultipleWeatherDataUseCase {
-        return FetchMultipleWeatherDataUseCase(repository)
-=======
-    fun provideFetchWeatherAndImageUseCase(repository: FetchWeatherAndImageRepository):FetchWeatherAndImageDataUseCase{
-        return FetchWeatherAndImageDataUseCase(repository)
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
-    }
 }
 

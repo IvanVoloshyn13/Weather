@@ -44,7 +44,9 @@ class GetSavedPlacesRepositoryImpl @Inject constructor(
             name = name,
             latitude = latitude,
             longitude = longitude,
-            timezone = timezone
+            timezone = timezone,
+            country = country,
+            countryCode=countryCode
         )
     }
 }

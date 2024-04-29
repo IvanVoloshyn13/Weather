@@ -1,8 +1,8 @@
 package voloshyn.android.domain.repository.addSearch
 
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
+import voloshyn.android.domain.model.Place
 
 
 interface StorePlaceRepository {
-    suspend fun store(searchPlace: SearchPlace)
+    suspend fun store(searchPlace: Place)
 }
