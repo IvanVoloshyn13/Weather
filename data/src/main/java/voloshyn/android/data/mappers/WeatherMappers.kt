@@ -3,7 +3,7 @@ package voloshyn.android.data.mappers
 import android.annotation.SuppressLint
 import voloshyn.android.domain.model.weather.DailyForecast
 import voloshyn.android.domain.model.weather.HourlyForecast
-import voloshyn.android.domain.model.weather.MainWeatherInfo
+import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.network.retrofit.models.weather.WeatherResponse
 import java.time.LocalDate
@@ -91,7 +91,7 @@ fun WeatherResponse.toWeatherComponents(): WeatherComponents {
     return WeatherComponents(
         dailyForecast = dailyForecast[0] as ArrayList<DailyForecast>,
         hourlyForecast = toHourlyForecastList(),
-        mainWeatherInfo = MainWeatherInfo(
+        currentForecast = CurrentForecast(
             todayMaxTemp,
             todayMinTemp,
             currentHourWeatherCode,

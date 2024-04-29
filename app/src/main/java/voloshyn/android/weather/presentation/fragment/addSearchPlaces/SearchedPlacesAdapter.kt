@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.domain.model.addSearchPlace.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemSearchPlaceBinding
 
 class SearchedPlacesAdapter(private val listener: RecyclerViewOnItemClick) :
-    ListAdapter<Place, SearchedPlacesAdapter.CitiesViewHolder>(CitiesDiffUtil()) {
+    ListAdapter<SearchPlace, SearchedPlacesAdapter.CitiesViewHolder>(CitiesDiffUtil()) {
 
-    private val citiesList: ArrayList<Place> = ArrayList<Place>()
+    private val citiesList: ArrayList<SearchPlace> = ArrayList<SearchPlace>()
 
     inner class CitiesViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         init {
@@ -21,7 +21,7 @@ class SearchedPlacesAdapter(private val listener: RecyclerViewOnItemClick) :
         }
 
         private val binding = ItemSearchPlaceBinding.bind(view)
-        fun bind(item: Place) {
+        fun bind(item: SearchPlace) {
             binding.tvName.text = item.toString()
         }
 
@@ -33,12 +33,12 @@ class SearchedPlacesAdapter(private val listener: RecyclerViewOnItemClick) :
         }
     }
 
-    class CitiesDiffUtil() : DiffUtil.ItemCallback<Place>() {
-        override fun areItemsTheSame(oldItem: Place, newItem: Place): Boolean {
+    class CitiesDiffUtil() : DiffUtil.ItemCallback<SearchPlace>() {
+        override fun areItemsTheSame(oldItem: SearchPlace, newItem: SearchPlace): Boolean {
             return oldItem.latitude == newItem.latitude
         }
 
-        override fun areContentsTheSame(oldItem: Place, newItem: Place): Boolean {
+        override fun areContentsTheSame(oldItem: SearchPlace, newItem: SearchPlace): Boolean {
             return oldItem.name == newItem.name && oldItem.latitude == newItem.latitude
         }
 
@@ -59,13 +59,13 @@ class SearchedPlacesAdapter(private val listener: RecyclerViewOnItemClick) :
         return citiesList.size
     }
 
-    fun submitList1(list: List<Place>) {
+    fun submitList1(list: List<SearchPlace>) {
         citiesList.clear()
         citiesList.addAll(list)
         notifyDataSetChanged() //TODO() setup this method with more specific change event
     }
 
     interface RecyclerViewOnItemClick {
-        fun onItemClick(city: Place)
+        fun onItemClick(city: SearchPlace)
     }
 }

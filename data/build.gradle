@@ -57,5 +57,7 @@ dependencies {
 //Location
     implementation "com.google.android.gms:play-services-location:$gms_location_version"
 
+    implementation 'com.google.code.gson:gson:2.8.9'
+
 
 }

@@ -16,10 +16,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.model.addSearchPlace.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentPlaceSearchBinding
 import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.weather.WeatherFragment
 
 @AndroidEntryPoint
 class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
@@ -98,9 +99,12 @@ class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
         findNavController().popBackStack()
     }
 
-    override fun onItemClick(location: Place) {
+    override fun onItemClick(location: SearchPlace) {
         searchViewModel.saveCity(location)
-        setFragmentResult("locationId", bundleOf("bundle_key" to location.id))
+        setFragmentResult(
+            WeatherFragment.CITY_ID_REQUEST_KEY,
+            bundleOf(WeatherFragment.CITY_ID_BUNDLE_KEY to location.id)
+        )
         onBackPressed()
     }
 

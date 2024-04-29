@@ -3,6 +3,7 @@ package voloshyn.android.weather.presentation.fragment.weather
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -24,10 +25,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import voloshyn.android.data.repository.weather.WeatherTypeRepository
-import voloshyn.android.domain.model.NetworkStatus
-import voloshyn.android.domain.model.addSearchPlace.ListSizeState
-import voloshyn.android.domain.model.addSearchPlace.Place
-import voloshyn.android.domain.model.weather.MainWeatherInfo
+import voloshyn.android.domain.NetworkStatus
+import voloshyn.android.domain.model.ListSizeState
+import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.addSearchPlace.SearchPlace
+import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.databinding.HeaderLayoutBinding
@@ -103,10 +105,10 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         sideEffects()
         collectTime()
 
-        setFragmentResultListener("locationId") { _, bundle ->
-            val cityId = bundle.getInt("bundle_key")
+        setFragmentResultListener(CITY_ID_REQUEST_KEY) { _, bundle ->
+            val cityId = bundle.getInt(CITY_ID_BUNDLE_KEY)
             if (cityId != null) {
-                viewModel.onIntent(FetchWeatherForSavedPlace(cityId))
+               // viewModel.onIntent(FetchWeatherForSavedPlace(cityId))
                 viewModel.onIntent(TogglePlaces)
             }
         }
@@ -159,11 +161,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     }
 
     private suspend fun updateUi(state: WeatherState) {
-        updateMainWeatherWidget(state.mainWeatherInfo)
+        updateMainWeatherWidget(state.currentForecast)
         updateWidgetForecast(state)
         updateHeader(state.placesState)
         binding.apply {
-            binding.toolbar.tvToolbarTitle.text = state.location
+            binding.toolbar.tvToolbarTitle.text = state.placeName
             if (state.imageUrl.isNotEmpty()) {
                 //TODO() blurState do not equal to 0 when view is not visible
                 BlurUtil.setBlurredImageFromUrl(
@@ -244,6 +246,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             binding.mainDrawer.openDrawer(GravityCompat.START)
         }
         headerBinding.currentLocation.cityLayout.setOnClickListener {
+            Log.d("Intent", "Intent")
             viewModel.onIntent(FetchWeatherForCurrentLocation)
             drawerLayout.close()
         }
@@ -262,7 +265,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         hourlyAdapter.submitList(state.hourlyForecast)
     }
 
-    private fun updateMainWeatherWidget(state: MainWeatherInfo) {
+    private fun updateMainWeatherWidget(state: CurrentForecast) {
         binding.apply {
             tvCurrentTemp.text = state.currentTemperature.toString()
             tvMaxTemp.text = state.maxTemperature.toString()
@@ -356,7 +359,14 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     override fun onClick(place: Place) {
         drawerLayout.close()
-        viewModel.onIntent(FetchWeatherForSavedPlace(place.id))
+        //TODO() change argument from id to place and get necessary data without
+        // fetch place from dataBase(unnecessary work)
+        viewModel.onIntent(FetchWeatherForSavedPlace(place))
+    }
+
+    companion object {
+        const val CITY_ID_REQUEST_KEY = "city_id_request_key"
+        const val CITY_ID_BUNDLE_KEY = "city_id_bundle_key"
     }
 
 }

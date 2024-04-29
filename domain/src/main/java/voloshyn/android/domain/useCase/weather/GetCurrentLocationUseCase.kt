@@ -1,19 +1,12 @@
 package voloshyn.android.domain.useCase.weather
 
+import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.error.LocationProviderError
 import voloshyn.android.domain.location.FusedLocationProvider
-import voloshyn.android.domain.model.CurrentUserLocation
-import voloshyn.android.domain.model.Location
-import voloshyn.android.domain.useCase.toResult
+import voloshyn.android.domain.model.Place
 
 class GetCurrentLocationUseCase(private val fusedLocationProvider: FusedLocationProvider) {
-    suspend fun invoke(): Location {
-        val resource = fusedLocationProvider.getCurrentUserLocation()
-        val currentLocation = resource.toResult()
-        val location = Location(
-            name = currentLocation.city,
-            latitude = currentLocation.latitude,
-            longitude = currentLocation.longitude
-        )
-        return location
+    suspend fun invoke(): AppResult<Place, LocationProviderError> {
+        return fusedLocationProvider.getCurrentUserLocation()
     }
 }
