@@ -12,8 +12,8 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.LocationProviderError
+import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.LocationProviderError
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.model.CurrentUserLocation
 import voloshyn.android.domain.model.Place

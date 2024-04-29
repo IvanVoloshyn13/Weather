@@ -8,8 +8,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import voloshyn.android.data.dataSource.local.datastorePreferences.PreferencesKeys
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.DataError
+import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.repository.mainActivity.OnBoarding
 import javax.inject.Inject
 

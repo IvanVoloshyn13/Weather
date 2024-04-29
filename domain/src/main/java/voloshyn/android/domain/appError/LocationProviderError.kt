@@ -1,4 +1,4 @@
-package voloshyn.android.domain.error
+package voloshyn.android.domain.appError
 
 
 enum class LocationProviderError:AppError {

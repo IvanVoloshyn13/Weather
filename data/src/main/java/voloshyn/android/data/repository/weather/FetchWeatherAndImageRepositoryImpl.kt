@@ -1,22 +1,24 @@
 package voloshyn.android.data.repository.weather
 
-import android.net.http.NetworkException
-import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.domain.error.AppError
-import voloshyn.android.domain.error.AppResult
+import voloshyn.android.data.mappers.toResultError
+import voloshyn.android.domain.appError.AppError
+import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.WeatherAndImage
 import voloshyn.android.domain.repository.cache.WeatherAndImageCacheRepository
 import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
 import voloshyn.android.domain.repository.weather.WeatherRepository
+import voloshyn.android.network.http.exceptions.ApiException
 import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
+import java.io.IOException
+import java.net.UnknownHostException
 import java.sql.SQLException
 import javax.inject.Inject
 
@@ -31,22 +33,18 @@ class FetchWeatherAndImageRepositoryImpl @Inject constructor(
     override suspend fun get(place: Place): AppResult<WeatherAndImage, AppError> {
         return try {
             update(place)
-            delay(3000)
-           AppResult.Success(data = cache.get(place.id))
-        } catch (e: NoConnectivityException) {
-            onNetworkException()
-            Log.d("Exc", "12")
-            TODO()
-        } catch (e: HttpException) {
-            onNetworkException()
-            Log.d("Exc", "13")
-            TODO()
+            AppResult.Success(data = cache.get(place.id))
+        } catch (e: IOException) {
+            AppResult.Error(
+                data = onNetworkException(place.id),
+                error = DataError.Network.N0_CONNECTION
+            )
+        } catch (e: ApiException) {
+            AppResult.Error(data = onNetworkException(place.id), error = e.toResultError())
         } catch (e: SQLException) {
-            Log.d("Exc", "14")
-            TODO()
+            AppResult.Error(data = null, error = DataError.Locale.LOCAL_STORAGE_ERROR)
         } catch (e: Exception) {
-            Log.d("Exc", e.message.toString())
-            TODO()
+            AppResult.Error(data = null, error = DataError.Network.UNKNOWN_ERROR)
         }
 
     }
@@ -58,15 +56,15 @@ class FetchWeatherAndImageRepositoryImpl @Inject constructor(
             async { unsplashImageRepository.fetchCurrentPlaceImageByName(place.name) }
         val weatherAndImage =
             WeatherAndImage(weatherComponentsDeferred.await(), imageDeferred.await())
-        cache.store(placeId = place.id, weatherAndImage,place)
+        cache.store(placeId = place.id, weatherAndImage, place)
     }
 
 
     /** Get data from local database if network request fails
      * @throws [SQLException]
      * */
-    private fun onNetworkException() {
-
+    private suspend fun onNetworkException(placeId: Int): WeatherAndImage {
+        return cache.get(placeId = placeId)
     }
 
 

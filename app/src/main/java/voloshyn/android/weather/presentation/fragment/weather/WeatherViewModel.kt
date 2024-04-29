@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.NetworkStatus
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.LocationProviderError
+import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.LocationProviderError
 import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
@@ -110,9 +110,7 @@ class WeatherViewModel @Inject constructor(
     fun onIntent(intent: WeatherScreenIntent) {
         when (intent) {
             FetchWeatherForCurrentLocation -> {
-                Log.d("Model", "Intent")
                 viewModelScope.launch {
-                    Log.d("Model", "Intent1")
                     fetchWeatherData(Place())
                 }
             }
@@ -238,17 +236,38 @@ class WeatherViewModel @Inject constructor(
             place
         )
         when (result) {
-            is AppResult.Error -> {}
+            is AppResult.Error -> {
+                if(result.data!=null){
+                    result.data?.let {
+                        val dailyForecast = it.weatherComponents.dailyForecast
+                        val hourlyForecast = it.weatherComponents.hourlyForecast
+                        val mainWeatherInfo = it.weatherComponents.currentForecast
+                        val imageUrl = it.image.url
+                        _state.update {state->
+                            state.copy(
+                                currentForecast = mainWeatherInfo,
+                                hourlyForecast = hourlyForecast,
+                                dailyForecast = dailyForecast,
+                                timeZone = it.weatherComponents.timezone ?: "",
+                                imageUrl = imageUrl
+                            )
+                        }
+                    }
+
+                }
+            }
             is AppResult.Success -> {
                 val dailyForecast = result.data.weatherComponents.dailyForecast
                 val hourlyForecast = result.data.weatherComponents.hourlyForecast
                 val mainWeatherInfo = result.data.weatherComponents.currentForecast
+                val imageUrl = result.data.image.url
                 _state.update {
                     it.copy(
                         currentForecast = mainWeatherInfo,
                         hourlyForecast = hourlyForecast,
                         dailyForecast = dailyForecast,
-                        timeZone = result.data.weatherComponents.timezone ?: ""
+                        timeZone = result.data.weatherComponents.timezone ?: "",
+                        imageUrl = imageUrl
                     )
                 }
             }

@@ -1,7 +1,7 @@
 package voloshyn.android.domain.repository.addSearch
 
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.DataError
+import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.Place
 
 typealias PlacesList = List<Place>

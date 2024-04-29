@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
 import javax.inject.Inject
 

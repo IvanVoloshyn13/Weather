@@ -5,12 +5,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.DataError
 import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
-import voloshyn.android.network.http.ApiResult
-import voloshyn.android.network.http.executeApiCall
+import voloshyn.android.network.http.utils.ApiResult
+import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiUnsplashService
 import voloshyn.android.network.retrofit.models.unsplash.UnsplashApiResponse
 import voloshyn.android.network.retrofit.utils.UnsplashApi

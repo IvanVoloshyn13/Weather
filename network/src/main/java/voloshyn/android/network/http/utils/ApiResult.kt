@@ -1,4 +1,4 @@
-package voloshyn.android.network.http
+package voloshyn.android.network.http.utils
 
 sealed class ApiResult<T> {
     data class Success<T>(val data: T) : ApiResult<T>()

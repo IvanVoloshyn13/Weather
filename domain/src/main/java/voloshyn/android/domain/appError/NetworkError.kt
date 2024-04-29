@@ -1,8 +1,8 @@
-package voloshyn.android.domain.error
+package voloshyn.android.domain.appError
 
 sealed interface DataError : AppError {
     enum class Network : DataError {
-        N0_CONNECTION, CLIENT_ERROR, EMPTY_BODY, SERVER_ERROR, REQUEST_TIMEOUT,UNKNOWN_ERROR
+        N0_CONNECTION, CLIENT_ERROR, SERVER_ERROR,UNKNOWN_ERROR
     }
 
     enum class Locale:DataError {
