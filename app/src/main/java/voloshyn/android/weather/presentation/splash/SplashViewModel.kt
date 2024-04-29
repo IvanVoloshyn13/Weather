@@ -4,11 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.Resource
+import voloshyn.android.domain.error.AppResult
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
 import javax.inject.Inject
 
@@ -34,7 +33,7 @@ class SplashViewModel @Inject constructor(
     private suspend fun isOnBoardingCompleted() {
         val completed = onBoarding.invoke()
         when (completed) {
-            is Resource.Success -> {
+            is AppResult.Success -> {
                 completed.data.let { completed ->
                     _onBoardingStatus.emit(
                         OnBoardingStatus(
@@ -45,14 +44,14 @@ class SplashViewModel @Inject constructor(
                 }
             }
 
-            is Resource.Error -> {
-                completed.e.let { exception ->
+            is AppResult.Error -> {
+                completed.error.let { exception ->
                     _onBoardingStatus.emit(
                         OnBoardingStatus(
                             isError = true,
                             completed = false,
                             isLoading = false,
-                            errorMessage = exception.message
+                            errorMessage = TODO()
                         )
                     )
                 }

@@ -28,7 +28,6 @@ import voloshyn.android.data.repository.weather.WeatherTypeRepository
 import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
@@ -50,7 +49,6 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
-import voloshyn.android.weather.presentation.fragment.weather.pager.PagerFragment
 
 
 @AndroidEntryPoint

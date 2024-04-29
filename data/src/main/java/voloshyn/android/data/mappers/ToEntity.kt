@@ -4,7 +4,9 @@ import android.util.Log
 import voloshyn.android.data.dataSource.local.database.entities.CurrentForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.DailyForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.HourlyForecastEntity
+import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.data.dataSource.local.database.entities.PlaceImageEntity
+import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.domain.model.weather.DailyForecast
@@ -63,6 +65,15 @@ fun UnsplashImage.toEntity(placeId: Int): PlaceImageEntity {
     return PlaceImageEntity(
         placeId = placeId,
         imageUrl = this.url
+    )
+}
+
+fun Place.toPlaceEntity(): PlaceEntity {
+    return PlaceEntity(
+        id = id,
+        name = name,
+        latitude = latitude, longitude = longitude, timezone = timezone, country = country,
+        countryCode = countryCode
     )
 }
 

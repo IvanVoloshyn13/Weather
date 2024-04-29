@@ -27,11 +27,9 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
     private val viewModel: OnBoardingViewModel by viewModels()
     private lateinit var bttEnableNotificationStatus: MutableStateFlow<NotificationButtonStatus>
 
-    private var someInt = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        someInt++
         val everydayWeatherBinding = ItemEverydayWeatherBinding.bind(binding.root)
         val temperatureChangesBinding = ItemTemperatureChangesBinding.bind(binding.root)
         val upcomingRainfallBinding = ItemUpcomingRainfallBinding.bind(binding.root)
@@ -54,7 +52,6 @@ class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
                 isWeatherAlertNotificationEnabled = isWeatherAlertNotificationEnabled
             )
         )
-        Toast.makeText(requireContext(), someInt.toString(), Toast.LENGTH_SHORT).show()
 
 
         viewLifecycleOwner.lifecycleScope.launch {

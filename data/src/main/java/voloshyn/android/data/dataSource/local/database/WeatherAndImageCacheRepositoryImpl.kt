@@ -1,12 +1,10 @@
 package voloshyn.android.data.dataSource.local.database
 
 import android.util.Log
-import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.data.mappers.toEntity
-import voloshyn.android.data.repository.addSearch.toPlaceEntity
+import voloshyn.android.data.mappers.toPlaceEntity
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.WeatherAndImage
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
 import voloshyn.android.domain.repository.cache.WeatherAndImageCacheRepository
 import java.sql.SQLException
 import javax.inject.Inject
@@ -40,13 +38,4 @@ class WeatherAndImageCacheRepositoryImpl @Inject constructor(
     }
 
 
-}
-
-fun Place.toPlaceEntity(): PlaceEntity {
-    return PlaceEntity(
-        id = id,
-        name = name,
-        latitude = latitude, longitude = longitude, timezone = timezone, country = "country",
-        countryCode = "countryCode"
-    )
 }

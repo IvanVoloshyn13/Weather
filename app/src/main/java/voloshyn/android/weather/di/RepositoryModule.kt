@@ -13,17 +13,10 @@ import voloshyn.android.data.repository.onBoard.first.PushNotificationRepository
 import voloshyn.android.data.repository.onBoard.second.OnFinishOnBoardingCompletedImpl
 import voloshyn.android.data.repository.onBoard.second.PopularPlacesRepositoryImpl
 import voloshyn.android.data.repository.weather.GetSavedPlacesRepositoryImpl
-<<<<<<< HEAD
-import voloshyn.android.data.repository.weather.LocationTimeRepositoryImpl
-import voloshyn.android.data.repository.weather.UnsplashImageRepositoryImpl
-import voloshyn.android.data.repository.weather.pager.SavedPlacesLocationRepositoryImpl
-import voloshyn.android.data.repository.weather.pager.WeatherDataRepositoryImpl
-=======
 import voloshyn.android.data.repository.weather.TimeForCurrentPlaceRepositoryImpl
 import voloshyn.android.data.dataSource.remote.UnsplashImageRepositoryImpl
 import voloshyn.android.data.dataSource.remote.WeatherRepositoryImpl
 import voloshyn.android.data.repository.weather.FetchWeatherAndImageRepositoryImpl
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.repository.addSearch.StorePlaceRepository
 import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
@@ -36,12 +29,8 @@ import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
 import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
 import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
-<<<<<<< HEAD
-import voloshyn.android.domain.repository.weather.pager.SavedPlacesLocationRepository
-import voloshyn.android.domain.repository.weather.pager.WeatherDataRepository
-=======
 import voloshyn.android.domain.repository.weather.WeatherRepository
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -88,12 +77,6 @@ internal interface RepositoryModule {
     ): GetSavedPlacesRepository
 
     @Binds
-<<<<<<< HEAD
-    fun bindSavedLocationsRepository(repository: SavedPlacesLocationRepositoryImpl): SavedPlacesLocationRepository
-
-    @Binds
-    fun bindWeatherDataRepository(repository: WeatherDataRepositoryImpl): WeatherDataRepository
-=======
     fun bindFetchWeatherAndImageRepository(
         repository: FetchWeatherAndImageRepositoryImpl
     ): FetchWeatherAndImageRepository
@@ -103,5 +86,5 @@ internal interface RepositoryModule {
         repository: WeatherAndImageCacheRepositoryImpl
     ): WeatherAndImageCacheRepository
 
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
+
 }

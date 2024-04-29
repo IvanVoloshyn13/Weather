@@ -1,5 +1,6 @@
 package voloshyn.android.data.repository.weather
 
+import android.net.http.NetworkException
 import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
@@ -9,13 +10,13 @@ import retrofit2.HttpException
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.domain.error.AppError
 import voloshyn.android.domain.error.AppResult
-import voloshyn.android.domain.error.NetworkException
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.WeatherAndImage
 import voloshyn.android.domain.repository.cache.WeatherAndImageCacheRepository
 import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
 import voloshyn.android.domain.repository.weather.WeatherRepository
+import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
 import java.sql.SQLException
 import javax.inject.Inject
 
@@ -32,7 +33,7 @@ class FetchWeatherAndImageRepositoryImpl @Inject constructor(
             update(place)
             delay(3000)
            AppResult.Success(data = cache.get(place.id))
-        } catch (e: NetworkException.NoNetworkException) {
+        } catch (e: NoConnectivityException) {
             onNetworkException()
             Log.d("Exc", "12")
             TODO()

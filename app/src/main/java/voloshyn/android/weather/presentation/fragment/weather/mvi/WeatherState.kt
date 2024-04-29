@@ -3,10 +3,9 @@ package voloshyn.android.weather.presentation.fragment.weather.mvi
 import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
+import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.domain.model.weather.DailyForecast
 import voloshyn.android.domain.model.weather.HourlyForecast
-import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 
 data class WeatherState(

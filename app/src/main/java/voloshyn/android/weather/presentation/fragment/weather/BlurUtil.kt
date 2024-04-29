@@ -63,7 +63,6 @@ object BlurUtil {
                 .build()
             imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
             bitmap = imageDrawable.toBitmap()
-<<<<<<< HEAD
 
             val convertedBitmap = convertBitmap(bitmap)
             if (blurRadius > 0f) {
@@ -84,9 +83,6 @@ object BlurUtil {
                 imageView.setImageDrawable(imageDrawable)
                 imageView.scaleType = ImageView.ScaleType.FIT_XY
             }
-=======
-            setBlurredImage( blurRadius, imageView, context)
-        } else {
             setBlurredImage( blurRadius, imageView, context)
         }
     }
@@ -104,7 +100,6 @@ object BlurUtil {
         } else {
             imageView.setImageDrawable(imageDrawable)
             imageView.scaleType = ImageView.ScaleType.FIT_XY
->>>>>>> 2ade996e796081d5c8f5e2f97bdb45cae6cb57ca
         }
     }
 }

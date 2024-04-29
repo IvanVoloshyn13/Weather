@@ -144,7 +144,11 @@ fun CurrentUserLocation.toPlace(): Place {
     return Place(
         name = this.city,
         latitude = this.latitude,
-        longitude = this.longitude
+        longitude = this.longitude,
+        id=0,
+        timezone = "",
+        country = "",
+        countryCode = ""
 
     )
 }

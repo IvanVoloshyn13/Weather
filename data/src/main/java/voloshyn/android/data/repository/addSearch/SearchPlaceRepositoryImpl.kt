@@ -5,9 +5,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.data.mappers.toResultError
-import voloshyn.android.domain.Resource
-import voloshyn.android.domain.model.addSearchPlace.SearchPlace
+import voloshyn.android.domain.error.AppResult
+import voloshyn.android.domain.error.DataError
+import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.repository.addSearch.PlacesList
 import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
 import voloshyn.android.network.http.ApiResult
@@ -25,7 +25,7 @@ class SearchPlaceRepositoryImpl @Inject constructor(
     @IoDispatcher val dispatcher: CoroutineDispatcher
 ) : SearchPlaceRepository {
 
-    override suspend fun searchPlaceByName(name: String): Resource<PlacesList> =
+    override suspend fun searchPlaceByName(name: String): AppResult<PlacesList,DataError.Network> =
         withContext(dispatcher) {
             try {
                 val result = executeApiCall(call = {
@@ -33,22 +33,22 @@ class SearchPlaceRepositoryImpl @Inject constructor(
                 })
                 return@withContext when (result) {
                     is ApiResult.Success -> {
-                        Resource.Success(data = result.data.toSearchedCityList())
+                        AppResult.Success(data = result.data.toSearchedCityList())
                     }
 
                     is ApiResult.Error -> {
-                        Resource.Error(e = result.e)
+                       TODO()
                     }
                 }
             } catch (e: ApiException) {
-                return@withContext Resource.Error(e)
+                return@withContext TODO()
             }
         }
 }
 
-fun PlacesSearchResponse.toSearchedCityList(): ArrayList<SearchPlace> {
+fun PlacesSearchResponse.toSearchedCityList(): ArrayList<Place> {
     return this.citiesList.map { location: SearchedPlaces ->
-        SearchPlace(
+        Place(
             id = location.id,
             name = location.name,
             latitude = location.latitude,
@@ -57,6 +57,6 @@ fun PlacesSearchResponse.toSearchedCityList(): ArrayList<SearchPlace> {
             country = location.country,
             countryCode = location.countyCode
         )
-    } as ArrayList<SearchPlace>
+    } as ArrayList<Place>
 
 }
