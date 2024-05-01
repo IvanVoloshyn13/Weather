@@ -1,6 +1,7 @@
 package voloshyn.android.weather.presentation.fragment.weather.adapter
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +11,10 @@ import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemPlacesBinding
 
 class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
-    RecyclerView.Adapter<SavedPlacesAdapter.CitiesItemViewHolde>(), View.OnClickListener {
-    private var citiesList = ArrayList<Place>()
+    RecyclerView.Adapter<SavedPlacesAdapter.CitiesItemViewHolder>(), View.OnClickListener {
+    private var places = ArrayList<Place>()
 
-    inner class CitiesItemViewHolde(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CitiesItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val binding = ItemPlacesBinding.bind(itemView)
         fun bind(place: Place) {
             binding.apply {
@@ -32,27 +33,27 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
         listener.onClick(place)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitiesItemViewHolde {
-        return CitiesItemViewHolde(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitiesItemViewHolder {
+        return CitiesItemViewHolder(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_places, parent, false)
         )
     }
 
     override fun getItemCount(): Int {
-        return citiesList.size
+        return places.size
     }
 
-    override fun onBindViewHolder(holder: CitiesItemViewHolde, position: Int) {
-        val place = citiesList[position]
+    override fun onBindViewHolder(holder: CitiesItemViewHolder, position: Int) {
+        val place = places[position]
         holder.bind(place)
         holder.itemView.tag = place
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun submitList(list: List<Place>) {
-        citiesList.clear()
-        citiesList.addAll(list)
+        places.clear()
+        places.addAll(list)
         notifyDataSetChanged() //TODO() setup this method with more specific change event if it have sense
     }
 

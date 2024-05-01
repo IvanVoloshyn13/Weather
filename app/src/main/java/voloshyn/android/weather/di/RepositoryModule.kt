@@ -12,7 +12,7 @@ import voloshyn.android.data.repository.mainActivity.OnBoardingImpl
 import voloshyn.android.data.repository.onBoard.first.PushNotificationRepositoryImpl
 import voloshyn.android.data.repository.onBoard.second.OnFinishOnBoardingCompletedImpl
 import voloshyn.android.data.repository.onBoard.second.PopularPlacesRepositoryImpl
-import voloshyn.android.data.repository.weather.GetSavedPlacesRepositoryImpl
+import voloshyn.android.data.repository.weather.SavedPlacesRepositoryImpl
 import voloshyn.android.data.repository.weather.TimeForCurrentPlaceRepositoryImpl
 import voloshyn.android.data.dataSource.remote.UnsplashImageRepositoryImpl
 import voloshyn.android.data.dataSource.remote.WeatherRepositoryImpl
@@ -26,7 +26,7 @@ import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepos
 import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
 import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
-import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
+import voloshyn.android.domain.repository.weather.SavedPlacesRepository
 import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
 import voloshyn.android.domain.repository.weather.WeatherRepository
@@ -73,8 +73,8 @@ internal interface RepositoryModule {
 
     @Binds
     fun bindGetSavedPlacesRepository(
-        repository: GetSavedPlacesRepositoryImpl
-    ): GetSavedPlacesRepository
+        repository: SavedPlacesRepositoryImpl
+    ): SavedPlacesRepository
 
     @Binds
     fun bindFetchWeatherAndImageRepository(
