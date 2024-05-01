@@ -6,6 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
+import voloshyn.android.domain.appError.AppError
+import voloshyn.android.domain.appError.AppResult
 
 
 @Dao
@@ -18,10 +20,10 @@ interface PlaceDao {
     suspend fun storeNewPlace(place: PlaceEntity)
 
     @Query("SELECT * FROM places")
-     fun getAllPlaces(): Flow<List<PlaceEntity>>
+    fun getAllPlaces(): Flow<List<PlaceEntity>>
 
-
-
+    @Query("SELECT * FROM places where id=:placeId LIMIT 1")
+    fun getPlace(placeId: Int): PlaceEntity
 
 
 }

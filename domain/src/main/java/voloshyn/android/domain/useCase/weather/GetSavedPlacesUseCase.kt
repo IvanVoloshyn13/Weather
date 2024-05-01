@@ -3,14 +3,14 @@ package voloshyn.android.domain.useCase.weather
 import kotlinx.coroutines.flow.Flow
 import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
+import voloshyn.android.domain.repository.weather.SavedPlacesRepository
 
 
 const val INITIAL_CITIES_LIST_SIZE = 4
 
-class GetSavedPlacesUseCase(private val repository: GetSavedPlacesRepository) {
-    suspend fun invoke(listSizeState: ListSizeState): Flow<List<Place>> {
-        val result = repository.getSavedPlaces()
+class GetSavedPlacesUseCase(private val repository: SavedPlacesRepository) {
+     fun invoke(listSizeState: ListSizeState): Flow<List<Place>> {
+        val result = repository.getPlaces()
        return  result
 
     }

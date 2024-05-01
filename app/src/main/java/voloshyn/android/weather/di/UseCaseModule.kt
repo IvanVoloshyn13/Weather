@@ -15,7 +15,7 @@ import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepos
 import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
 import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
 import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
-import voloshyn.android.domain.repository.weather.GetSavedPlacesRepository
+import voloshyn.android.domain.repository.weather.SavedPlacesRepository
 import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
@@ -27,6 +27,7 @@ import voloshyn.android.domain.useCase.onBoarding.second.OnBoardingCompletedUseC
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
+import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
 
@@ -96,8 +97,13 @@ internal object UseCaseModule {
 
 
     @Provides
-    fun provideGetSavedPlacesUseCase(repository: GetSavedPlacesRepository): GetSavedPlacesUseCase {
+    fun provideGetSavedPlacesUseCase(repository: SavedPlacesRepository): GetSavedPlacesUseCase {
         return GetSavedPlacesUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetPlaceByIdUseCase(repository: SavedPlacesRepository): GetPlaceByIdUseCase {
+        return GetPlaceByIdUseCase(repository)
     }
 
     @Provides

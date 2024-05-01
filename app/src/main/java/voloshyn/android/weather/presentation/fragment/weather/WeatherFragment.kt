@@ -3,7 +3,6 @@ package voloshyn.android.weather.presentation.fragment.weather
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -45,6 +44,7 @@ import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceCli
 import voloshyn.android.weather.presentation.fragment.weather.adapter.SavedPlacesAdapter
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
+import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlaceById
 import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
@@ -104,9 +104,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         collectTime()
 
         setFragmentResultListener(CITY_ID_REQUEST_KEY) { _, bundle ->
-            val cityId = bundle.getInt(CITY_ID_BUNDLE_KEY)
-            if (cityId != null) {
-               // viewModel.onIntent(FetchWeatherForSavedPlace(cityId))
+            val placeID = bundle.getInt(CITY_ID_BUNDLE_KEY)
+            if (placeID != null) {
+                viewModel.onIntent(FetchWeatherForSavedPlaceById(placeID))
                 viewModel.onIntent(TogglePlaces)
             }
         }
@@ -182,11 +182,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                 backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
             }
 
-            if (state.places.first <= 4) {
-                headerBinding.bttTogglePlacesSize.visibility = View.GONE
-            } else {
-                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
-            }
+//            if (state.places.first <= 4) {
+//                headerBinding.bttTogglePlacesSize.visibility = View.GONE
+//            } else {
+//                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
+//            }
             savedPlacesAdapter.submitList(state.places.second)
 
         }
@@ -244,7 +244,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             binding.mainDrawer.openDrawer(GravityCompat.START)
         }
         headerBinding.currentLocation.cityLayout.setOnClickListener {
-            Log.d("Intent", "Intent")
             viewModel.onIntent(FetchWeatherForCurrentLocation)
             drawerLayout.close()
         }
@@ -357,8 +356,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     override fun onClick(place: Place) {
         drawerLayout.close()
-        //TODO() change argument from id to place and get necessary data without
-        // fetch place from dataBase(unnecessary work)
         viewModel.onIntent(FetchWeatherForSavedPlace(place))
     }
 
