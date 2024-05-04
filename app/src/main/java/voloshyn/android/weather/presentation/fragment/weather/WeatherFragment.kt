@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import voloshyn.android.data.repository.weather.WeatherTypeRepository
 import voloshyn.android.domain.NetworkStatus
-import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.PlacesSizeState
 import voloshyn.android.domain.model.weather.CurrentForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
@@ -68,7 +68,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         super.onAttach(context)
         observeGpsStatus()
         observeNetworkStatus()
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,7 +106,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             val placeID = bundle.getInt(CITY_ID_BUNDLE_KEY)
             if (placeID != null) {
                 viewModel.onIntent(FetchWeatherForSavedPlaceById(placeID))
-                viewModel.onIntent(TogglePlaces)
             }
         }
     }
@@ -144,7 +142,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                         binding.errorDialog.tvError.text = state.errorMessage
                         progressBarBinding.progressBar.visibility = View.GONE
 
-
                     }, onSuccess = {
                         updateUi(state)
                         binding.errorDialog.errorDialog.visibility = View.GONE
@@ -162,50 +159,58 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         updateMainWeatherWidget(state.currentForecast)
         updateWidgetForecast(state)
         updateHeader(state.placesState)
+        updateImage(state.imageUrl)
         binding.apply {
             binding.toolbar.tvToolbarTitle.text = state.placeName
-            if (state.imageUrl.isNotEmpty()) {
-                //TODO() blurState do not equal to 0 when view is not visible
-                BlurUtil.setBlurredImageFromUrl(
-                    binding.backgroundImage.context,
-                    binding.backgroundImage,
-                    state.imageUrl,
-                    (state.weatherWidgetVisibility.toFloat()) / 8f
-                )
+            if (state.places.first <= 3) {
+                headerBinding.bttTogglePlacesSize.visibility = View.GONE
             } else {
-                backgroundImage.setImageDrawable(
-                    AppCompatResources.getDrawable(
-                        requireContext(),
-                        R.drawable.splash
-                    )
-                )
-                backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
+                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
             }
-
-//            if (state.places.first <= 4) {
-//                headerBinding.bttTogglePlacesSize.visibility = View.GONE
-//            } else {
-//                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
-//            }
             savedPlacesAdapter.submitList(state.places.second)
 
         }
     }
 
+    private suspend fun updateImage(url:String){
+        if (url.isNotEmpty()) {
+            BlurUtil.initialize(binding.backgroundImage.context,url)
+            lifecycleScope.launch {
+                viewModel.blurState.collectLatest {blur->
+                    BlurUtil.setBlurredImageFromUrl(
+                        binding.backgroundImage,
+                        (blur.toFloat()) / 8f)
+                }
+            }
+        } else {
+           binding.backgroundImage.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    requireContext(),
+                    R.drawable.splash
+                )
+            )
+            binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
+        }
+    }
 
-    private fun updateHeader(placesState: ListSizeState) {
+
+    private fun updateHeader(placesState: PlacesSizeState) {
         when (placesState) {
-            ListSizeState.FULL -> {
+            PlacesSizeState.FULL -> {
                 headerBinding.tvToggleText.text = getString(R.string.show_less)
                 headerBinding.icToggleIcon.setImageResource(R.drawable.ic_expand_less)
             }
 
-            else -> {
+            PlacesSizeState.TRIM -> {
+                headerBinding.tvToggleText.text = getString(R.string.show_more)
+                headerBinding.icToggleIcon.setImageResource(R.drawable.ic_expand_more)
+            }
+
+            PlacesSizeState.DEFAULT -> {
                 headerBinding.tvToggleText.text = getString(R.string.show_more)
                 headerBinding.icToggleIcon.setImageResource(R.drawable.ic_expand_more)
             }
         }
-
     }
 
     private fun calculateVisibilityPercentage() {

@@ -32,11 +32,8 @@ class FusedLocationProviderImpl @Inject constructor(
     ): AppResult<Place, LocationProviderError> {
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
         val hasPermission = context.checkLocationPermission()
-
         val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-
         val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!hasPermission) {

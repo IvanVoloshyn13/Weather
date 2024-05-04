@@ -12,7 +12,7 @@ data class Place(
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val timezone: String = EMPTY_STRING,
-    val country: String="",
+    val country: String = "",
     val countryCode: String = ""
 ) {
 
@@ -34,6 +34,7 @@ data class Place(
     }
 }
 
-enum class ListSizeState {
-    FULL, TRIM, DEFAULT
+enum class PlacesSizeState{
+    DEFAULT,TRIM,FULL
 }
+

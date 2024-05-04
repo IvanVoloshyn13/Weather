@@ -19,8 +19,11 @@ import kotlinx.coroutines.launch
 import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.LocationProviderError
-import voloshyn.android.domain.model.ListSizeState
 import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.PlacesSizeState
+import voloshyn.android.domain.model.UnsplashImage
+import voloshyn.android.domain.model.WeatherAndImage
+import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
@@ -74,12 +77,15 @@ class WeatherViewModel @Inject constructor(
     private val _time = MutableStateFlow<String>("")
     val time = _time.asStateFlow()
 
+    private val _blurState= MutableStateFlow<Double>(0.0)
+    val blurState=_blurState.asStateFlow()
+
     init {
+        Log.d("PLACES", "init")
+        getSavedPlaces(placesSizeState = PlacesSizeState.DEFAULT)
         viewModelScope.launch {
-            getSavedPlaces(listSizeState = ListSizeState.DEFAULT)
             /** #1 Main function to get weather data */
             fetchWeatherData(Place())
-
         }
     }
 
@@ -109,17 +115,17 @@ class WeatherViewModel @Inject constructor(
             is TogglePlaces -> {
                 viewModelScope.launch {
                     when (_state.value.placesState) {
-                        ListSizeState.FULL -> {
-                            getSavedPlaces(ListSizeState.TRIM)
+                        PlacesSizeState.FULL -> {
+                            getSavedPlaces(PlacesSizeState.TRIM)
                             _state.update {
-                                it.copy(placesState = ListSizeState.TRIM)
+                                it.copy(placesState = PlacesSizeState.TRIM)
                             }
                         }
 
-                        else -> {
-                            getSavedPlaces(ListSizeState.FULL)
+                        PlacesSizeState.TRIM, PlacesSizeState.DEFAULT -> {
+                            getSavedPlaces(PlacesSizeState.FULL)
                             _state.update {
-                                it.copy(placesState = ListSizeState.FULL)
+                                it.copy(placesState = PlacesSizeState.FULL)
                             }
                         }
                     }
@@ -130,24 +136,25 @@ class WeatherViewModel @Inject constructor(
             is FetchWeatherForSavedPlaceById -> {
                 viewModelScope.launch {
                     val place = getPlaceById(intent.placeID)
-                   fetchWeatherData(place)
+                    fetchWeatherData(place)
                 }
 
             }
         }
     }
 
-    private fun getSavedPlaces(listSizeState: ListSizeState) {
+    private fun getSavedPlaces(placesSizeState: PlacesSizeState) {
         viewModelScope.launch {
-            val result = getSavedPlaces.invoke(listSizeState)
+            val result = getSavedPlaces.invoke(placesSizeState)
             result.collectLatest { list ->
                 _state.update {
                     it.copy(
-                        places = Pair(list.size, list)
+                        places = Pair(list.size, list),
                     )
                 }
             }
         }
+
     }
 
     private suspend fun getPlaceById(placeId: Int): Place {
@@ -160,6 +167,7 @@ class WeatherViewModel @Inject constructor(
             is AppResult.Error -> {
                 Place()
             }
+
         }
     }
 
@@ -182,14 +190,9 @@ class WeatherViewModel @Inject constructor(
         when (place) {
             Place.EMPTY_PLACE_ERROR -> TODO()
             else -> {
-                getWeatherAndImage(place)
+                val weatherAndImage: WeatherAndImage = getWeatherAndImage(place)
+                updateState(place.name, weatherAndImage)
                 observeTime(place.timezone)
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        placeName = place.name
-                    )
-                }
             }
         }
     }
@@ -203,44 +206,20 @@ class WeatherViewModel @Inject constructor(
             is AppResult.Error -> {
                 when (result.error) {
                     LocationProviderError.NO_LOCATION -> {
-                        _state.update {
-                            it.copy(
-                                placeName = Place.EMPTY_PLACE_ERROR.name,
-                                locationProviderError = Pair(true, TODO("Create text resources"))
-                            )
-                        }
                         Place.EMPTY_PLACE_ERROR
                     }
 
                     LocationProviderError.PROVIDER_ERROR -> {
-                        _state.update {
-                            it.copy(
-                                placeName = Place.EMPTY_PLACE_ERROR.name,
-                                locationProviderError = Pair(true, TODO("Create text resources"))
-                            )
-                        }
                         Place.EMPTY_PLACE_ERROR
                     }
 
                     LocationProviderError.NO_PERMISSION -> {
-                        _state.update {
-                            it.copy(
-                                placeName = Place.EMPTY_PLACE_ERROR.name,
-                                locationProviderError = Pair(true, TODO("Create text resources"))
-                            )
-                        }
                         Place.EMPTY_PLACE_ERROR
                     }
                 }
             }
 
             is AppResult.Success -> {
-                _state.update {
-                    it.copy(
-                        placeName = result.data.name,
-                        locationProviderError = Pair(false, WeatherState.NO_ERROR)
-                    )
-                }
                 with(result.data) {
                     Place(
                         name = name,
@@ -260,46 +239,30 @@ class WeatherViewModel @Inject constructor(
      * or saved place  */
     private suspend fun getWeatherAndImage(
         place: Place
-    ) {
+    ): WeatherAndImage {
         val result = weatherAndImage.invoke(
             place
         )
-        when (result) {
+        return when (result) {
             is AppResult.Error -> {
-                if (result.data != null) {
-                    result.data?.let {
-                        val dailyForecast = it.weatherComponents.dailyForecast
-                        val hourlyForecast = it.weatherComponents.hourlyForecast
-                        val mainWeatherInfo = it.weatherComponents.currentForecast
-                        val imageUrl = it.image.url
-                        _state.update { state ->
-                            state.copy(
-                                currentForecast = mainWeatherInfo,
-                                hourlyForecast = hourlyForecast,
-                                dailyForecast = dailyForecast,
-                                timeZone = it.weatherComponents.timezone ?: "",
-                                imageUrl = imageUrl
-                            )
-                        }
-                    }
-
-                }
+                TODO()
             }
 
             is AppResult.Success -> {
                 val dailyForecast = result.data.weatherComponents.dailyForecast
                 val hourlyForecast = result.data.weatherComponents.hourlyForecast
-                val mainWeatherInfo = result.data.weatherComponents.currentForecast
+                val currentForecast = result.data.weatherComponents.currentForecast
                 val imageUrl = result.data.image.url
-                _state.update {
-                    it.copy(
-                        currentForecast = mainWeatherInfo,
+                WeatherAndImage(
+                    weatherComponents = WeatherComponents(
+                        currentForecast = currentForecast,
                         hourlyForecast = hourlyForecast,
                         dailyForecast = dailyForecast,
-                        timeZone = result.data.weatherComponents.timezone ?: "",
-                        imageUrl = imageUrl
-                    )
-                }
+                        timezone = result.data.weatherComponents.timezone ?: ""
+                    ),
+                    image = UnsplashImage(imageUrl)
+                )
+
             }
         }
     }
@@ -336,11 +299,7 @@ class WeatherViewModel @Inject constructor(
 
     fun updateWeatherWidgetVisibility(value: Double) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    weatherWidgetVisibility = value
-                )
-            }
+            _blurState.emit(value)
         }
     }
 
@@ -363,6 +322,21 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun stopTimeObserve() {
         locationTimeJob?.cancelAndJoin()
+    }
+
+    private fun updateState(placeName: String, weatherAndImage: WeatherAndImage) {
+        _state.update {
+            it.copy(
+                currentForecast = weatherAndImage.weatherComponents.currentForecast,
+                hourlyForecast = weatherAndImage.weatherComponents.hourlyForecast,
+                dailyForecast = weatherAndImage.weatherComponents.dailyForecast,
+                timeZone = weatherAndImage.weatherComponents.timezone ?: "",
+                imageUrl = weatherAndImage.image.url,
+                isLoading = false,
+                placeName = placeName
+
+            )
+        }
     }
 
 }

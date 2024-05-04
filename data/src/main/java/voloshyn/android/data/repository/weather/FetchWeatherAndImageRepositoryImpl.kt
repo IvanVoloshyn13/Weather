@@ -2,7 +2,6 @@ package voloshyn.android.data.repository.weather
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toResultError
@@ -16,9 +15,7 @@ import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
 import voloshyn.android.domain.repository.weather.WeatherRepository
 import voloshyn.android.network.http.exceptions.ApiException
-import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
 import java.io.IOException
-import java.net.UnknownHostException
 import java.sql.SQLException
 import javax.inject.Inject
 
@@ -35,16 +32,18 @@ class FetchWeatherAndImageRepositoryImpl @Inject constructor(
             update(place)
             AppResult.Success(data = cache.get(place.id))
         } catch (e: IOException) {
-            AppResult.Error(
-                data = onNetworkException(place.id),
-                error = DataError.Network.N0_CONNECTION
-            )
+            val data = onNetworkException(place.id)
+            AppResult.Success(
+                data = data)
         } catch (e: ApiException) {
-            AppResult.Error(data = onNetworkException(place.id), error = e.toResultError())
+            val data = onNetworkException(place.id)
+            AppResult.Success(
+                data = data,
+               )
         } catch (e: SQLException) {
-            AppResult.Error(data = null, error = DataError.Locale.LOCAL_STORAGE_ERROR)
+            AppResult.Error(error = DataError.Locale.LOCAL_STORAGE_ERROR)
         } catch (e: Exception) {
-            AppResult.Error(data = null, error = DataError.Network.UNKNOWN_ERROR)
+            AppResult.Error(error = DataError.Network.UNKNOWN_ERROR)
         }
 
     }
