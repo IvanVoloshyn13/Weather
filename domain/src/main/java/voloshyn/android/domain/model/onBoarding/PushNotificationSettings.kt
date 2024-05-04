@@ -31,29 +31,6 @@ fun PushNotificationStatus.toBoolean(): Boolean {
 }
 
 
-//class PushNotificationsTest {
-//    private val notifyEverydayWeather = false
-//    private val notifyUpcomingRainfall = false
-//    private val notifyWeatherAlert = false
-//    private val notifyTemperatureChanges = true
-//
-//
-//    fun showNotification() {
-//        // Given
-//        val pushNotifications = PushNotifications(
-//            notifyEverydayWeather,
-//            notifyUpcomingRainfall,
-//            notifyTemperatureChanges,
-//            notifyWeatherAlert
-//        )
-//
-//        val showNotifications = pushNotifications.showNotifications
-//        println(showNotifications)
-//
-//
-//    }
-//}
-
 
 
 

@@ -4,8 +4,6 @@ import voloshyn.android.domain.model.UnsplashImage
 
 
 interface UnsplashImageRepository {
-    /**
-     * Load [UnsplashImage] from Unsplash service
-     * */
+    /** Load [UnsplashImage] from Unsplash service */
     suspend fun fetchCurrentPlaceImageByName(cityName: String): UnsplashImage
 }

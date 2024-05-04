@@ -8,7 +8,7 @@ import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.repository.addSearch.PlacesList
+import voloshyn.android.domain.repository.addSearch.Places
 import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
 import voloshyn.android.network.http.utils.ApiResult
 import voloshyn.android.network.http.exceptions.ApiException
@@ -25,7 +25,7 @@ class SearchPlaceRepositoryImpl @Inject constructor(
     @IoDispatcher val dispatcher: CoroutineDispatcher
 ) : SearchPlaceRepository {
 
-    override suspend fun searchPlaceByName(name: String): AppResult<PlacesList,DataError.Network> =
+    override suspend fun searchPlaceByName(name: String): AppResult<Places,DataError.Network> =
         withContext(dispatcher) {
             try {
                 val result = executeApiCall(call = {
