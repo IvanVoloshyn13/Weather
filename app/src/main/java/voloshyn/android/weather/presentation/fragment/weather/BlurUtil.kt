@@ -1,5 +1,6 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -8,10 +9,13 @@ import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import android.widget.ImageView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import voloshyn.android.weather.R
+import kotlin.ClassCastException
 
 object BlurUtil {
 
@@ -45,6 +49,7 @@ object BlurUtil {
         return bitmap.copy(Bitmap.Config.ARGB_8888, true)
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     suspend fun initialize(context: Context, imageUrl: String) {
         val imageLoader = ImageLoader.Builder(context)
             .crossfade(true)
@@ -53,8 +58,14 @@ object BlurUtil {
         val request = ImageRequest.Builder(context)
             .data(imageUrl)
             .build()
-        imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
-        bitmap = imageDrawable.toBitmap()
+        try {
+            imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
+            bitmap = imageDrawable.toBitmap()
+        }catch (e:Exception){
+            imageDrawable= context.getDrawable(R.drawable.welcome_screen_background)!!
+            bitmap = imageDrawable.toBitmap()
+        }
+
     }
 
     fun setBlurredImageFromUrl(

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
@@ -65,6 +66,8 @@ class FusedLocationProviderImpl @Inject constructor(
                                 longitude = longitude,
                                 city = address[0].locality
                             )
+
+
                             continuation.resume(AppResult.Success(data = currentUserLocation.toPlace())) {
                                 continuation.resumeWithException(it)
                             }
