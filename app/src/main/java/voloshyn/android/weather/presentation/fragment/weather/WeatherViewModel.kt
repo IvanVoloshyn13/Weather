@@ -24,6 +24,7 @@ import voloshyn.android.domain.model.PlacesSizeState
 import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.model.WeatherAndImage
 import voloshyn.android.domain.model.weather.WeatherComponents
+import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
 import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
@@ -41,7 +42,8 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenI
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
 
-const val CURRENT_LOCATION_DEFAULT_ID = 0
+private const val CURRENT_LOCATION_DEFAULT_ID = 0
+private const val EMPTY_STRING = ""
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -49,7 +51,8 @@ class WeatherViewModel @Inject constructor(
     private val currentTime: GetTimeForSelectedPlaceUseCase,
     private val getSavedPlaces: GetSavedPlacesUseCase,
     private val getPlace: GetPlaceByIdUseCase,
-    private val weatherAndImage: FetchWeatherAndImageDataUseCase
+    private val weatherAndImage: FetchWeatherAndImageDataUseCase,
+    private val searchPlaceByNameUseCase: SearchPlaceByNameUseCase,
 ) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -77,8 +80,8 @@ class WeatherViewModel @Inject constructor(
     private val _time = MutableStateFlow<String>("")
     val time = _time.asStateFlow()
 
-    private val _blurState= MutableStateFlow<Double>(0.0)
-    val blurState=_blurState.asStateFlow()
+    private val _blurState = MutableStateFlow<Double>(0.0)
+    val blurState = _blurState.asStateFlow()
 
     init {
         Log.d("PLACES", "init")
@@ -180,7 +183,7 @@ class WeatherViewModel @Inject constructor(
         }
         val place = when (_place.id) {
             CURRENT_LOCATION_DEFAULT_ID -> {
-                getCurrentUserLocation()
+                getCurrentUserLocationWithTimezone()
             }
 
             else -> {
@@ -200,7 +203,7 @@ class WeatherViewModel @Inject constructor(
     /** When app is started it is default location for weather data. So if locationProvider will be disabled or
      * user denied permission we cant fetch weather data fo current location but we still can
      * search for favourite places and fetch weather data for them*/
-    private suspend fun getCurrentUserLocation(): Place {
+    private suspend fun getCurrentUserLocationWithTimezone(): Place {
         val result = getCurrentLocationUseCase.invoke()
         return when (result) {
             is AppResult.Error -> {
@@ -220,20 +223,44 @@ class WeatherViewModel @Inject constructor(
             }
 
             is AppResult.Success -> {
+                val placeWithTimezone = placeWithTimezone(result.data)
                 with(result.data) {
                     Place(
                         name = name,
                         latitude = latitude,
                         longitude = longitude,
                         id = id,
-                        timezone = timezone,
-                        country = country,
-                        countryCode = countryCode
+                        timezone = placeWithTimezone.timezone,
+                        country = placeWithTimezone.country,
+                        countryCode = placeWithTimezone.countryCode
                     )
                 }
             }
         }
     }
+
+    private suspend fun placeWithTimezone(place: Place): Place {
+        if (place.name.isBlank()) return place
+        return try {
+            val appResult = searchPlaceByNameUseCase.invoke(place.name)
+            when (appResult) {
+                is AppResult.Error -> {
+                    place
+                }
+
+                is AppResult.Success -> {
+                    val placeWithTimezone =
+                        appResult.data.firstOrNull()
+                    placeWithTimezone ?: place
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.d("ERROR", e.message.toString())
+            place
+        }
+    }
+
 
     /** This function fetch weather for both current place from FusedLocationProvider
      * or saved place  */
