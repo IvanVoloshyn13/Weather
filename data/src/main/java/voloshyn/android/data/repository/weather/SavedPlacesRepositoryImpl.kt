@@ -23,11 +23,11 @@ class SavedPlacesRepositoryImpl @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : SavedPlacesRepository {
     override fun getPlaces(placesState: PlacesSizeState): Flow<List<Place>> {
-        val placesCount = database.getPlaceDao().placesRowCount()
+        val placesCount = database.placeDao().placesRowCount()
         var limit = 0
         return try {
             limit = findLimit(placesCount, placesState)
-            val placeEntityList = database.getPlaceDao().getAllPlaces(limit)
+            val placeEntityList = database.placeDao().getAllPlaces(limit)
             val placesFlow: Flow<List<Place>> = placeEntityList.map {
                 it.map { placeEntity ->
                     placeEntity.toPlace()
@@ -59,7 +59,7 @@ class SavedPlacesRepositoryImpl @Inject constructor(
 
     override suspend fun getPlaceById(placeId: Int): AppResult<Place, DataError.Locale> {
         return try {
-            val appResult = database.getPlaceDao().getPlace(placeId)
+            val appResult = database.placeDao().getPlace(placeId)
             AppResult.Success(data = appResult.toPlace())
         } catch (e: SQLException) {
             AppResult.Error(error = DataError.Locale.LOCAL_STORAGE_ERROR)
