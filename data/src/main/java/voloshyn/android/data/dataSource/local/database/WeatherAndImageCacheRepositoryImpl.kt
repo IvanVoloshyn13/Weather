@@ -21,14 +21,15 @@ class WeatherAndImageCacheRepositoryImpl @Inject constructor(
 
     override suspend fun store(placeId: Int, weatherAndImage: WeatherAndImage, place: Place) {
         try {
-            db.getPlaceDao().storeNewPlace(place.toPlaceEntity())
-            db.getCurrentForecastDao()
-                .store(weatherAndImage.weatherComponents.currentForecast.toEntity(placeId))
-            db.getDailyForecastDao()
-                .store(weatherAndImage.weatherComponents.dailyForecast.toEntity(placeId))
-            db.getHourlyForecastDao()
-                .store(weatherAndImage.weatherComponents.hourlyForecast.toEntity(placeId))
-            db.getPlaceImageDao().store(weatherAndImage.image.toEntity(placeId))
+            db.placeDao().storeNewPlace(place.toPlaceEntity())
+            val current = weatherAndImage.weatherComponents.currentForecast.toEntity(placeId)
+            val hourly = weatherAndImage.weatherComponents.hourlyForecast.toEntity(placeId)
+            val daily = weatherAndImage.weatherComponents.dailyForecast.toEntity(placeId)
+            val image = weatherAndImage.image.toEntity(placeId)
+
+            db.weatherDao().storeWeather(
+                current, hourly, daily, image
+            )
         } catch (e: SQLException) {
 
         }
@@ -36,10 +37,13 @@ class WeatherAndImageCacheRepositoryImpl @Inject constructor(
     }
 
     override suspend fun get(placeId: Int): WeatherAndImage {
-        val currentForecast = db.getCurrentForecastDao().get(placeId).toCurrentForecast()
-        val dailyForecast = db.getDailyForecastDao().get(placeId).toDailyForecast()
-        val hourlyForecast = db.getHourlyForecastDao().get(placeId).toHourlyForecast()
-        val image = db.getPlaceImageDao().get(placeId).imageUrl
+        val weather = db.weatherDao().getWeather(placeId)
+        val currentForecast = weather.current.toCurrentForecast()
+        val dailyForecast = weather.daily.toDailyForecast()
+        val hourlyForecast = weather.hourly.toHourlyForecast()
+        val image = weather.imageUrl.imageUrl
+        Log.d("WEATHER", weather.toString())
+
         return WeatherAndImage(
             weatherComponents = WeatherComponents(
                 currentForecast,

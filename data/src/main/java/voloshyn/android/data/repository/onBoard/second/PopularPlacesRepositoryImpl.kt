@@ -1,6 +1,5 @@
 package voloshyn.android.data.repository.onBoard.second
 
-import android.util.Log
 import voloshyn.android.data.dataSource.local.database.AppDatabase
 import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.domain.model.onBoarding.PopularPlace
@@ -12,7 +11,7 @@ class PopularPlacesRepositoryImpl @Inject constructor(
 ) : PopularPlacesRepository {
 
     override suspend fun savePlaces(places: Array<PopularPlace>) {
-        db.getPlaceDao().storePopularPlaces(places = places.toPlaceEntityArray())
+        db.placeDao().storePopularPlaces(places = places.toPlaceEntityArray())
 
     }
 }

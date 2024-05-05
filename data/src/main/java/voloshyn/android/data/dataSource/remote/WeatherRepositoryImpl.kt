@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toWeatherComponents
-import voloshyn.android.data.dataSource.local.database.WeatherEntity
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.repository.weather.WeatherRepository
 import voloshyn.android.network.http.utils.ApiResult
@@ -42,12 +41,4 @@ class WeatherRepositoryImpl @Inject constructor(
         }
     }
 
-}
-
-fun WeatherComponents.toWeatherEntity(): WeatherEntity {
-    return WeatherEntity(
-        currentForecast = this.currentForecast,
-        hourlyForecast = this.hourlyForecast,
-        timezone = this.timezone
-    )
 }
