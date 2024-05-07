@@ -6,7 +6,7 @@ import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.repository.weather.SavedPlacesRepository
 
 class GetPlaceByIdUseCase(private val repository: SavedPlacesRepository) {
-    suspend fun invoke(placeId: Int): AppResult<Place, DataError.Locale> {
+    suspend fun invoke(placeId: Int): AppResult<Place, DataError> {
         return repository.getPlaceById(placeId)
     }
 }

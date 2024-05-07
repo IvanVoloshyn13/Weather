@@ -31,6 +31,7 @@ class SplashViewModel @Inject constructor(
     }
 
     private suspend fun isOnBoardingCompleted() {
+
         val completed = onBoarding.invoke()
         when (completed) {
             is AppResult.Success -> {
@@ -56,6 +57,8 @@ class SplashViewModel @Inject constructor(
                     )
                 }
             }
+
+            else -> {}
         }
     }
 

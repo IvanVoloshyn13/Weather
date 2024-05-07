@@ -27,7 +27,7 @@ class WeatherAndImageCacheRepositoryImpl @Inject constructor(
             val daily = weatherAndImage.weatherComponents.dailyForecast.toEntity(placeId)
             val image = weatherAndImage.image.toEntity(placeId)
 
-            db.weatherDao().storeWeather(
+            db.weatherDao().store(
                 current, hourly, daily, image
             )
         } catch (e: SQLException) {
@@ -37,7 +37,7 @@ class WeatherAndImageCacheRepositoryImpl @Inject constructor(
     }
 
     override suspend fun get(placeId: Int): WeatherAndImage {
-        val weather = db.weatherDao().getWeather(placeId)
+        val weather = db.weatherDao().get(placeId)
         val currentForecast = weather.current.toCurrentForecast()
         val dailyForecast = weather.daily.toDailyForecast()
         val hourlyForecast = weather.hourly.toHourlyForecast()

@@ -7,7 +7,7 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.DialogNoGpsBinding
-import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.base.viewBinding
 
 class GpsUnavailableDialog : DialogFragment(R.layout.dialog_no_gps) {
     private val binding: DialogNoGpsBinding by viewBinding()

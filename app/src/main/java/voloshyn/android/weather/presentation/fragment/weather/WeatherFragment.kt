@@ -36,8 +36,8 @@ import voloshyn.android.weather.databinding.WidgetForecastBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.networkObserver.NetworkObserver
-import voloshyn.android.weather.presentation.fragment.renderSimpleResult
-import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.base.renderSimpleResult
+import voloshyn.android.weather.presentation.fragment.base.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceClickListener
@@ -172,18 +172,19 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         }
     }
 
-    private suspend fun updateImage(url:String){
+    private suspend fun updateImage(url: String) {
         if (url.isNotEmpty()) {
-            BlurUtil.initialize(binding.backgroundImage.context,url)
+            BlurUtil.initialize(binding.backgroundImage.context, url)
             lifecycleScope.launch {
-                viewModel.blurState.collectLatest {blur->
+                viewModel.blurState.collectLatest { blur ->
                     BlurUtil.setBlurredImageFromUrl(
                         binding.backgroundImage,
-                        (blur.toFloat()) / 8f)
+                        (blur.toFloat()) / 8f
+                    )
                 }
             }
         } else {
-           binding.backgroundImage.setImageDrawable(
+            binding.backgroundImage.setImageDrawable(
                 AppCompatResources.getDrawable(
                     requireContext(),
                     R.drawable.splash
@@ -299,9 +300,15 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     private fun sideEffects() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.sideEffects.collectLatest {
-                if (it.showErrorMessage) {
-                    Toast.makeText(requireContext(), it.errorMessage, Toast.LENGTH_SHORT).show()
+            viewModel.errorState.collectLatest {
+                if (it.isError) {
+                    val text = getString(it.errorMessage)
+                    Toast.makeText(
+                        requireContext(),
+                        text,
+                        Toast.LENGTH_LONG
+                    ).show()
+
                 }
             }
         }

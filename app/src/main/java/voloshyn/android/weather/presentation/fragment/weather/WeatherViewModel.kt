@@ -1,14 +1,8 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,12 +12,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.appError.AppResult
-import voloshyn.android.domain.appError.LocationProviderError
+import voloshyn.android.domain.appError.mapToData
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.PlacesSizeState
-import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.model.WeatherAndImage
-import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
@@ -31,15 +23,16 @@ import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
+import voloshyn.android.weather.presentation.fragment.base.BaseViewModel
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlaceById
-import voloshyn.android.weather.presentation.fragment.weather.mvi.SideEffects
 import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenIntent
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
+import voloshyn.android.weather.presentation.fragment.base.toStringResources
 import javax.inject.Inject
 
 private const val CURRENT_LOCATION_DEFAULT_ID = 0
@@ -53,20 +46,9 @@ class WeatherViewModel @Inject constructor(
     private val getPlace: GetPlaceByIdUseCase,
     private val weatherAndImage: FetchWeatherAndImageDataUseCase,
     private val searchPlaceByNameUseCase: SearchPlaceByNameUseCase,
-) : ViewModel() {
-
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.d("EXCEPTION_HANDLER", "$throwable,  ${throwable.message}")
-        _state.update {
-            it.copy(
-                isLoading = false
-            )
-        }
-        return@CoroutineExceptionHandler
-    }
+) : BaseViewModel() {
 
     private var locationTimeJob: Job? = null
-    private val viewModelScope = CoroutineScope(SupervisorJob() + exceptionHandler)
 
     private val _state =
         MutableStateFlow<WeatherState>(
@@ -74,8 +56,7 @@ class WeatherViewModel @Inject constructor(
         )
     val state = _state.asStateFlow()
 
-    private val _sideEffectsState = MutableSharedFlow<SideEffects>()
-    val sideEffects = _sideEffectsState.asSharedFlow()
+    val errorState = baseErrorState.asSharedFlow()
 
     private val _time = MutableStateFlow<String>("")
     val time = _time.asStateFlow()
@@ -84,7 +65,6 @@ class WeatherViewModel @Inject constructor(
     val blurState = _blurState.asStateFlow()
 
     init {
-        Log.d("PLACES", "init")
         getSavedPlaces(placesSizeState = PlacesSizeState.DEFAULT)
         viewModelScope.launch {
             /** #1 Main function to get weather data */
@@ -146,6 +126,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
+    /** It is ok */
     private fun getSavedPlaces(placesSizeState: PlacesSizeState) {
         viewModelScope.launch {
             val result = getSavedPlaces.invoke(placesSizeState)
@@ -160,6 +141,7 @@ class WeatherViewModel @Inject constructor(
 
     }
 
+    /** It is ok */
     private suspend fun getPlaceById(placeId: Int): Place {
         val appResult = getPlace.invoke(placeId)
         return when (appResult) {
@@ -168,7 +150,8 @@ class WeatherViewModel @Inject constructor(
             }
 
             is AppResult.Error -> {
-                Place()
+                emitErrorAndResetStatus(appResult.error.toStringResources())
+                Place.EMPTY_PLACE_ERROR
             }
 
         }
@@ -190,14 +173,11 @@ class WeatherViewModel @Inject constructor(
                 _place
             }
         }
-        when (place) {
-            Place.EMPTY_PLACE_ERROR -> TODO()
-            else -> {
-                val weatherAndImage: WeatherAndImage = getWeatherAndImage(place)
-                updateState(place.name, weatherAndImage)
-                observeTime(place.timezone)
-            }
-        }
+        val weatherAndImage: WeatherAndImage = getWeatherAndImage(place)
+        updateState(place.name, weatherAndImage)
+        observeTime(place.timezone)
+
+
     }
 
     /** When app is started it is default location for weather data. So if locationProvider will be disabled or
@@ -206,22 +186,6 @@ class WeatherViewModel @Inject constructor(
     private suspend fun getCurrentUserLocationWithTimezone(): Place {
         val result = getCurrentLocationUseCase.invoke()
         return when (result) {
-            is AppResult.Error -> {
-                when (result.error) {
-                    LocationProviderError.NO_LOCATION -> {
-                        Place.EMPTY_PLACE_ERROR
-                    }
-
-                    LocationProviderError.PROVIDER_ERROR -> {
-                        Place.EMPTY_PLACE_ERROR
-                    }
-
-                    LocationProviderError.NO_PERMISSION -> {
-                        Place.EMPTY_PLACE_ERROR
-                    }
-                }
-            }
-
             is AppResult.Success -> {
                 val placeWithTimezone = placeWithTimezone(result.data)
                 with(result.data) {
@@ -236,6 +200,13 @@ class WeatherViewModel @Inject constructor(
                     )
                 }
             }
+
+            is AppResult.Error -> {
+                result.error.toStringResources()
+                Place.EMPTY_PLACE_ERROR
+            }
+
+
         }
     }
 
@@ -244,19 +215,18 @@ class WeatherViewModel @Inject constructor(
         return try {
             val appResult = searchPlaceByNameUseCase.invoke(place.name)
             when (appResult) {
-                is AppResult.Error -> {
-                    place
-                }
-
                 is AppResult.Success -> {
                     val placeWithTimezone =
                         appResult.data.firstOrNull()
                     placeWithTimezone ?: place
                 }
+
+                is AppResult.Error -> {
+                    Place()
+                }
             }
 
         } catch (e: Exception) {
-            Log.d("ERROR", e.message.toString())
             place
         }
     }
@@ -272,28 +242,23 @@ class WeatherViewModel @Inject constructor(
         )
         return when (result) {
             is AppResult.Error -> {
-                TODO()
+                var weatherAndImage: WeatherAndImage = WeatherAndImage()
+                result.mapToData(
+                    dataBlock = {
+                        weatherAndImage = it
+                    },
+                    errorBlock = {
+                        emitErrorAndResetStatus(result.error.toStringResources())
+                    }
+                )
+                weatherAndImage
             }
 
             is AppResult.Success -> {
-                val dailyForecast = result.data.weatherComponents.dailyForecast
-                val hourlyForecast = result.data.weatherComponents.hourlyForecast
-                val currentForecast = result.data.weatherComponents.currentForecast
-                val imageUrl = result.data.image.url
-                WeatherAndImage(
-                    weatherComponents = WeatherComponents(
-                        currentForecast = currentForecast,
-                        hourlyForecast = hourlyForecast,
-                        dailyForecast = dailyForecast,
-                        timezone = result.data.weatherComponents.timezone ?: ""
-                    ),
-                    image = UnsplashImage(imageUrl)
-                )
-
+                result.data
             }
         }
     }
-
 
     private suspend fun observeTime(timeZone: String) {
         if (locationTimeJob != null) {
@@ -312,15 +277,6 @@ class WeatherViewModel @Inject constructor(
                 _time.emit(time)
             }
         }
-    }
-
-    private suspend fun processNoNetwork() {
-        _sideEffectsState.emit(
-            SideEffects(
-                showErrorMessage = true,
-                errorMessage = "No network connection"
-            )
-        )
     }
 
 

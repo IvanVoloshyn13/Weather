@@ -48,16 +48,17 @@
     <string name="error_network_unavailable">Network is not available</string>
     <string name="error_connect_server">Unable to connect to server</string>
     <string name="error_invalid_response">Invalid response from server</string>
+    <string name="global_network_error_message">Sorry, something went wrong while updating weather
+        information.Please try again later</string>
     <!-- SQLITE-->
     <string name="error_sql">Unable to load data from the database</string>
     <!-- LOCATION-->
     <string name="error_gps_location">Error obtaining GPS location</string>
+    <string name="no_location_permission">Check location permission</string>
     <string name="error_gps_lost">GPS signal lost</string>
     <string name="error_provider_disabled">Location provider disabled</string>
     <string name="error_gps_unavailable">GPS hardware not available</string>
     <string name="error_location_retrieve">Unable to retrieve current location</string>
-
-
 
 
 </resources>

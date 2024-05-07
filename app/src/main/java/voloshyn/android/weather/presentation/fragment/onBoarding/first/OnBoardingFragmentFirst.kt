@@ -3,7 +3,6 @@ package voloshyn.android.weather.presentation.fragment.onBoarding.first
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -19,7 +18,7 @@ import voloshyn.android.weather.databinding.ItemEverydayWeatherBinding
 import voloshyn.android.weather.databinding.ItemTemperatureChangesBinding
 import voloshyn.android.weather.databinding.ItemUpcomingRainfallBinding
 import voloshyn.android.weather.databinding.ItemWeatherAlertBinding
-import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.base.viewBinding
 
 @AndroidEntryPoint
 class OnBoardingFragmentFirst : Fragment(R.layout.fragment_onboarding_first) {
