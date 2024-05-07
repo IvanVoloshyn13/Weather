@@ -2,6 +2,7 @@ package voloshyn.android.domain.repository.weather
 
 import voloshyn.android.domain.appError.AppError
 import voloshyn.android.domain.appError.AppResult
+import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.WeatherAndImage
 
@@ -17,5 +18,5 @@ interface FetchWeatherAndImageRepository {
      * */
 
     //TODO create tuples instead Place , PlaceTuples(id,name)
-    suspend fun get(place: Place): AppResult<WeatherAndImage, AppError>
+    suspend fun get(place: Place): AppResult<WeatherAndImage, DataError>
 }

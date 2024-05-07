@@ -3,7 +3,9 @@ package voloshyn.android.weather.presentation.fragment.addSearchPlaces
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -19,14 +21,14 @@ import kotlinx.coroutines.launch
 import voloshyn.android.domain.model.Place
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentPlaceSearchBinding
-import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.base.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.WeatherFragment
 
 @AndroidEntryPoint
 class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
     SearchedPlacesAdapter.RecyclerViewOnItemClick {
     private val binding by viewBinding<FragmentPlaceSearchBinding>()
-    private val searchViewModel: SearchViewModel by viewModels()
+    private val viewModel: SearchViewModel by viewModels()
     private var searchJob: Job? = null
     private val searchDelay: Long = 500
     private lateinit var searchedAdapter: SearchedPlacesAdapter
@@ -58,7 +60,7 @@ class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     if (it.length >= 3) {
-                        searchViewModel.search(it)
+                        viewModel.search(it)
                     }
                 }
                 return true
@@ -70,10 +72,10 @@ class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
                     newText?.let { query ->
                         if (query.length >= 3) {
                             delay(searchDelay)
-                            searchViewModel.search(query)
+                            viewModel.search(query)
                         }
                         if (query.isEmpty()) {
-                            searchViewModel.search(query)
+                            viewModel.search(query)
                         }
                     }
                 }
@@ -81,26 +83,29 @@ class AddSearchPlaceFragment : Fragment(R.layout.fragment_place_search),
             }
         })
         lifecycleScope.launch {
-            searchViewModel.places.collectLatest {
-                searchedAdapter.submitList1(it)
+            viewModel.state.collectLatest {
+                binding.progressBar.visibility = if (it.isLoading) View.VISIBLE else View.GONE
+                searchedAdapter.submitList1(it.places)
             }
         }
 
         lifecycleScope.launch {
-            searchViewModel.isLoading.collectLatest { isLoading ->
-                if (isLoading) binding.progressBar.visibility =
-                    View.VISIBLE else binding.progressBar.visibility = View.GONE
+            viewModel.errorState.collectLatest {
+                if(it.isError){
+                    Toast.makeText(requireContext(), getString(it.errorMessage) , Toast.LENGTH_SHORT).show()
+                }
             }
         }
+
     }
 
     private fun onBackPressed() {
-        searchViewModel.search("")
+        viewModel.search("")
         findNavController().popBackStack()
     }
 
     override fun onItemClick(place: Place) {
-        searchViewModel.savePlace(place)
+        viewModel.savePlace(place)
         setFragmentResult(
             WeatherFragment.CITY_ID_REQUEST_KEY,
             bundleOf(WeatherFragment.CITY_ID_BUNDLE_KEY to place.id)

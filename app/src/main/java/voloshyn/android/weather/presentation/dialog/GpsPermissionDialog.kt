@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import voloshyn.android.weather.presentation.MainActivity
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.DialogLocationPermissionBinding
-import voloshyn.android.weather.presentation.fragment.viewBinding
+import voloshyn.android.weather.presentation.fragment.base.viewBinding
 
 class GpsPermissionDialog : DialogFragment(R.layout.dialog_location_permission) {
     private val binding: DialogLocationPermissionBinding by viewBinding<DialogLocationPermissionBinding>()

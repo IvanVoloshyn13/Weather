@@ -16,7 +16,7 @@ suspend fun <T> executeApiCall(
     maxAttempts: Int = 3,
     shouldRetry: (Exception) -> Boolean = ::defaultShouldRetry,
     errorHandler: (Int, String?) -> Exception = ::defaultErrorHandler
-): ApiResult<T> {
+): T {
     repeat(maxAttempts) { attempt ->
         try {
             return call().toResult(errorHandler)
@@ -45,20 +45,18 @@ private fun defaultShouldRetry(exception: Exception) = when (exception) {
 private fun defaultErrorHandler(code: Int, message: String?) = ApiException(code, message)
 
 
-private fun <T> Response<T>.toResult(errorHandler: (Int, String?) -> Exception): ApiResult<T> {
+private fun <T> Response<T>.toResult(errorHandler: (Int, String?) -> Exception): T {
     return try {
         if (isSuccessful) {
-            ApiResult.Success(body()!!)
+         body()!!
         } else {
             val error = errorBody()?.let {
                 val errorAdapter = Moshi.Builder().build().adapter(Error::class.java)
                 errorAdapter.fromJson(it.source())
             }
-            ApiResult.Error<ApiException>(e = errorHandler(code(), error?.message))
             throw errorHandler(code(), error?.message)
         }
-    } catch (e: Exception) {
-        ApiResult.Error<ApiException>(e = e)
+    } catch (_: Exception) {
         throw errorHandler(code(), null)
 
     }

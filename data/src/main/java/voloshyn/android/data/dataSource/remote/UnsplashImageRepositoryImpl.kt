@@ -7,7 +7,8 @@ import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.domain.model.UnsplashImage
 import voloshyn.android.domain.repository.weather.UnsplashImageRepository
-import voloshyn.android.network.http.utils.ApiResult
+import voloshyn.android.network.http.exceptions.ApiException
+import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
 import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiUnsplashService
 import voloshyn.android.network.retrofit.models.unsplash.UnsplashApiResponse
@@ -39,20 +40,13 @@ class UnsplashImageRepositoryImpl @Inject constructor(
                 val result = executeApiCall(
                     call = { apiUnsplashService.fetchPictureByLocation(cityName = cityName) },
                 )
-                when (result) {
-                    is ApiResult.Success -> {
-                        if (result.data.imageList.isNotEmpty()) {
-                            return@withContext result.data.toCityImage(imageSize)
-                        } else {
-                            return@withContext UnsplashImage("")
-                        }
-                    }
-
-                    is ApiResult.Error -> {
-                        throw result.e
-                    }
-                }
-            } catch (e: Exception) {
+                return@withContext result.toCityImage(imageSize) ?: UnsplashImage("")
+            } catch (e: ApiException) {
+                throw e
+            } catch (e:NoConnectivityException){
+                throw e
+            }
+            catch (e: Exception) {
                 throw e
             }
         }

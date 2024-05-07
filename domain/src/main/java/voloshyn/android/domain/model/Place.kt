@@ -21,10 +21,10 @@ data class Place(
     }
 
     companion object {
-        private const val ERROR_LOCATION = "Error while getting location"
+
         val EMPTY_PLACE_ERROR = Place(
             id = 0,
-            name = ERROR_LOCATION,
+            name = EMPTY_STRING,
             latitude = 0.0,
             longitude = 0.0,
             timezone = EMPTY_STRING,
@@ -34,7 +34,7 @@ data class Place(
     }
 }
 
-enum class PlacesSizeState{
-    DEFAULT,TRIM,FULL
+enum class PlacesSizeState {
+    DEFAULT, TRIM, FULL
 }
 

@@ -8,19 +8,23 @@ import kotlinx.coroutines.flow.map
 import voloshyn.android.data.dataSource.local.database.AppDatabase
 import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.data.di.IoDispatcher
+import voloshyn.android.data.logError
+import voloshyn.android.data.mappers.toDomainError
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.Place
 import voloshyn.android.domain.model.PlacesSizeState
 import voloshyn.android.domain.repository.weather.SavedPlacesRepository
 import java.io.IOException
+import java.util.logging.Logger
 import javax.inject.Inject
 
 const val INITIAL_CITIES_LIST_SIZE = 4
 
 class SavedPlacesRepositoryImpl @Inject constructor(
     private val database: AppDatabase,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val logger: Logger
 ) : SavedPlacesRepository {
     override fun getPlaces(placesState: PlacesSizeState): Flow<List<Place>> {
         val placesCount = database.placeDao().placesRowCount()
@@ -35,6 +39,7 @@ class SavedPlacesRepositoryImpl @Inject constructor(
             }
             placesFlow
         } catch (e: IOException) {
+            logger.logError(this::class, e)
             throw e
         }
 
@@ -57,12 +62,12 @@ class SavedPlacesRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun getPlaceById(placeId: Int): AppResult<Place, DataError.Locale> {
+    override suspend fun getPlaceById(placeId: Int): AppResult<Place, DataError> {
         return try {
             val appResult = database.placeDao().getPlace(placeId)
             AppResult.Success(data = appResult.toPlace())
         } catch (e: SQLException) {
-            AppResult.Error(error = DataError.Locale.LOCAL_STORAGE_ERROR)
+            AppResult.Error(error = e.toDomainError())
         }
 
     }

@@ -6,7 +6,7 @@ import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toWeatherComponents
 import voloshyn.android.domain.model.weather.WeatherComponents
 import voloshyn.android.domain.repository.weather.WeatherRepository
-import voloshyn.android.network.http.utils.ApiResult
+import voloshyn.android.network.http.exceptions.ApiException
 import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiWeatherService
 import javax.inject.Inject
@@ -26,19 +26,19 @@ class WeatherRepositoryImpl @Inject constructor(
                     latitude = latitude,
                     longitude = longitude
                 )
-            })
-            when (networkResult) {
-                is ApiResult.Success -> {
-                    return@withContext networkResult.data.toWeatherComponents()
-                }
-
-                is ApiResult.Error -> {
-                    throw networkResult.e
-                }
             }
+            )
+            return@withContext networkResult.toWeatherComponents()
+        } catch (e: ApiException) {
+            throw e
         } catch (e: Exception) {
             throw e
         }
     }
 
+
 }
+
+
+
+
