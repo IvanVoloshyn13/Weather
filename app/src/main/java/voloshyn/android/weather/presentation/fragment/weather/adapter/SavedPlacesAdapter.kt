@@ -1,12 +1,11 @@
 package voloshyn.android.weather.presentation.fragment.weather.adapter
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.place.Place
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemPlacesBinding
 

@@ -23,11 +23,11 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import voloshyn.android.data.repository.weather.WeatherTypeRepository
+import voloshyn.android.data.model.WeatherTypeModel
 import voloshyn.android.domain.NetworkStatus
-import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.model.PlacesSizeState
-import voloshyn.android.domain.model.weather.CurrentForecast
+import voloshyn.android.domain.model.place.Place
+import voloshyn.android.domain.model.place.PlacesSizeState
+import voloshyn.android.domain.model.weather.components.CurrentForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentWeatherBinding
 import voloshyn.android.weather.databinding.HeaderLayoutBinding
@@ -36,8 +36,8 @@ import voloshyn.android.weather.databinding.WidgetForecastBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.networkObserver.NetworkObserver
-import voloshyn.android.weather.presentation.fragment.base.renderSimpleResult
-import voloshyn.android.weather.presentation.fragment.base.viewBinding
+import voloshyn.android.weather.renderResult.renderSimpleResult
+import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.OnPlaceClickListener
@@ -273,8 +273,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             tvCurrentTemp.text = state.currentTemperature.toString()
             tvMaxTemp.text = state.maxTemperature.toString()
             tvMinTemp.text = state.minTemperature.toString()
-            tvWeatherTypeDesc.text = WeatherTypeRepository.fromWHO(state.weatherCode).weatherType
-            ivWeatherTypeIcon.setImageResource(WeatherTypeRepository.fromWHO(state.weatherCode).weatherIcon)
+            tvWeatherTypeDesc.text = WeatherTypeModel.fromWHO(state.weatherCode).weatherType
+            ivWeatherTypeIcon.setImageResource(WeatherTypeModel.fromWHO(state.weatherCode).weatherIcon)
         }
 
     }
@@ -296,6 +296,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     private fun initPlacesRecycler() {
         val rv = headerBinding.rvPlaces
         rv.adapter = savedPlacesAdapter
+
     }
 
     private fun sideEffects() {

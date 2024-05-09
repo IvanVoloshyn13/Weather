@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.data.repository.weather.WeatherTypeRepository
-import voloshyn.android.domain.model.weather.DailyForecast
+import voloshyn.android.data.model.WeatherTypeModel
+import voloshyn.android.domain.model.weather.components.DailyForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemDailyForecastBinding
 
@@ -17,7 +17,7 @@ class DailyAdapter : RecyclerView.Adapter<DailyAdapter.DailyViewHolder>() {
         private val binding = ItemDailyForecastBinding.bind(itemView)
         fun bind(data: DailyForecast) {
             binding.apply {
-                ivWeatherType.setImageResource(WeatherTypeRepository.fromWHO(data.weatherCode).weatherIcon)
+                ivWeatherType.setImageResource(WeatherTypeModel.fromWHO(data.weatherCode).weatherIcon)
                 tvMaxTemp.text = data.maxTemperature.toString()
                 tvMinTemp.text = data.minTemperature.toString()
                 tvDayOfWeek.text = data.dayOfTheWeek

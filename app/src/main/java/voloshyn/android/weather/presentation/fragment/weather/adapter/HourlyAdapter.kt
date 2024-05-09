@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.data.repository.weather.WeatherTypeRepository
-import voloshyn.android.domain.model.weather.HourlyForecast
+import voloshyn.android.data.model.WeatherTypeModel
+import voloshyn.android.domain.model.weather.components.HourlyForecast
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemHourlyForecastBinding
 
@@ -23,7 +23,7 @@ class HourlyAdapter : RecyclerView.Adapter<HourlyAdapter.HourlyViewHolder>() {
                 tvHour.text =
                     data.currentDate.hour.toString() + ":00"
                 tvTemperature.text = data.currentTemp.toString()
-                tvWeatherTypeIcon.setImageResource(WeatherTypeRepository.fromWHO(data.weatherCode).weatherIcon)
+                tvWeatherTypeIcon.setImageResource(WeatherTypeModel.fromWHO(data.weatherCode).weatherIcon)
             }
         }
     }

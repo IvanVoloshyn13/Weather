@@ -1,7 +1,7 @@
 package voloshyn.android.domain.useCase.weather
 
 import kotlinx.coroutines.flow.Flow
-import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
+import voloshyn.android.domain.repository.TimeForCurrentPlaceRepository
 
 class GetTimeForSelectedPlaceUseCase(private val timeRepo: TimeForCurrentPlaceRepository) {
 

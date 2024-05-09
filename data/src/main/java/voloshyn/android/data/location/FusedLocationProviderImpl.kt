@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Build
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
@@ -16,8 +15,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.LocationProviderError
 import voloshyn.android.domain.location.FusedLocationProvider
-import voloshyn.android.domain.model.CurrentUserLocation
-import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.place.CurrentUserLocation
+import voloshyn.android.domain.model.place.Place
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume

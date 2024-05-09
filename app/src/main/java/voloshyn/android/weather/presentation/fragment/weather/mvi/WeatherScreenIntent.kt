@@ -1,7 +1,7 @@
 package voloshyn.android.weather.presentation.fragment.weather.mvi
 
 import voloshyn.android.domain.NetworkStatus
-import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.place.Place
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 
 

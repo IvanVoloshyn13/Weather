@@ -1,10 +1,10 @@
 package voloshyn.android.domain.useCase.addsearch
 
-import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.repository.addSearch.StorePlaceRepository
+import voloshyn.android.domain.model.place.Place
+import voloshyn.android.domain.repository.PlaceRepository
 
-class SavePlaceUseCase(private val saveRepository: StorePlaceRepository) {
+class SavePlaceUseCase(private val repository: PlaceRepository) {
     suspend fun invoke(place: Place) {
-        return saveRepository.store(place)
+        return repository.storePlace(place)
     }
 }

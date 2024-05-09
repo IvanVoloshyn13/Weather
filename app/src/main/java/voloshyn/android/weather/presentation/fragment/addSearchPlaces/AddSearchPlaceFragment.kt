@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -18,10 +17,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.place.Place
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentPlaceSearchBinding
-import voloshyn.android.weather.presentation.fragment.base.viewBinding
+import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.WeatherFragment
 
 @AndroidEntryPoint

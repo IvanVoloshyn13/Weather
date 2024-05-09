@@ -5,9 +5,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
-import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandler
-import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandlerImpl
+import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
+import voloshyn.android.data.dataSource.popularPlacesStorage.multichoice.MultiChoiceHandler
+import voloshyn.android.data.dataSource.popularPlacesStorage.multichoice.MultiChoiceHandlerImpl
 import javax.inject.Qualifier
 
 @Qualifier

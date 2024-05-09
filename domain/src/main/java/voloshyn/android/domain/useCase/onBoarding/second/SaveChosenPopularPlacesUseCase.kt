@@ -1,12 +1,12 @@
 package voloshyn.android.domain.useCase.onBoarding.second
 
-import voloshyn.android.domain.model.onBoarding.PopularPlace
-import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
+import voloshyn.android.domain.model.place.Place
+import voloshyn.android.domain.repository.PlaceRepository
 
-class SaveChosenPopularPlacesUseCase(private val popularPlacesRepository: PopularPlacesRepository) {
-    suspend fun invoke(places: Array<PopularPlace>) {
+class SaveChosenPopularPlacesUseCase(private val repository: PlaceRepository) {
+    suspend fun invoke(places: Array<Place>) {
         if (places.isNotEmpty()) {
-            popularPlacesRepository.savePlaces(places)
+            repository.storePlaces(places)
         }
     }
 }

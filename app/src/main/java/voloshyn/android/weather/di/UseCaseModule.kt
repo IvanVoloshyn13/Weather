@@ -6,17 +6,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
+import voloshyn.android.data.dataSource.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
 import voloshyn.android.domain.location.FusedLocationProvider
-import voloshyn.android.domain.repository.addSearch.StorePlaceRepository
-import voloshyn.android.domain.repository.addSearch.SearchPlaceRepository
-import voloshyn.android.domain.repository.mainActivity.OnBoarding
-import voloshyn.android.domain.repository.onBoarding.first.PushNotificationRepository
-import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
-import voloshyn.android.domain.repository.onBoarding.second.PopularPlacesRepository
-import voloshyn.android.domain.repository.weather.FetchWeatherAndImageRepository
-import voloshyn.android.domain.repository.weather.SavedPlacesRepository
-import voloshyn.android.domain.repository.weather.TimeForCurrentPlaceRepository
+import voloshyn.android.domain.repository.OnBoardingRepository
+import voloshyn.android.domain.repository.PlaceRepository
+import voloshyn.android.domain.repository.PushNotificationRepository
+import voloshyn.android.domain.repository.TimeForCurrentPlaceRepository
+import voloshyn.android.domain.repository.WeatherAndImageRepository
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.mainActivity.GetOnBoardingStatusUseCase
@@ -60,23 +56,22 @@ internal object UseCaseModule {
         InMemoryPopularPlacesRepositoryImpl(context)
 
     @Provides
-    fun provideSavePopularPlacesUseCase(popularPlacesRepository: PopularPlacesRepository): SaveChosenPopularPlacesUseCase =
-        SaveChosenPopularPlacesUseCase(popularPlacesRepository)
+    fun provideSavePopularPlacesUseCase(repository: PlaceRepository): SaveChosenPopularPlacesUseCase =
+        SaveChosenPopularPlacesUseCase(repository)
 
     @Provides
     fun provideGetCurrentLocationUseCase(fusedLocationProvider: FusedLocationProvider): GetCurrentLocationUseCase =
         GetCurrentLocationUseCase(fusedLocationProvider)
 
     @Provides
-    fun provideShowOnBoardingScreenUseCase(onBoarding: OnBoarding): GetOnBoardingStatusUseCase {
-        return GetOnBoardingStatusUseCase(onBoarding)
+    fun provideShowOnBoardingScreenUseCase(repository: OnBoardingRepository): GetOnBoardingStatusUseCase {
+        return GetOnBoardingStatusUseCase(repository)
     }
 
     @Provides
-    fun provideOnFinishedOnBoardingUseCase(onFinished: OnBoardingCompleted): OnBoardingCompletedUseCase {
-        return OnBoardingCompletedUseCase(onFinished)
+    fun provideOnFinishedOnBoardingUseCase(repository: OnBoardingRepository): OnBoardingCompletedUseCase {
+        return OnBoardingCompletedUseCase(repository)
     }
-
 
 
     @Provides
@@ -86,28 +81,28 @@ internal object UseCaseModule {
 
 
     @Provides
-    fun provideSearchPlacesUseCase(searchPlace: SearchPlaceRepository): SearchPlaceByNameUseCase {
-        return SearchPlaceByNameUseCase(searchPlace)
+    fun provideSearchPlacesUseCase(repository: PlaceRepository): SearchPlaceByNameUseCase {
+        return SearchPlaceByNameUseCase(repository)
     }
 
     @Provides
-    fun provideSaveLocationUseCase(saveLocation: StorePlaceRepository): SavePlaceUseCase {
-        return SavePlaceUseCase(saveLocation)
+    fun provideSaveLocationUseCase(repository: PlaceRepository): SavePlaceUseCase {
+        return SavePlaceUseCase(repository)
     }
 
 
     @Provides
-    fun provideGetSavedPlacesUseCase(repository: SavedPlacesRepository): GetSavedPlacesUseCase {
+    fun provideGetSavedPlacesUseCase(repository: PlaceRepository): GetSavedPlacesUseCase {
         return GetSavedPlacesUseCase(repository)
     }
 
     @Provides
-    fun provideGetPlaceByIdUseCase(repository: SavedPlacesRepository): GetPlaceByIdUseCase {
+    fun provideGetPlaceByIdUseCase(repository: PlaceRepository): GetPlaceByIdUseCase {
         return GetPlaceByIdUseCase(repository)
     }
 
     @Provides
-    fun provideFetchWeatherAndImageUseCase(repository: FetchWeatherAndImageRepository): FetchWeatherAndImageDataUseCase {
+    fun provideFetchWeatherAndImageUseCase(repository: WeatherAndImageRepository): FetchWeatherAndImageDataUseCase {
         return FetchWeatherAndImageDataUseCase(repository)
     }
 
