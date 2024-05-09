@@ -13,9 +13,9 @@ import kotlinx.coroutines.launch
 import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.mapToData
-import voloshyn.android.domain.model.Place
-import voloshyn.android.domain.model.PlacesSizeState
-import voloshyn.android.domain.model.WeatherAndImage
+import voloshyn.android.domain.model.place.Place
+import voloshyn.android.domain.model.place.PlacesSizeState
+import voloshyn.android.domain.model.weather.WeatherAndImage
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.domain.useCase.weather.FetchWeatherAndImageDataUseCase
 import voloshyn.android.domain.useCase.weather.GetCurrentLocationUseCase
@@ -23,7 +23,7 @@ import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
 import voloshyn.android.weather.gpsReceiver.GpsStatus
-import voloshyn.android.weather.presentation.fragment.base.BaseViewModel
+import voloshyn.android.weather.presentation.fragment.BaseViewModel
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlaceById
@@ -32,7 +32,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatu
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherScreenIntent
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
-import voloshyn.android.weather.presentation.fragment.base.toStringResources
+import voloshyn.android.weather.renderResult.toStringResources
 import javax.inject.Inject
 
 private const val CURRENT_LOCATION_DEFAULT_ID = 0
@@ -47,6 +47,7 @@ class WeatherViewModel @Inject constructor(
     private val weatherAndImage: FetchWeatherAndImageDataUseCase,
     private val searchPlaceByNameUseCase: SearchPlaceByNameUseCase,
 ) : BaseViewModel() {
+
 
     private var locationTimeJob: Job? = null
 

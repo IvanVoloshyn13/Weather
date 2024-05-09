@@ -1,9 +1,9 @@
 package voloshyn.android.domain.useCase.onBoarding.second
 
-import voloshyn.android.domain.repository.onBoarding.second.OnBoardingCompleted
+import voloshyn.android.domain.repository.OnBoardingRepository
 
-class OnBoardingCompletedUseCase(private val completed: OnBoardingCompleted) {
+class OnBoardingCompletedUseCase(private val repository: OnBoardingRepository) {
 
-    suspend fun invoke(isFinished: Boolean) = completed.saveOnBoardingStatus(isFinished)
+    suspend fun invoke(isFinished: Boolean) = repository.storeOnBoardingStatus(isFinished)
 
 }

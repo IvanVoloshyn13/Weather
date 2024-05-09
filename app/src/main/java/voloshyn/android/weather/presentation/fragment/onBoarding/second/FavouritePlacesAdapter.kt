@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
+import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.ItemPopularPlacesBinding
 

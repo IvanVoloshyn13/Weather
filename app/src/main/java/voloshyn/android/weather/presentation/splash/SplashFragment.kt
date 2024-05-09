@@ -13,8 +13,8 @@ import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentSplashBinding
 import voloshyn.android.weather.presentation.MainActivity
 import voloshyn.android.weather.presentation.MainActivityArgs
-import voloshyn.android.weather.presentation.fragment.base.renderSimpleResult
-import voloshyn.android.weather.presentation.fragment.base.viewBinding
+import voloshyn.android.weather.renderResult.renderSimpleResult
+import voloshyn.android.weather.presentation.fragment.viewBinding
 
 @AndroidEntryPoint
 class SplashFragment : Fragment(R.layout.fragment_splash) {

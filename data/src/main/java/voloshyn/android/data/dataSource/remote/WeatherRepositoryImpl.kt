@@ -4,8 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toWeatherComponents
-import voloshyn.android.domain.model.weather.WeatherComponents
-import voloshyn.android.domain.repository.weather.WeatherRepository
+import voloshyn.android.domain.model.weather.components.WeatherComponents
 import voloshyn.android.network.http.exceptions.ApiException
 import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiWeatherService

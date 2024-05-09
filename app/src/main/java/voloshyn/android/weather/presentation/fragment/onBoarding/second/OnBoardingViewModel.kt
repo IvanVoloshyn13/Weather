@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import voloshyn.android.data.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
-import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
-import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceHandler
-import voloshyn.android.data.popularPlacesStorage.multichoice.MultiChoiceState
-import voloshyn.android.domain.model.onBoarding.PopularPlace
+import voloshyn.android.data.dataSource.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
+import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
+import voloshyn.android.data.dataSource.popularPlacesStorage.multichoice.MultiChoiceHandler
+import voloshyn.android.data.dataSource.popularPlacesStorage.multichoice.MultiChoiceState
+import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.useCase.onBoarding.second.OnBoardingCompletedUseCase
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
 import voloshyn.android.weather.di.PlacesMultiChoice
@@ -77,11 +77,11 @@ class OnBoardingViewModel @Inject constructor(
         multiChoiceHandlerImpl.toggle(place)
     }
 
-    fun checkedItems(): Array<PopularPlace> {
+    fun checkedItems(): Array<Place> {
         val multiChoice = multiChoiceHandlerImpl as MultiChoiceState<PopularPlaceData>
         val elements = multiChoice.checkedItem
         val placesNameArray =
-            Array<PopularPlace>(elements.size) { PopularPlace() }
+            Array<Place>(elements.size) { Place() }
         elements.map { it }
             .forEachIndexed { index, name ->
                 placesNameArray[index] =
@@ -90,7 +90,7 @@ class OnBoardingViewModel @Inject constructor(
         return placesNameArray
     }
 
-    fun save(array: Array<PopularPlace>) {
+    fun save(array: Array<Place>) {
         val onBoardingIsFinished = true
         viewModelScope.launch {
             onFinished.invoke(onBoardingIsFinished)

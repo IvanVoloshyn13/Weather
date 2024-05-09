@@ -10,10 +10,10 @@ import androidx.navigation.navOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import voloshyn.android.data.popularPlacesStorage.PopularPlaceData
+import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
 import voloshyn.android.weather.R
 import voloshyn.android.weather.databinding.FragmentOnboardingSecondBinding
-import voloshyn.android.weather.presentation.fragment.base.viewBinding
+import voloshyn.android.weather.presentation.fragment.viewBinding
 
 @AndroidEntryPoint
 class OnBoardingFragmentSecond : Fragment(R.layout.fragment_onboarding_second),

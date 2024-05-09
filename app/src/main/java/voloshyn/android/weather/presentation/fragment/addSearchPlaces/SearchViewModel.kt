@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import voloshyn.android.data.R
 import voloshyn.android.domain.appError.AppResult
-import voloshyn.android.domain.model.Place
+import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.useCase.addsearch.SavePlaceUseCase
 import voloshyn.android.domain.useCase.addsearch.SearchPlaceByNameUseCase
 import voloshyn.android.weather.presentation.fragment.addSearchPlaces.mvi.FragmentSearchState
-import voloshyn.android.weather.presentation.fragment.base.BaseViewModel
-import voloshyn.android.weather.presentation.fragment.base.toStringResources
+import voloshyn.android.weather.presentation.fragment.BaseViewModel
+import voloshyn.android.weather.renderResult.toStringResources
 import javax.inject.Inject
 
 @HiltViewModel
