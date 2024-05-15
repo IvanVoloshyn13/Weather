@@ -1,5 +1,6 @@
 package voloshyn.android.data.dataSource.popularPlacesStorage.multichoice
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,7 @@ import kotlinx.coroutines.launch
 import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
 import javax.inject.Inject
 
-
+@ViewModelScoped
 class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularPlaceData>,
     MultiChoiceState<PopularPlaceData> {
 
@@ -17,7 +18,10 @@ class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularP
     private var items: List<PopularPlaceData> = emptyList()
     private val stateFlow = MutableStateFlow(OnChanged())
 
-    override fun setItemsFlow(coroutineScope: CoroutineScope, itemsFlow: Flow<List<PopularPlaceData>>) {
+    override fun setItemsFlow(
+        coroutineScope: CoroutineScope,
+        itemsFlow: Flow<List<PopularPlaceData>>
+    ) {
         coroutineScope.launch {
             itemsFlow.collectLatest { list ->
                 items = list
@@ -61,16 +65,14 @@ class MultiChoiceHandlerImpl @Inject constructor() : MultiChoiceHandler<PopularP
     }
 
     override val checkedItem: List<PopularPlaceData>
-        get() = items.filter { checkedIds.contains(it.name) }.
-            map { element ->
-                element.copy(isChecked = true)
-            }
-
+        get() = items.filter { checkedIds.contains(it.name) }.map { element ->
+            element.copy(isChecked = true)
+        }
 
 
     private fun notifyUpdates() {
         stateFlow.value = OnChanged()
     }
 
-    private class OnChanged
+    private class OnChanged()
 }

@@ -13,12 +13,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object DispatcherModule {
 
-
     @Provides
     @Singleton
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
-
 
 }
 

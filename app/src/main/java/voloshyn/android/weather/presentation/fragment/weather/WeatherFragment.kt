@@ -1,6 +1,5 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
-import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
@@ -16,6 +15,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,7 +36,6 @@ import voloshyn.android.weather.databinding.WidgetForecastBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.networkObserver.NetworkObserver
-import voloshyn.android.weather.renderResult.renderSimpleResult
 import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
@@ -49,6 +48,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
+import voloshyn.android.weather.renderResult.renderSimpleResult
 
 
 @AndroidEntryPoint
@@ -62,16 +62,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     private lateinit var hourlyAdapter: HourlyAdapter
     private lateinit var dailyAdapter: DailyAdapter
     private lateinit var savedPlacesAdapter: SavedPlacesAdapter
-
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        observeGpsStatus()
-        observeNetworkStatus()
-    }
+    private lateinit var scope: LifecycleCoroutineScope
+    private var gpsUnavailableDialog: GpsUnavailableDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        scope = viewLifecycleOwner.lifecycleScope
+
         widgetForecastBinding = WidgetForecastBinding.bind(binding.root)
         progressBarBinding = ProgressBarBinding.bind(binding.root)
         val displayMetrics = requireContext().resources.displayMetrics
@@ -94,6 +91,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         hourlyAdapter = HourlyAdapter()
         dailyAdapter = DailyAdapter()
         savedPlacesAdapter = SavedPlacesAdapter(this)
+        observeGpsStatus()
+        observeNetworkStatus()
         initDailyRecycler()
         initHourlyRecycler()
         initPlacesRecycler()
@@ -121,7 +120,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     }
 
     private fun renderUi() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        scope.launch {
             viewModel.state.collectLatest { state ->
                 renderSimpleResult(binding.scroll,
                     isError = state.isError,
@@ -162,7 +161,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         updateImage(state.imageUrl)
         binding.apply {
             binding.toolbar.tvToolbarTitle.text = state.placeName
-            if (state.places.first <= 3) {
+            if (state.places.first <= 4) {
                 headerBinding.bttTogglePlacesSize.visibility = View.GONE
             } else {
                 headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
@@ -170,12 +169,33 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             savedPlacesAdapter.submitList(state.places.second)
 
         }
+
+        state.gpsStatus.let {
+            when (it) {
+                GpsStatus.AVAILABLE -> {
+                    gpsUnavailableDialog?.dialog?.dismiss()
+                    gpsUnavailableDialog = null
+                }
+
+                GpsStatus.UNAVAILABLE -> {
+//                    if(headerBinding.currentLocation.)
+                    gpsUnavailableDialog = GpsUnavailableDialog()
+                    gpsUnavailableDialog?.show(childFragmentManager, null)
+
+                }
+
+                else -> {
+                    Unit
+                }
+            }
+        }
+
     }
 
     private suspend fun updateImage(url: String) {
         if (url.isNotEmpty()) {
             BlurUtil.initialize(binding.backgroundImage.context, url)
-            lifecycleScope.launch {
+            scope.launch {
                 viewModel.blurState.collectLatest { blur ->
                     BlurUtil.setBlurredImageFromUrl(
                         binding.backgroundImage,
@@ -300,7 +320,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     }
 
     private fun sideEffects() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        scope.launch {
             viewModel.errorState.collectLatest {
                 if (it.isError) {
                     val text = getString(it.errorMessage)
@@ -309,14 +329,13 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                         text,
                         Toast.LENGTH_LONG
                     ).show()
-
                 }
             }
         }
     }
 
     private fun collectTime() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        scope.launch {
             viewModel.time.collectLatest {
                 binding.toolbar.tvCurrentTime.text = it
             }
@@ -326,23 +345,10 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     private fun observeGpsStatus() {
         val fragmentAct = requireActivity() as GpsReceiver
-        var gpsUnavailableDialog: GpsUnavailableDialog? = null
-        lifecycleScope.launch {
+        scope.launch {
             fragmentAct.gpsStatus.collectLatest { status ->
                 status?.let {
-                    when (it) {
-                        GpsStatus.AVAILABLE -> {
-                            gpsUnavailableDialog?.dialog?.dismiss()
-                            gpsUnavailableDialog = null
-                            viewModel.onIntent(UpdateGpsStatus(it))
-                        }
-
-                        GpsStatus.UNAVAILABLE -> {
-                            gpsUnavailableDialog = GpsUnavailableDialog()
-                            gpsUnavailableDialog?.show(childFragmentManager, null)
-                            viewModel.onIntent(UpdateGpsStatus(it))
-                        }
-                    }
+                    viewModel.onIntent(UpdateGpsStatus(it))
                 }
             }
         }
@@ -350,7 +356,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     private fun observeNetworkStatus() {
         val fragmentAct = requireActivity() as NetworkObserver
-        lifecycleScope.launch {
+        scope.launch {
             fragmentAct.networkStatusFlow.collectLatest { network ->
                 network?.let {
                     when (it) {
@@ -367,7 +373,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         }
     }
 
-    override fun onClick(place: Place) {
+    override fun onItemClick(place: Place) {
         drawerLayout.close()
         viewModel.onIntent(FetchWeatherForSavedPlace(place))
     }

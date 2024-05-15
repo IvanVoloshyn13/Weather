@@ -52,6 +52,7 @@
         information.Please try again later</string>
     <!-- SQLITE-->
     <string name="error_sql">Unable to load data from the database</string>
+    <string name="data_not_found">Can not find any data </string>
     <!-- LOCATION-->
     <string name="error_gps_location">Error obtaining GPS location</string>
     <string name="no_location_permission">Check location permission</string>

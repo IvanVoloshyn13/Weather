@@ -42,7 +42,8 @@
 
     <include
         android:id="@+id/current_location"
-        layout="@layout/item_places" />
+        layout="@layout/item_places"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_places"

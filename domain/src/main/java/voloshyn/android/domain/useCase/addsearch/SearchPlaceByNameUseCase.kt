@@ -9,4 +9,5 @@ class SearchPlaceByNameUseCase(private val repository: PlaceRepository) {
     suspend fun invoke(locationName: String):AppResult< Places,DataError.Network> {
        return repository.searchByName(locationName)
     }
+
 }

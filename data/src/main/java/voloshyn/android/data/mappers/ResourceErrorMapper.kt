@@ -1,5 +1,6 @@
 package voloshyn.android.data.mappers
 
+import voloshyn.android.data.dataSource.local.CustomSqlException
 import voloshyn.android.domain.appError.AppError
 import voloshyn.android.domain.appError.DataError
 import voloshyn.android.network.http.exceptions.ApiException
@@ -20,6 +21,7 @@ fun ApiException.toResultError(): DataError.Network {
 
 fun Exception.toDomainError(): DataError {
     return when (this) {
+        is CustomSqlException.NoSuchPlaceException->DataError.Locale.DATA_NOT_FOUND
         is SQLException -> DataError.Locale.LOCAL_STORAGE_ERROR
         is NoConnectivityException->DataError.Network.N0_CONNECTION
         is IOException -> DataError.Network.UNKNOWN_ERROR

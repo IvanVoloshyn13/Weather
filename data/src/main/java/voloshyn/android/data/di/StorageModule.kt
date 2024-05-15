@@ -16,7 +16,8 @@ import dagger.hilt.components.SingletonComponent
 import voloshyn.android.data.dataSource.local.database.AppDatabase
 import javax.inject.Singleton
 
-const val PREFERENCE_DATA_STORE_FILE_NAME = "datastore.preferences_pb"
+internal const val PREFERENCE_DATA_STORE_FILE_NAME = "datastore.preferences_pb"
+internal const val APP_DATABASE_NAME = "weather_app.db"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -44,4 +45,3 @@ internal object StorageModule {
 }
 
 
-internal const val APP_DATABASE_NAME = "weather_app.db"

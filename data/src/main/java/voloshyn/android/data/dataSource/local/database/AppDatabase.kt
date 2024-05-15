@@ -17,6 +17,6 @@ import voloshyn.android.data.dataSource.local.database.entities.PlaceImageEntity
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun placeDao(): PlaceDao
-    abstract fun weatherDao(): WeatherAndImageDao
+    abstract fun weatherAndImageDao(): WeatherAndImageDao
 
 }

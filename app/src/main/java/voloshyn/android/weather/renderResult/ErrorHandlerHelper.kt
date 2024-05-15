@@ -7,7 +7,7 @@ import voloshyn.android.weather.R
 fun LocationProviderError.toStringResources(): Int {
     return when (this) {
         LocationProviderError.NO_PERMISSION -> R.string.no_location_permission
-        LocationProviderError.PROVIDER_ERROR -> R.string.error_gps_location
+        LocationProviderError.PROVIDER_ERROR -> R.string.error_provider_disabled
         LocationProviderError.NO_LOCATION -> R.string.error_location_retrieve
     }
 }

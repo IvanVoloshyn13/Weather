@@ -1,13 +1,13 @@
 package voloshyn.android.domain.model.onBoarding
 
+
 data class PushNotificationSettings(
     val everydayWeather: PushNotificationStatus,
     val upcomingRainfall: PushNotificationStatus,
     val temperatureChanges: PushNotificationStatus,
     val weatherAlert: PushNotificationStatus
 ) {
-
-    val showNotifications:Boolean
+    val showNotifications: Boolean
         get() = everydayWeather.toBoolean() || upcomingRainfall.toBoolean() || temperatureChanges.toBoolean() || weatherAlert.toBoolean()
 
 }

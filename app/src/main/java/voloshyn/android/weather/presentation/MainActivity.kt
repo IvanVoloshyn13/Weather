@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), GpsReceiver by G
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
             registerLifecycleOwner(this, this)
             registerNetworkLifecycleOwner(this, this)
             checkLocationPermission()

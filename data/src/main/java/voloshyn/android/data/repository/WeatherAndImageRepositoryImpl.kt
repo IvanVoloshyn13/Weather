@@ -1,8 +1,10 @@
 package voloshyn.android.data.repository
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import voloshyn.android.data.dataSource.local.CustomSqlException
 import voloshyn.android.data.dataSource.local.database.WeatherAndImageLocalDataSourceRepository
 import voloshyn.android.data.dataSource.remote.UnsplashRepository
 import voloshyn.android.data.dataSource.remote.WeatherRepository
@@ -35,24 +37,11 @@ class WeatherAndImageRepositoryImpl @Inject constructor(
             store(weatherAndImage, place)
             AppResult.Success(data = localStorage.get(place.id))
         } catch (e: ApiException) {
-            val data = onNetworkException(place.id)
-            AppResult.Error(
-                data = data,
-                error = e.toDomainError()
-            )
-        }catch (e:NoConnectivityException){
-            val data = onNetworkException(place.id)
-            AppResult.Error(
-                data = data,
-                error = e.toDomainError()
-            )
-        }
-        catch (e: IOException) {
-            val data = onNetworkException(place.id)
-            AppResult.Error(
-                data = data,
-                error = e.toDomainError()
-            )
+            onNetworkException(place.id, e)
+        } catch (e: NoConnectivityException) {
+            onNetworkException(place.id, e)
+        } catch (e: IOException) {
+            onNetworkException(place.id, e)
         } catch (e: SQLException) {
             AppResult.Error(error = e.toDomainError())
         } catch (e: Exception) {
@@ -81,8 +70,17 @@ class WeatherAndImageRepositoryImpl @Inject constructor(
     /** Get data from local database if network request fails
      * @throws [SQLException]
      * */
-    private suspend fun onNetworkException(placeId: Int): WeatherAndImage {
-        return localStorage.get(placeId = placeId)
+    private suspend fun onNetworkException(
+        placeId: Int,
+        e: Exception
+    ): AppResult<WeatherAndImage, DataError> {
+        return try {
+            AppResult.Error(data = localStorage.get(placeId = placeId), error = e.toDomainError())
+        } catch (e: CustomSqlException.NoSuchPlaceException) {
+            AppResult.Error(error = e.toDomainError())
+        } catch (e: Exception) {
+            AppResult.Error(error = e.toDomainError())
+        }
     }
 
 

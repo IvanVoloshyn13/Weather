@@ -15,7 +15,7 @@ import voloshyn.android.data.dataSource.local.database.entities.PlaceImageEntity
 interface WeatherAndImageDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun store(
+    suspend fun store(
         current: CurrentForecastEntity,
         hourly: HourlyForecastEntity,
         daily: DailyForecastEntity,
@@ -23,11 +23,16 @@ interface WeatherAndImageDao {
     )
 
 
-    @Query("SELECT places.id \n" +
-            " FROM places \n" +
-            " LEFT JOIN hourly_forecast ON places.id = hourly_forecast.placeId \n " +
-            " LEFT JOIN daily_forecast ON places.id = daily_forecast.placeId \n" +
-            " LEFT JOIN current_forecast ON places.id = current_forecast.placeId \n" +
-            " WHERE places.id =:placeId ")
-    fun get(placeId: Int): PlaceWithWeather
+    @Query(
+        "SELECT places.id \n" +
+                " FROM places \n" +
+                " LEFT JOIN hourly_forecast ON places.id = hourly_forecast.place_id \n " +
+                " LEFT JOIN daily_forecast ON places.id = daily_forecast.place_id \n" +
+                " LEFT JOIN current_forecast ON places.id = current_forecast.place_id \n" +
+                " WHERE places.id =:placeId "
+    )
+    suspend fun get(placeId: Int): PlaceWithWeather
+
+    @Query("SELECT place_id FROM current_forecast WHERE place_id =:placeId")
+    suspend fun weatherExist(placeId: Int): Int
 }

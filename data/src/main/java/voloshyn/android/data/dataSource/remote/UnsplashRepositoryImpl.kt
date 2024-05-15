@@ -6,8 +6,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.domain.model.unsplash.UnsplashImage
-import voloshyn.android.network.http.exceptions.ApiException
-import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
 import voloshyn.android.network.http.utils.executeApiCall
 import voloshyn.android.network.retrofit.apiServices.ApiUnsplashService
 import voloshyn.android.network.retrofit.models.unsplash.UnsplashApiResponse
@@ -17,6 +15,7 @@ import kotlin.random.Random
 
 private const val SMALL_IMAGE = 0
 private const val REGULAR_IMAGE = 1
+
 
 class UnsplashRepositoryImpl @Inject constructor(
     @UnsplashApi private val apiUnsplashService: ApiUnsplashService,
@@ -35,19 +34,13 @@ class UnsplashRepositoryImpl @Inject constructor(
 
     override suspend fun fetchImageByName(cityName: String): UnsplashImage =
         withContext(dispatcher) {
-            try {
+            wrapNetworkCallWithException {
                 val result = executeApiCall(
                     call = { apiUnsplashService.fetchPictureByLocation(cityName = cityName) },
                 )
-                return@withContext result.toCityImage(imageSize) ?: UnsplashImage("")
-            } catch (e: ApiException) {
-                throw e
-            } catch (e:NoConnectivityException){
-                throw e
+                return@wrapNetworkCallWithException result.toCityImage(imageSize) ?: UnsplashImage("")
             }
-            catch (e: Exception) {
-                throw e
-            }
+
         }
 
     private fun imageSizeByScreenSize(): Int {

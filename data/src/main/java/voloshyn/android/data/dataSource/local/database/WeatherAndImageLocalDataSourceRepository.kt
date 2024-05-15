@@ -9,7 +9,6 @@ interface WeatherAndImageLocalDataSourceRepository {
      * of it to the corresponding tables in local database */
 
     //TODO() store place in another way
-    //Dont remember for what i wrote this todo()
     suspend fun store(placeId: Int, weatherAndImage: WeatherAndImage, place: Place)
 
     /** Task of this function is to return [WeatherAndImage] from local database

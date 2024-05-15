@@ -1,6 +1,7 @@
-package voloshyn.android.http.di
+package voloshyn.android.network.http.di
 
 import android.content.Context
+import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,6 +40,7 @@ internal object HttpModule {
             .readTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .writeTimeout(TIMEOUT_MS, TimeUnit.MILLISECONDS)
             .addNetworkInterceptor(connectivityInterceptor)
+            .addInterceptor(connectivityInterceptor)
             .addInterceptor(loggingInterceptor)
             .addInterceptor(emptyBodyInterceptor)
             .cache(Cache(File(context.cacheDir, "http_cache"), 50 * 1024 * 1024))
