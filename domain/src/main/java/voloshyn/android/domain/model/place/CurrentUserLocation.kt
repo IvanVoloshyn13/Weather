@@ -1,18 +1,10 @@
 package voloshyn.android.domain.model.place
 
-private const val EMPTY_CITY_NAME = ""
 
-/**
- * Data class for fused location provider to
- * TODO It will be good to map this after getting weather to [Place] and save in Room with specific Id
- * */
+/** Data class for fused location provider */
 data class CurrentUserLocation(
-    val latitude: Double,
-    val longitude: Double,
-    val city: String,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val city: String = EMPTY_STRING,
 
-    ) {
-    companion object {
-        val DEFAULT = CurrentUserLocation(0.0, 0.0, EMPTY_CITY_NAME)
-    }
-}
+    )

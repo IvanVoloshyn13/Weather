@@ -18,7 +18,6 @@ class OnBoardingViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.d("EXCEPTION_HANDLER", throwable.toString())
         Log.d("EXCEPTION_HANDLER", throwable.message.toString())
     }
     private val viewModelScope = CoroutineScope(coroutineExceptionHandler)

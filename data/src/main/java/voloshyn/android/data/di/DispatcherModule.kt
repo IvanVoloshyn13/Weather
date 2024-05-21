@@ -13,13 +13,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object DispatcherModule {
 
-
     @Provides
     @Singleton
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
 
+    @Provides
+    @Singleton
+    @DefaultDispatcher
+    fun provideIDefaultDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
 @Retention(AnnotationRetention.BINARY)

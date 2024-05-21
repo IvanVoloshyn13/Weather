@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -23,9 +24,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class FusedLocationProviderImpl @Inject constructor(
-    private val fusedLocationProviderClient: FusedLocationProviderClient,
     @ApplicationContext val context: Context
 ) : FusedLocationProvider {
+
+    @Inject
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getCurrentUserLocation(
@@ -144,7 +147,7 @@ fun CurrentUserLocation.toPlace(): Place {
         name = this.city,
         latitude = this.latitude,
         longitude = this.longitude,
-        id=0,
+        id = 0,
         timezone = "",
         country = "",
         countryCode = ""

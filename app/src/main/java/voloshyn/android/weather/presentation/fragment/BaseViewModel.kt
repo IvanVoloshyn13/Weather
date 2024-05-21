@@ -28,6 +28,7 @@ open class BaseViewModel : ViewModel() {
                 errorMessage = stringResource
             )
         )
+
         delay(1000)
         baseErrorState.emit(
             ErrorState(

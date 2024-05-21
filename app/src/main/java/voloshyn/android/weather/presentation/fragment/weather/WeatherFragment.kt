@@ -1,8 +1,9 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
-import android.content.Context
+import android.content.res.Resources
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -16,15 +17,13 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import voloshyn.android.data.model.WeatherTypeModel
-import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.model.place.PlacesSizeState
 import voloshyn.android.domain.model.weather.components.CurrentForecast
@@ -36,7 +35,6 @@ import voloshyn.android.weather.databinding.WidgetForecastBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
 import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.networkObserver.NetworkObserver
-import voloshyn.android.weather.renderResult.renderSimpleResult
 import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
 import voloshyn.android.weather.presentation.fragment.weather.adapter.HourlyAdapter
@@ -49,7 +47,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
-
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListener {
@@ -62,18 +60,20 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     private lateinit var hourlyAdapter: HourlyAdapter
     private lateinit var dailyAdapter: DailyAdapter
     private lateinit var savedPlacesAdapter: SavedPlacesAdapter
+    private lateinit var scope: LifecycleCoroutineScope
+    private var gpsUnavailableDialog: GpsUnavailableDialog? = null
 
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        observeGpsStatus()
-        observeNetworkStatus()
-    }
+    @Inject
+    lateinit var blurUtil: BlurUtil
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val header = binding.mainNavView.getHeaderView(0)
+        scope = viewLifecycleOwner.lifecycleScope
         widgetForecastBinding = WidgetForecastBinding.bind(binding.root)
         progressBarBinding = ProgressBarBinding.bind(binding.root)
+        drawerLayout = binding.mainDrawer
+        headerBinding = HeaderLayoutBinding.bind(header)
         val displayMetrics = requireContext().resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
 
@@ -88,17 +88,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         }
 
         calculateVisibilityPercentage()
-        drawerLayout = binding.mainDrawer
-        val header = binding.mainNavView.getHeaderView(0)
-        headerBinding = HeaderLayoutBinding.bind(header)
-        hourlyAdapter = HourlyAdapter()
-        dailyAdapter = DailyAdapter()
-        savedPlacesAdapter = SavedPlacesAdapter(this)
-        initDailyRecycler()
-        initHourlyRecycler()
-        initPlacesRecycler()
+        observeGpsStatus()
+        observeNetworkStatus()
+        initRecyclers()
         setupViewListeners()
-        renderUi()
+        collectUi()
         sideEffects()
         collectTime()
 
@@ -120,83 +114,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         return screenHeight - insetsValue - layoutMeasure
     }
 
-    private fun renderUi() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.state.collectLatest { state ->
-                renderSimpleResult(binding.scroll,
-                    isError = state.isError,
-                    isLoading = state.isLoading,
-                    onLoading = {
-                        progressBarBinding.progressBar.visibility = View.VISIBLE
-                        binding.errorDialog.errorDialog.visibility = View.GONE
-                        binding.backgroundImage.setImageDrawable(
-                            AppCompatResources.getDrawable(
-                                requireContext(),
-                                R.drawable.splash
-                            )
-                        )
-                        binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
-                    },
-                    onError = {
-                        binding.errorDialog.errorDialog.visibility = View.VISIBLE
-                        binding.errorDialog.tvError.text = state.errorMessage
-                        progressBarBinding.progressBar.visibility = View.GONE
-
-                    }, onSuccess = {
-                        updateUi(state)
-                        binding.errorDialog.errorDialog.visibility = View.GONE
-                        progressBarBinding.progressBar.visibility = View.GONE
-                    }
-                )
-            }
-
-        }
-
-
-    }
-
-    private suspend fun updateUi(state: WeatherState) {
-        updateMainWeatherWidget(state.currentForecast)
-        updateWidgetForecast(state)
-        updateHeader(state.placesState)
-        updateImage(state.imageUrl)
-        binding.apply {
-            binding.toolbar.tvToolbarTitle.text = state.placeName
-            if (state.places.first <= 3) {
-                headerBinding.bttTogglePlacesSize.visibility = View.GONE
-            } else {
-                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
-            }
-            savedPlacesAdapter.submitList(state.places.second)
-
-        }
-    }
-
     private suspend fun updateImage(url: String) {
         if (url.isNotEmpty()) {
-            BlurUtil.initialize(binding.backgroundImage.context, url)
-            lifecycleScope.launch {
+            blurUtil.initialize(binding.backgroundImage.context, url)
+            scope.launch {
                 viewModel.blurState.collectLatest { blur ->
-                    BlurUtil.setBlurredImageFromUrl(
+                    blurUtil.setBlurredImageFromUrl(
                         binding.backgroundImage,
                         (blur.toFloat()) / 8f
                     )
                 }
             }
-        } else {
-            binding.backgroundImage.setImageDrawable(
-                AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.splash
-                )
-            )
-            binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
-        }
+        } else defaultBackground()
     }
 
 
-    private fun updateHeader(placesState: PlacesSizeState) {
-        when (placesState) {
+    private fun updateHeader(state: WeatherState) {
+        savedPlacesAdapter.submitList(state.places.second)
+        if (state.places.first <= 4) {
+            headerBinding.bttTogglePlacesSize.visibility = View.GONE
+        } else {
+            headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
+        }
+        when (state.placesState) {
             PlacesSizeState.FULL -> {
                 headerBinding.tvToggleText.text = getString(R.string.show_less)
                 headerBinding.icToggleIcon.setImageResource(R.drawable.ic_expand_less)
@@ -276,31 +216,22 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             tvWeatherTypeDesc.text = WeatherTypeModel.fromWHO(state.weatherCode).weatherType
             ivWeatherTypeIcon.setImageResource(WeatherTypeModel.fromWHO(state.weatherCode).weatherIcon)
         }
-
     }
 
-    private fun initHourlyRecycler() {
+    private fun initRecyclers() {
+        hourlyAdapter = HourlyAdapter()
+        dailyAdapter = DailyAdapter()
+        savedPlacesAdapter = SavedPlacesAdapter(this)
+        //Hourly
         widgetForecastBinding.rvHourlyForecast.adapter = hourlyAdapter
-        widgetForecastBinding.rvHourlyForecast.layoutManager = LinearLayoutManager(
-            this@WeatherFragment.requireContext(), RecyclerView.HORIZONTAL, false
-        )
-    }
-
-    private fun initDailyRecycler() {
+        //Daily
         widgetForecastBinding.rvDaily.adapter = dailyAdapter
-        widgetForecastBinding.rvDaily.layoutManager = LinearLayoutManager(
-            this@WeatherFragment.requireContext(), RecyclerView.VERTICAL, false
-        )
-    }
-
-    private fun initPlacesRecycler() {
-        val rv = headerBinding.rvPlaces
-        rv.adapter = savedPlacesAdapter
-
+        //Places
+        headerBinding.rvPlaces.adapter = savedPlacesAdapter
     }
 
     private fun sideEffects() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        scope.launch {
             viewModel.errorState.collectLatest {
                 if (it.isError) {
                     val text = getString(it.errorMessage)
@@ -309,40 +240,25 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                         text,
                         Toast.LENGTH_LONG
                     ).show()
-
                 }
             }
         }
     }
 
     private fun collectTime() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        scope.launch {
             viewModel.time.collectLatest {
                 binding.toolbar.tvCurrentTime.text = it
             }
         }
-
     }
 
     private fun observeGpsStatus() {
         val fragmentAct = requireActivity() as GpsReceiver
-        var gpsUnavailableDialog: GpsUnavailableDialog? = null
-        lifecycleScope.launch {
+        scope.launch {
             fragmentAct.gpsStatus.collectLatest { status ->
                 status?.let {
-                    when (it) {
-                        GpsStatus.AVAILABLE -> {
-                            gpsUnavailableDialog?.dialog?.dismiss()
-                            gpsUnavailableDialog = null
-                            viewModel.onIntent(UpdateGpsStatus(it))
-                        }
-
-                        GpsStatus.UNAVAILABLE -> {
-                            gpsUnavailableDialog = GpsUnavailableDialog()
-                            gpsUnavailableDialog?.show(childFragmentManager, null)
-                            viewModel.onIntent(UpdateGpsStatus(it))
-                        }
-                    }
+                    viewModel.onIntent(UpdateGpsStatus(it))
                 }
             }
         }
@@ -350,16 +266,50 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     private fun observeNetworkStatus() {
         val fragmentAct = requireActivity() as NetworkObserver
-        lifecycleScope.launch {
+        scope.launch {
             fragmentAct.networkStatusFlow.collectLatest { network ->
                 network?.let {
-                    when (it) {
-                        NetworkStatus.AVAILABLE -> {
-                            viewModel.onIntent(UpdateNetworkStatus(it))
-                        }
+                    viewModel.onIntent(UpdateNetworkStatus(it))
+                }
+            }
+        }
+    }
 
-                        NetworkStatus.LOST, NetworkStatus.UNAVAILABLE -> {
-                            viewModel.onIntent(UpdateNetworkStatus(NetworkStatus.UNAVAILABLE))
+    override fun onItemClick(place: Place) {
+        drawerLayout.close()
+        viewModel.onIntent(FetchWeatherForSavedPlace(place))
+    }
+
+    private fun collectUi() {
+        scope.launch {
+            viewModel.state.collectLatest { state ->
+                renderStateToUi(
+                    state.isLoading,
+                    state.isError,
+                    state.errorMessage
+                ) {
+                    updateMainWeatherWidget(state.currentForecast)
+                    updateWidgetForecast(state)
+                    updateHeader(state)
+                    updateImage(state.imageUrl)
+                    binding.toolbar.tvToolbarTitle.text = state.placeName
+                    state.gpsStatus.let {
+                        when (it) {
+                            GpsStatus.AVAILABLE -> {
+                                gpsUnavailableDialog?.dialog?.dismiss()
+                                gpsUnavailableDialog = null
+                            }
+
+                            GpsStatus.UNAVAILABLE -> {
+//                    if(headerBinding.currentLocation.)
+                                gpsUnavailableDialog = GpsUnavailableDialog()
+                                gpsUnavailableDialog?.show(childFragmentManager, null)
+
+                            }
+
+                            else -> {
+                                Unit
+                            }
                         }
                     }
                 }
@@ -367,9 +317,40 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         }
     }
 
-    override fun onClick(place: Place) {
-        drawerLayout.close()
-        viewModel.onIntent(FetchWeatherForSavedPlace(place))
+    private suspend fun renderStateToUi(
+        isLoading: Boolean, isError: Boolean, errorMessage: String,
+        onSuccess: suspend () -> Unit
+    ) {
+        progressBarBinding.progressBar.visibility =
+            if (isLoading) View.VISIBLE else View.GONE
+
+        binding.errorDialog.errorDialog.visibility =
+            if (!isError) View.GONE else View.VISIBLE
+        when {
+            isLoading -> {
+                defaultBackground()
+            }
+
+            isError -> {
+                defaultBackground()
+                binding.errorDialog.tvError.text = errorMessage
+            }
+
+            else -> {
+                onSuccess()
+            }
+        }
+
+    }
+
+    private fun defaultBackground() {
+        binding.backgroundImage.setImageDrawable(
+            AppCompatResources.getDrawable(
+                requireContext(),
+                R.drawable.splash
+            )
+        )
+        binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
     }
 
     companion object {

@@ -16,8 +16,8 @@ class GpsUnavailableDialog : DialogFragment(R.layout.dialog_no_gps) {
         super.onViewCreated(view, savedInstanceState)
         val dialog = dialog
         dialog?.apply {
-            setCanceledOnTouchOutside(false)
-            setCancelable(false)
+            setCanceledOnTouchOutside(true)
+            setCancelable(true)
         }
         binding.bttEnabledLocation.setOnClickListener {
             showAppSettings()

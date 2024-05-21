@@ -12,8 +12,7 @@
         android:id="@+id/background_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
-    </ImageView>
+        android:fitsSystemWindows="true"></ImageView>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
@@ -100,7 +99,8 @@
                 android:textAppearance="@style/TextAppearance.Weather.DisplayMedium"
                 android:textSize="46sp" />
 
-            <include layout="@layout/widget_forecast" />
+            <include
+                layout="@layout/widget_forecast" />
 
 
         </LinearLayout>

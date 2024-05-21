@@ -17,18 +17,17 @@ import voloshyn.android.data.dataSource.popularPlacesStorage.multichoice.MultiCh
 import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.useCase.onBoarding.second.OnBoardingCompletedUseCase
 import voloshyn.android.domain.useCase.onBoarding.second.SaveChosenPopularPlacesUseCase
-import voloshyn.android.weather.di.PlacesMultiChoice
+import voloshyn.android.data.di.PlacesMultiChoice
 import javax.inject.Inject
 
 @HiltViewModel
 class OnBoardingViewModel @Inject constructor(
     private val inMemoryPopularPlacesRepositoryImpl: InMemoryPopularPlacesRepositoryImpl,
-    @PlacesMultiChoice private val multiChoiceHandlerImpl: MultiChoiceHandler<PopularPlaceData>,
+    @PlacesMultiChoice private val multiChoice: MultiChoiceHandler<PopularPlaceData>,
     private val saveChosenPopularPlacesUseCase: SaveChosenPopularPlacesUseCase,
     private val onFinished: OnBoardingCompletedUseCase
 ) : ViewModel() {
     private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.d("EXCEPTION_HANDLER", throwable.toString())
         Log.d("EXCEPTION_HANDLER", throwable.message.toString())
     }
     private var viewModelScope: CoroutineScope = CoroutineScope(coroutineExceptionHandler)
@@ -39,13 +38,13 @@ class OnBoardingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            multiChoiceHandlerImpl.setItemsFlow(
+            multiChoice.setItemsFlow(
                 viewModelScope,
                 inMemoryPopularPlacesRepositoryImpl.getPopularPlaces()
             )
             val combinedFlow = combine(
                 inMemoryPopularPlacesRepositoryImpl.getPopularPlaces(),
-                multiChoiceHandlerImpl.listen(),
+                multiChoice.listen(),
                 ::merge
             )
             combinedFlow.collectLatest {
@@ -74,20 +73,18 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun toggleSelection(place: PopularPlaceData) {
-        multiChoiceHandlerImpl.toggle(place)
+        multiChoice.toggle(place)
     }
 
     fun checkedItems(): Array<Place> {
-        val multiChoice = multiChoiceHandlerImpl as MultiChoiceState<PopularPlaceData>
-        val elements = multiChoice.checkedItem
-        val placesNameArray =
-            Array<Place>(elements.size) { Place() }
-        elements.map { it }
-            .forEachIndexed { index, name ->
-                placesNameArray[index] =
-                    inMemoryPopularPlacesRepositoryImpl.toDomainPopularPlace(name)
+        val multiChoice = multiChoice as MultiChoiceState<PopularPlaceData>
+        val checkedItems = multiChoice.checkedItem
+        val places = Array<Place>(checkedItems.size) { Place() }
+        checkedItems.forEachIndexed { index, element ->
+                places[index] =
+                    inMemoryPopularPlacesRepositoryImpl.toDomainPopularPlace(element)
             }
-        return placesNameArray
+        return places
     }
 
     fun save(array: Array<Place>) {

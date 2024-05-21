@@ -8,21 +8,28 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import android.util.Log
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import voloshyn.android.data.di.DefaultDispatcher
 import voloshyn.android.weather.R
-import kotlin.ClassCastException
+import javax.inject.Inject
 
-object BlurUtil {
+class BlurUtil @Inject constructor(
+    @DefaultDispatcher private val dispatcher: CoroutineDispatcher
+){
 
     private lateinit var imageDrawable: Drawable
     private lateinit var bitmap: Bitmap
 
-    private fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap {
+    //Maybe using flow here
+    private suspend fun blurBitmap(context: Context, bitmap: Bitmap, blurRadius: Float): Bitmap = withContext(dispatcher){
         val rs = RenderScript.create(context)
         var blurredBitmap = bitmap.copy(bitmap.config, false)
 
@@ -39,9 +46,8 @@ object BlurUtil {
         script.setInput(input)
         script.forEach(output)
         output.copyTo(blurredBitmap)
-
         rs.destroy()
-        return blurredBitmap
+        return@withContext blurredBitmap
 
     }
 
@@ -61,17 +67,17 @@ object BlurUtil {
         try {
             imageDrawable = (imageLoader.execute(request) as SuccessResult).drawable
             bitmap = imageDrawable.toBitmap()
-        }catch (e:Exception){
-            imageDrawable= context.getDrawable(R.drawable.welcome_screen_background)!!
+        } catch (e: Exception) {
+            imageDrawable = context.getDrawable(R.drawable.welcome_screen_background)!!
             bitmap = imageDrawable.toBitmap()
         }
 
     }
 
-    fun setBlurredImageFromUrl(
+   suspend fun setBlurredImageFromUrl(
         imageView: ImageView,
         blurRadius: Float
-    ) {
+    ) = withContext(Dispatchers.Main){
         val convertedBitmap = convertBitmap(bitmap)
         if (blurRadius > 0f) {
             val blurredBitmap = blurBitmap(imageView.context, convertedBitmap, blurRadius)

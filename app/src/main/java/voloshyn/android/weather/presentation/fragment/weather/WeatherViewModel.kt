@@ -1,5 +1,6 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -36,7 +37,6 @@ import voloshyn.android.weather.renderResult.toStringResources
 import javax.inject.Inject
 
 private const val CURRENT_LOCATION_DEFAULT_ID = 0
-private const val EMPTY_STRING = ""
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -101,16 +101,11 @@ class WeatherViewModel @Inject constructor(
                     when (_state.value.placesState) {
                         PlacesSizeState.FULL -> {
                             getSavedPlaces(PlacesSizeState.TRIM)
-                            _state.update {
-                                it.copy(placesState = PlacesSizeState.TRIM)
-                            }
                         }
 
                         PlacesSizeState.TRIM, PlacesSizeState.DEFAULT -> {
                             getSavedPlaces(PlacesSizeState.FULL)
-                            _state.update {
-                                it.copy(placesState = PlacesSizeState.FULL)
-                            }
+
                         }
                     }
                 }
@@ -127,14 +122,16 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    /** It is ok */
+
     private fun getSavedPlaces(placesSizeState: PlacesSizeState) {
         viewModelScope.launch {
             val result = getSavedPlaces.invoke(placesSizeState)
             result.collectLatest { list ->
+                Log.d("DIALOG", "placesUpdate")
                 _state.update {
                     it.copy(
-                        places = Pair(list.size, list),
+                        places = Pair(first = list.first, second = list.second),
+                        placesState = placesSizeState
                     )
                 }
             }
@@ -142,7 +139,6 @@ class WeatherViewModel @Inject constructor(
 
     }
 
-    /** It is ok */
     private suspend fun getPlaceById(placeId: Int): Place {
         val appResult = getPlace.invoke(placeId)
         return when (appResult) {
@@ -174,17 +170,24 @@ class WeatherViewModel @Inject constructor(
                 _place
             }
         }
-        val weatherAndImage: WeatherAndImage = getWeatherAndImage(place)
-        updateState(place.name, weatherAndImage)
-        observeTime(place.timezone)
-
+        place?.let {
+            val weatherAndImage: WeatherAndImage = getWeatherAndImage(place)
+            updateState(place.name, weatherAndImage)
+            observeTime(place.timezone)
+        }.also {
+            if (place == null) {
+                _state.update {
+                    it.copy(isLoading = false)
+                }
+            }
+        }
 
     }
 
     /** When app is started it is default location for weather data. So if locationProvider will be disabled or
      * user denied permission we cant fetch weather data fo current location but we still can
      * search for favourite places and fetch weather data for them*/
-    private suspend fun getCurrentUserLocationWithTimezone(): Place {
+    private suspend fun getCurrentUserLocationWithTimezone(): Place? {
         val result = getCurrentLocationUseCase.invoke()
         return when (result) {
             is AppResult.Success -> {
@@ -203,8 +206,8 @@ class WeatherViewModel @Inject constructor(
             }
 
             is AppResult.Error -> {
-                result.error.toStringResources()
-                Place.EMPTY_PLACE_ERROR
+                emitErrorAndResetStatus(result.error.toStringResources())
+                null
             }
 
 
@@ -322,6 +325,7 @@ class WeatherViewModel @Inject constructor(
             )
         }
     }
+
 
 }
 

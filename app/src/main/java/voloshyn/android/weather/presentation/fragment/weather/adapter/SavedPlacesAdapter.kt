@@ -29,7 +29,7 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
 
     override fun onClick(v: View) {
         val place = v.tag as Place
-        listener.onClick(place)
+        listener.onItemClick(place)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitiesItemViewHolder {
@@ -59,5 +59,5 @@ class SavedPlacesAdapter(private val listener: OnPlaceClickListener) :
 }
 
 interface OnPlaceClickListener {
-    fun onClick(place: Place)
+    fun onItemClick(place: Place)
 }

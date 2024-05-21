@@ -1,10 +1,9 @@
 package voloshyn.android.domain.model.place
 
-private const val EMPTY_STRING = ""
+ const val EMPTY_STRING = ""
 
 /**
- * Data class for the place that will be use in Ui layer in recycler and for getting
- * weather and image
+ * Data class for the place that will be use in Ui layer
  * */
 data class Place(
     val id: Int = 0,
@@ -21,7 +20,6 @@ data class Place(
     }
 
     companion object {
-
         val EMPTY_PLACE_ERROR = Place(
             id = 0,
             name = EMPTY_STRING,

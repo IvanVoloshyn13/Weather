@@ -23,7 +23,7 @@ interface PlaceRepository {
 
     /** Return saved list of [Place] from local dataBase
      * @param [placesState]*/
-    fun getPlaces(placesState: PlacesSizeState): Flow<Places>
+    fun getPlaces(placesState: PlacesSizeState): Flow<Pair<Int, Places>>
 
     /** Return one [Place] from local dataBase
      * @param [placeId] */

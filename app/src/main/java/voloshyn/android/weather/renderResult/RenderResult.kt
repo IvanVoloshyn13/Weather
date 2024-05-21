@@ -27,7 +27,7 @@ suspend fun renderSimpleResult(
         onSuccess = {
             root.children.filter { it.id != R.id.error_dialog }
                 .forEach { it.visibility = View.VISIBLE }
-            onSuccess()
+          onSuccess()
         }
     )
 }

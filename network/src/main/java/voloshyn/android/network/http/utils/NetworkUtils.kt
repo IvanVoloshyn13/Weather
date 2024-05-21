@@ -17,22 +17,22 @@ suspend fun <T> executeApiCall(
     shouldRetry: (Exception) -> Boolean = ::defaultShouldRetry,
     errorHandler: (Int, String?) -> Exception = ::defaultErrorHandler
 ): T {
-    repeat(maxAttempts) { attempt ->
-        try {
-            return call().toResult(errorHandler)
-        } catch (e:NoConnectivityException){
-            throw e
-        } catch (e: Exception) {
-            if (attempt == (maxAttempts - 1) || !shouldRetry(e)) {
-                if (e is JsonDataException) {
-                    Log.e("APICall", e.toString())
-                }
+        repeat(maxAttempts) { attempt ->
+            try {
+                return call().toResult(errorHandler)
+            } catch (e: NoConnectivityException) {
                 throw e
+            } catch (e: Exception) {
+                if (attempt == (maxAttempts - 1) || !shouldRetry(e)) {
+                    if (e is JsonDataException) {
+                        Log.e("APICall", e.toString())
+                    }
+                    throw e
+                }
             }
+            val nextDelay = attempt * attempt * defaultDelay
+            delay(nextDelay)
         }
-        val nextDelay = attempt * attempt * defaultDelay
-        delay(nextDelay)
-    }
     throw IllegalStateException("Unknown exception from executeWithRetry.")
 }
 
@@ -48,7 +48,7 @@ private fun defaultErrorHandler(code: Int, message: String?) = ApiException(code
 private fun <T> Response<T>.toResult(errorHandler: (Int, String?) -> Exception): T {
     return try {
         if (isSuccessful) {
-         body()!!
+            body()!!
         } else {
             val error = errorBody()?.let {
                 val errorAdapter = Moshi.Builder().build().adapter(Error::class.java)
@@ -62,5 +62,7 @@ private fun <T> Response<T>.toResult(errorHandler: (Int, String?) -> Exception):
     }
 
 }
+
+
 
 

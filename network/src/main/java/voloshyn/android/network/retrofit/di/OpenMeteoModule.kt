@@ -1,5 +1,6 @@
 package voloshyn.android.network.retrofit.di
 
+import android.util.Log
 import com.slack.eithernet.ApiResultCallAdapterFactory
 import dagger.Module
 import dagger.Provides
@@ -29,9 +30,10 @@ internal object OpenMeteoModule {
     ): Retrofit.Builder {
         val callFactory = Call.Factory { request -> okHttpClient.newCall(request) }
         return Retrofit.Builder()
+            .callFactory(callFactory)
             .addConverterFactory(moshiConverterFactory)
             .addCallAdapterFactory(ApiResultCallAdapterFactory)
-            .callFactory(callFactory)
+
 
     }
 

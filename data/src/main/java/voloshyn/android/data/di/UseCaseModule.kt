@@ -1,4 +1,4 @@
-package voloshyn.android.weather.di
+package voloshyn.android.data.di
 
 import android.content.Context
 import dagger.Module
@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 import voloshyn.android.data.dataSource.popularPlacesStorage.InMemoryPopularPlacesRepositoryImpl
 import voloshyn.android.domain.location.FusedLocationProvider
 import voloshyn.android.domain.repository.OnBoardingRepository
@@ -27,12 +28,26 @@ import voloshyn.android.domain.useCase.weather.GetPlaceByIdUseCase
 import voloshyn.android.domain.useCase.weather.GetSavedPlacesUseCase
 import voloshyn.android.domain.useCase.weather.GetTimeForSelectedPlaceUseCase
 
-
 @Module
 @InstallIn(ViewModelComponent::class)
-internal object UseCaseModule {
+ object UseCaseModule {
+
+    //onBoarding
 
     @Provides
+    @ViewModelScoped
+    fun provideShowOnBoardingScreenUseCase(repository: OnBoardingRepository): GetOnBoardingStatusUseCase {
+        return GetOnBoardingStatusUseCase(repository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideOnFinishedOnBoardingUseCase(repository: OnBoardingRepository): OnBoardingCompletedUseCase {
+        return OnBoardingCompletedUseCase(repository)
+    }
+
+    @Provides
+    @ViewModelScoped
     fun provideGetShowNotificationStatus(
         pushNotificationRepository: PushNotificationRepository
     ): GetPushNotificationStatusUseCase =
@@ -40,6 +55,7 @@ internal object UseCaseModule {
 
 
     @Provides
+    @ViewModelScoped
     fun provideSaveNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
     ): SavePushNotificationSettingsUseCase {
@@ -47,61 +63,62 @@ internal object UseCaseModule {
     }
 
     @Provides
+    @ViewModelScoped
     fun providePushNotificationSettingsUseCase(
         pushNotificationRepository: PushNotificationRepository
     ): PushNotificationSettingsUseCase = PushNotificationSettingsUseCase(pushNotificationRepository)
 
+    //UserLocation
     @Provides
-    fun provideInMemoryPlacesRepository(@ApplicationContext context: Context): InMemoryPopularPlacesRepositoryImpl =
-        InMemoryPopularPlacesRepositoryImpl(context)
-
-    @Provides
-    fun provideSavePopularPlacesUseCase(repository: PlaceRepository): SaveChosenPopularPlacesUseCase =
-        SaveChosenPopularPlacesUseCase(repository)
-
-    @Provides
+    @ViewModelScoped
     fun provideGetCurrentLocationUseCase(fusedLocationProvider: FusedLocationProvider): GetCurrentLocationUseCase =
         GetCurrentLocationUseCase(fusedLocationProvider)
 
+    //Time for current Place
     @Provides
-    fun provideShowOnBoardingScreenUseCase(repository: OnBoardingRepository): GetOnBoardingStatusUseCase {
-        return GetOnBoardingStatusUseCase(repository)
-    }
-
-    @Provides
-    fun provideOnFinishedOnBoardingUseCase(repository: OnBoardingRepository): OnBoardingCompletedUseCase {
-        return OnBoardingCompletedUseCase(repository)
-    }
-
-
-    @Provides
+    @ViewModelScoped
     fun provideGetTimeForLocationUseCase(timeRepository: TimeForCurrentPlaceRepository): GetTimeForSelectedPlaceUseCase {
         return GetTimeForSelectedPlaceUseCase(timeRepository)
     }
 
+    //Place
+    @Provides
+    @ViewModelScoped
+    fun provideInMemoryPlacesRepository(@ApplicationContext context: Context): InMemoryPopularPlacesRepositoryImpl =
+        InMemoryPopularPlacesRepositoryImpl(context)
 
     @Provides
+    @ViewModelScoped
+    fun provideSavePopularPlacesUseCase(repository: PlaceRepository): SaveChosenPopularPlacesUseCase =
+        SaveChosenPopularPlacesUseCase(repository)
+
+    @Provides
+    @ViewModelScoped
     fun provideSearchPlacesUseCase(repository: PlaceRepository): SearchPlaceByNameUseCase {
         return SearchPlaceByNameUseCase(repository)
     }
 
     @Provides
-    fun provideSaveLocationUseCase(repository: PlaceRepository): SavePlaceUseCase {
+    @ViewModelScoped
+    fun provideSavePlaceUseCase(repository: PlaceRepository): SavePlaceUseCase {
         return SavePlaceUseCase(repository)
     }
 
-
     @Provides
+    @ViewModelScoped
     fun provideGetSavedPlacesUseCase(repository: PlaceRepository): GetSavedPlacesUseCase {
         return GetSavedPlacesUseCase(repository)
     }
 
     @Provides
+    @ViewModelScoped
     fun provideGetPlaceByIdUseCase(repository: PlaceRepository): GetPlaceByIdUseCase {
         return GetPlaceByIdUseCase(repository)
     }
 
+    //WeatherAndImage
     @Provides
+    @ViewModelScoped
     fun provideFetchWeatherAndImageUseCase(repository: WeatherAndImageRepository): FetchWeatherAndImageDataUseCase {
         return FetchWeatherAndImageDataUseCase(repository)
     }

@@ -17,6 +17,6 @@ interface WeatherAndImageRepository {
      * @param [place]
      * */
 
-    //TODO create tuples instead Place , PlaceTuples(id,name)
+    // TODO create tuples instead Place , PlaceTuples(id,name)
     suspend fun get(place: Place): AppResult<WeatherAndImage, DataError>
 }

@@ -62,7 +62,6 @@ class SearchViewModel @Inject constructor(
                     }
 
                 } catch (e: Exception) {
-                    Log.d("CITY_ERROR", e.message.toString())
                     _state.emit(
                         FragmentSearchState(
                             isLoading = false,

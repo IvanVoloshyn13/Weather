@@ -2,12 +2,13 @@ package voloshyn.android.data.repository
 
 import android.content.Context
 import android.database.SQLException
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import voloshyn.android.data.dataSource.local.database.AppDatabase
+import voloshyn.android.data.dataSource.local.database.dao.PlaceDao
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.logError
 import voloshyn.android.data.mappers.toDomainError
@@ -34,7 +35,7 @@ private const val INITIAL_CITIES_LIST_SIZE = 4
 class PlaceRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val searchCityService: ApiSearchCityService,
-    private val database: AppDatabase,
+    private val placeDao: PlaceDao,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) : PlaceRepository {
@@ -55,25 +56,25 @@ class PlaceRepositoryImpl @Inject constructor(
         }
 
     override suspend fun storePlace(place: Place) {
-        database.placeDao().storePlace(place.toPlaceEntity())
+        placeDao.storePlace(place.toPlaceEntity())
     }
 
     override suspend fun storePlaces(places: Array<Place>) {
-        database.placeDao().storePlaces(places.toPlaceEntityArray())
+        placeDao.storePlaces(places.toPlaceEntityArray())
     }
 
-    override fun getPlaces(placesState: PlacesSizeState): Flow<Places> {
-        val placesCount = database.placeDao().placesRowCount()
+    override fun getPlaces(placesState: PlacesSizeState): Flow<Pair<Int, Places>> {
         var limit = 0
         return try {
-            limit = findLimit(placesCount, placesState)
-            val placeEntityList = database.placeDao().getAllPlaces(limit)
-            val placesFlow: Flow<List<Place>> = placeEntityList.map {
-                it.map { placeEntity ->
+            val result = placeDao.placesRowCount().map { placesCount ->
+                limit = findLimit(placesCount, placesState)
+                val places = placeDao.getPlaces(limit)
+                val list = places.map { placeEntity ->
                     placeEntity.toPlace()
                 }
+                Pair(placesCount, list)
             }
-            placesFlow
+            result
         } catch (e: IOException) {
             logger.logError(this::class, e)
             throw e
@@ -100,7 +101,7 @@ class PlaceRepositoryImpl @Inject constructor(
 
     override suspend fun getPlaceById(placeId: Int): AppResult<Place, DataError> {
         return try {
-            val appResult = database.placeDao().getPlace(placeId)
+            val appResult = placeDao.getPlace(placeId)
             AppResult.Success(data = appResult.toPlace())
         } catch (e: SQLException) {
             AppResult.Error(error = e.toDomainError())
