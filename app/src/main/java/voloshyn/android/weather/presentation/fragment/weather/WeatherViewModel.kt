@@ -101,16 +101,11 @@ class WeatherViewModel @Inject constructor(
                     when (_state.value.placesState) {
                         PlacesSizeState.FULL -> {
                             getSavedPlaces(PlacesSizeState.TRIM)
-                            _state.update {
-                                it.copy(placesState = PlacesSizeState.TRIM)
-                            }
                         }
 
                         PlacesSizeState.TRIM, PlacesSizeState.DEFAULT -> {
                             getSavedPlaces(PlacesSizeState.FULL)
-                            _state.update {
-                                it.copy(placesState = PlacesSizeState.FULL)
-                            }
+
                         }
                     }
                 }
@@ -132,9 +127,11 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             val result = getSavedPlaces.invoke(placesSizeState)
             result.collectLatest { list ->
+                Log.d("DIALOG", "placesUpdate")
                 _state.update {
                     it.copy(
                         places = Pair(first = list.first, second = list.second),
+                        placesState = placesSizeState
                     )
                 }
             }

@@ -18,6 +18,11 @@ internal object DispatcherModule {
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
+
+    @Provides
+    @Singleton
+    @DefaultDispatcher
+    fun provideIDefaultDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
 @Retention(AnnotationRetention.BINARY)

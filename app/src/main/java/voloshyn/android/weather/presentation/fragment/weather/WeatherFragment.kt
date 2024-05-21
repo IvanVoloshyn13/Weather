@@ -1,7 +1,9 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
+import android.content.res.Resources
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -18,13 +20,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import voloshyn.android.data.model.WeatherTypeModel
-import voloshyn.android.domain.NetworkStatus
 import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.model.place.PlacesSizeState
 import voloshyn.android.domain.model.weather.components.CurrentForecast
@@ -48,8 +47,7 @@ import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
-import voloshyn.android.weather.renderResult.renderSimpleResult
-
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListener {
@@ -65,12 +63,17 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     private lateinit var scope: LifecycleCoroutineScope
     private var gpsUnavailableDialog: GpsUnavailableDialog? = null
 
+    @Inject
+    lateinit var blurUtil: BlurUtil
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val header = binding.mainNavView.getHeaderView(0)
         scope = viewLifecycleOwner.lifecycleScope
-
         widgetForecastBinding = WidgetForecastBinding.bind(binding.root)
         progressBarBinding = ProgressBarBinding.bind(binding.root)
+        drawerLayout = binding.mainDrawer
+        headerBinding = HeaderLayoutBinding.bind(header)
         val displayMetrics = requireContext().resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
 
@@ -85,19 +88,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         }
 
         calculateVisibilityPercentage()
-        drawerLayout = binding.mainDrawer
-        val header = binding.mainNavView.getHeaderView(0)
-        headerBinding = HeaderLayoutBinding.bind(header)
-        hourlyAdapter = HourlyAdapter()
-        dailyAdapter = DailyAdapter()
-        savedPlacesAdapter = SavedPlacesAdapter(this)
         observeGpsStatus()
         observeNetworkStatus()
-        initDailyRecycler()
-        initHourlyRecycler()
-        initPlacesRecycler()
+        initRecyclers()
         setupViewListeners()
-        renderUi()
+        collectUi()
         sideEffects()
         collectTime()
 
@@ -119,104 +114,29 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         return screenHeight - insetsValue - layoutMeasure
     }
 
-    private fun renderUi() {
-        scope.launch {
-            viewModel.state.collectLatest { state ->
-                renderSimpleResult(binding.scroll,
-                    isError = state.isError,
-                    isLoading = state.isLoading,
-                    onLoading = {
-                        progressBarBinding.progressBar.visibility = View.VISIBLE
-                        binding.errorDialog.errorDialog.visibility = View.GONE
-                        binding.backgroundImage.setImageDrawable(
-                            AppCompatResources.getDrawable(
-                                requireContext(),
-                                R.drawable.splash
-                            )
-                        )
-                        binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
-                    },
-                    onError = {
-                        binding.errorDialog.errorDialog.visibility = View.VISIBLE
-                        binding.errorDialog.tvError.text = state.errorMessage
-                        progressBarBinding.progressBar.visibility = View.GONE
-
-                    }, onSuccess = {
-                        updateUi(state)
-                        binding.errorDialog.errorDialog.visibility = View.GONE
-                        progressBarBinding.progressBar.visibility = View.GONE
-                    }
-                )
-            }
-
-        }
-
-
-    }
-
-    private suspend fun updateUi(state: WeatherState) {
-        updateMainWeatherWidget(state.currentForecast)
-        updateWidgetForecast(state)
-        updateHeader(state.placesState)
-        updateImage(state.imageUrl)
-        binding.apply {
-            binding.toolbar.tvToolbarTitle.text = state.placeName
-            if (state.places.first <= 4) {
-                headerBinding.bttTogglePlacesSize.visibility = View.GONE
-            } else {
-                headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
-            }
-            savedPlacesAdapter.submitList(state.places.second)
-
-        }
-
-        state.gpsStatus.let {
-            when (it) {
-                GpsStatus.AVAILABLE -> {
-                    gpsUnavailableDialog?.dialog?.dismiss()
-                    gpsUnavailableDialog = null
-                }
-
-                GpsStatus.UNAVAILABLE -> {
-//                    if(headerBinding.currentLocation.)
-                    gpsUnavailableDialog = GpsUnavailableDialog()
-                    gpsUnavailableDialog?.show(childFragmentManager, null)
-
-                }
-
-                else -> {
-                    Unit
-                }
-            }
-        }
-
-    }
-
     private suspend fun updateImage(url: String) {
         if (url.isNotEmpty()) {
-            BlurUtil.initialize(binding.backgroundImage.context, url)
+            blurUtil.initialize(binding.backgroundImage.context, url)
             scope.launch {
                 viewModel.blurState.collectLatest { blur ->
-                    BlurUtil.setBlurredImageFromUrl(
+                    blurUtil.setBlurredImageFromUrl(
                         binding.backgroundImage,
                         (blur.toFloat()) / 8f
                     )
                 }
             }
-        } else {
-            binding.backgroundImage.setImageDrawable(
-                AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.splash
-                )
-            )
-            binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
-        }
+        } else defaultBackground()
     }
 
 
-    private fun updateHeader(placesState: PlacesSizeState) {
-        when (placesState) {
+    private fun updateHeader(state: WeatherState) {
+        savedPlacesAdapter.submitList(state.places.second)
+        if (state.places.first <= 4) {
+            headerBinding.bttTogglePlacesSize.visibility = View.GONE
+        } else {
+            headerBinding.bttTogglePlacesSize.visibility = View.VISIBLE
+        }
+        when (state.placesState) {
             PlacesSizeState.FULL -> {
                 headerBinding.tvToggleText.text = getString(R.string.show_less)
                 headerBinding.icToggleIcon.setImageResource(R.drawable.ic_expand_less)
@@ -296,27 +216,18 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
             tvWeatherTypeDesc.text = WeatherTypeModel.fromWHO(state.weatherCode).weatherType
             ivWeatherTypeIcon.setImageResource(WeatherTypeModel.fromWHO(state.weatherCode).weatherIcon)
         }
-
     }
 
-    private fun initHourlyRecycler() {
+    private fun initRecyclers() {
+        hourlyAdapter = HourlyAdapter()
+        dailyAdapter = DailyAdapter()
+        savedPlacesAdapter = SavedPlacesAdapter(this)
+        //Hourly
         widgetForecastBinding.rvHourlyForecast.adapter = hourlyAdapter
-        widgetForecastBinding.rvHourlyForecast.layoutManager = LinearLayoutManager(
-            this@WeatherFragment.requireContext(), RecyclerView.HORIZONTAL, false
-        )
-    }
-
-    private fun initDailyRecycler() {
+        //Daily
         widgetForecastBinding.rvDaily.adapter = dailyAdapter
-        widgetForecastBinding.rvDaily.layoutManager = LinearLayoutManager(
-            this@WeatherFragment.requireContext(), RecyclerView.VERTICAL, false
-        )
-    }
-
-    private fun initPlacesRecycler() {
-        val rv = headerBinding.rvPlaces
-        rv.adapter = savedPlacesAdapter
-
+        //Places
+        headerBinding.rvPlaces.adapter = savedPlacesAdapter
     }
 
     private fun sideEffects() {
@@ -340,7 +251,6 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                 binding.toolbar.tvCurrentTime.text = it
             }
         }
-
     }
 
     private fun observeGpsStatus() {
@@ -359,15 +269,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         scope.launch {
             fragmentAct.networkStatusFlow.collectLatest { network ->
                 network?.let {
-                    when (it) {
-                        NetworkStatus.AVAILABLE -> {
-                            viewModel.onIntent(UpdateNetworkStatus(it))
-                        }
-
-                        NetworkStatus.LOST, NetworkStatus.UNAVAILABLE -> {
-                            viewModel.onIntent(UpdateNetworkStatus(NetworkStatus.UNAVAILABLE))
-                        }
-                    }
+                    viewModel.onIntent(UpdateNetworkStatus(it))
                 }
             }
         }
@@ -376,6 +278,79 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     override fun onItemClick(place: Place) {
         drawerLayout.close()
         viewModel.onIntent(FetchWeatherForSavedPlace(place))
+    }
+
+    private fun collectUi() {
+        scope.launch {
+            viewModel.state.collectLatest { state ->
+                renderStateToUi(
+                    state.isLoading,
+                    state.isError,
+                    state.errorMessage
+                ) {
+                    updateMainWeatherWidget(state.currentForecast)
+                    updateWidgetForecast(state)
+                    updateHeader(state)
+                    updateImage(state.imageUrl)
+                    binding.toolbar.tvToolbarTitle.text = state.placeName
+                    state.gpsStatus.let {
+                        when (it) {
+                            GpsStatus.AVAILABLE -> {
+                                gpsUnavailableDialog?.dialog?.dismiss()
+                                gpsUnavailableDialog = null
+                            }
+
+                            GpsStatus.UNAVAILABLE -> {
+//                    if(headerBinding.currentLocation.)
+                                gpsUnavailableDialog = GpsUnavailableDialog()
+                                gpsUnavailableDialog?.show(childFragmentManager, null)
+
+                            }
+
+                            else -> {
+                                Unit
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun renderStateToUi(
+        isLoading: Boolean, isError: Boolean, errorMessage: String,
+        onSuccess: suspend () -> Unit
+    ) {
+        progressBarBinding.progressBar.visibility =
+            if (isLoading) View.VISIBLE else View.GONE
+
+        binding.errorDialog.errorDialog.visibility =
+            if (!isError) View.GONE else View.VISIBLE
+        when {
+            isLoading -> {
+                defaultBackground()
+            }
+
+            isError -> {
+                defaultBackground()
+                binding.errorDialog.tvError.text = errorMessage
+            }
+
+            else -> {
+                onSuccess()
+            }
+        }
+
+    }
+
+    private fun defaultBackground() {
+        binding.backgroundImage.setImageDrawable(
+            AppCompatResources.getDrawable(
+                requireContext(),
+                R.drawable.splash
+            )
+        )
+        binding.backgroundImage.scaleType = ImageView.ScaleType.FIT_XY
     }
 
     companion object {

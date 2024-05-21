@@ -23,7 +23,7 @@ class WeatherAndImageLocalDataSourceRepositoryImpl @Inject constructor(
 
     override suspend fun store(placeId: Int, weatherAndImage: WeatherAndImage, place: Place) {
         try {
-            placeDao.storePlace(place.toPlaceEntity())
+         //   placeDao.storePlace(place.toPlaceEntity())
             val current = weatherAndImage.weatherComponents.currentForecast.toEntity(placeId)
             val hourly = weatherAndImage.weatherComponents.hourlyForecast.toEntity(placeId)
             val daily = weatherAndImage.weatherComponents.dailyForecast.toEntity(placeId)
