@@ -1,9 +1,8 @@
 package voloshyn.android.weather.presentation.fragment.weather
 
-import android.content.res.Resources
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
@@ -33,7 +32,6 @@ import voloshyn.android.weather.databinding.HeaderLayoutBinding
 import voloshyn.android.weather.databinding.ProgressBarBinding
 import voloshyn.android.weather.databinding.WidgetForecastBinding
 import voloshyn.android.weather.gpsReceiver.GpsReceiver
-import voloshyn.android.weather.gpsReceiver.GpsStatus
 import voloshyn.android.weather.networkObserver.NetworkObserver
 import voloshyn.android.weather.presentation.fragment.viewBinding
 import voloshyn.android.weather.presentation.fragment.weather.adapter.DailyAdapter
@@ -43,8 +41,9 @@ import voloshyn.android.weather.presentation.fragment.weather.adapter.SavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForCurrentLocation
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlace
 import voloshyn.android.weather.presentation.fragment.weather.mvi.FetchWeatherForSavedPlaceById
+import voloshyn.android.weather.presentation.fragment.weather.mvi.SetCurrentLocationIsActive
+import voloshyn.android.weather.presentation.fragment.weather.mvi.SetGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.TogglePlaces
-import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateGpsStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.UpdateNetworkStatus
 import voloshyn.android.weather.presentation.fragment.weather.mvi.WeatherState
 import javax.inject.Inject
@@ -76,6 +75,8 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         headerBinding = HeaderLayoutBinding.bind(header)
         val displayMetrics = requireContext().resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
+
+
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -192,7 +193,9 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         headerBinding.currentLocation.cityLayout.setOnClickListener {
             viewModel.onIntent(FetchWeatherForCurrentLocation)
             drawerLayout.close()
+            viewModel.onIntent(SetCurrentLocationIsActive(true))
         }
+
 
         binding.toolbar.bttAddNewCity.setOnClickListener {
             findNavController().navigate(R.id.action_weatherFragment_to_addSearchFragment)
@@ -232,14 +235,22 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
 
     private fun sideEffects() {
         scope.launch {
-            viewModel.errorState.collectLatest {
+            viewModel.uiEffects.collectLatest {
                 if (it.isError) {
-                    val text = getString(it.errorMessage)
+                    val messageFromResources = getString(it.message.stringRes)
+                    val message = it.message.message
                     Toast.makeText(
                         requireContext(),
-                        text,
+                        messageFromResources,
                         Toast.LENGTH_LONG
                     ).show()
+                    if (message.isNotBlank()) {
+                        Toast.makeText(
+                            requireContext(),
+                            message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
@@ -258,7 +269,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
         scope.launch {
             fragmentAct.gpsStatus.collectLatest { status ->
                 status?.let {
-                    viewModel.onIntent(UpdateGpsStatus(it))
+                    viewModel.onIntent(SetGpsStatus(it))
                 }
             }
         }
@@ -278,6 +289,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
     override fun onItemClick(place: Place) {
         drawerLayout.close()
         viewModel.onIntent(FetchWeatherForSavedPlace(place))
+        viewModel.onIntent(SetCurrentLocationIsActive(false))
     }
 
     private fun collectUi() {
@@ -293,34 +305,26 @@ class WeatherFragment : Fragment(R.layout.fragment_weather), OnPlaceClickListene
                     updateHeader(state)
                     updateImage(state.imageUrl)
                     binding.toolbar.tvToolbarTitle.text = state.placeName
-                    state.gpsStatus.let {
-                        when (it) {
-                            GpsStatus.AVAILABLE -> {
-                                gpsUnavailableDialog?.dialog?.dismiss()
-                                gpsUnavailableDialog = null
-                            }
-
-                            GpsStatus.UNAVAILABLE -> {
-//                    if(headerBinding.currentLocation.)
-                                gpsUnavailableDialog = GpsUnavailableDialog()
-                                gpsUnavailableDialog?.show(childFragmentManager, null)
-
-                            }
-
-                            else -> {
-                                Unit
-                            }
-                        }
+                    if (state.showGpsDisabledDialog) {
+                        gpsUnavailableDialog = GpsUnavailableDialog()
+                        gpsUnavailableDialog?.show(childFragmentManager, null)
+                    } else {
+                        gpsUnavailableDialog?.dialog?.dismiss()
+                        gpsUnavailableDialog = null
                     }
                 }
+
             }
+
         }
+
     }
 
     private suspend fun renderStateToUi(
         isLoading: Boolean, isError: Boolean, errorMessage: String,
         onSuccess: suspend () -> Unit
     ) {
+        binding.scroll.visibility = if (isLoading || isError) View.INVISIBLE else View.VISIBLE
         progressBarBinding.progressBar.visibility =
             if (isLoading) View.VISIBLE else View.GONE
 

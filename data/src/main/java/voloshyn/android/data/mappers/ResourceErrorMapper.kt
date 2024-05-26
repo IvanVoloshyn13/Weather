@@ -8,17 +8,6 @@ import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityExc
 import java.io.IOException
 import java.sql.SQLException
 
-
-fun ApiException.toResultError(): DataError.Network {
-    return if (this.isClientError()) {
-        DataError.Network.CLIENT_ERROR
-    } else if (this.isServerError()) {
-        DataError.Network.SERVER_ERROR
-    } else {
-        DataError.Network.UNKNOWN_ERROR
-    }
-}
-
 fun Exception.toDomainError(): DataError {
     return when (this) {
         is CustomSqlException.NoSuchPlaceException->DataError.Locale.DATA_NOT_FOUND
@@ -30,5 +19,13 @@ fun Exception.toDomainError(): DataError {
     }
 }
 
-
+fun ApiException.toResultError(): DataError.Network {
+    return if (this.isClientError()) {
+        DataError.Network.CLIENT_ERROR
+    } else if (this.isServerError()) {
+        DataError.Network.SERVER_ERROR
+    } else {
+        DataError.Network.UNKNOWN_ERROR
+    }
+}
 

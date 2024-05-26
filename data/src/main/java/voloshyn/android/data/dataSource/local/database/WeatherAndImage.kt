@@ -5,10 +5,9 @@ import androidx.room.Relation
 import voloshyn.android.data.dataSource.local.database.entities.CurrentForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.DailyForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.HourlyForecastEntity
-import voloshyn.android.data.dataSource.local.database.entities.PlaceEntity
 import voloshyn.android.data.dataSource.local.database.entities.PlaceImageEntity
 
-data class PlaceWithWeather(
+data class WeatherAndImage(
     @ColumnInfo(name = "id") val placeId: Int,
     @Relation(
         parentColumn = "id",

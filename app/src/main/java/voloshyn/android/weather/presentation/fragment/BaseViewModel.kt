@@ -7,10 +7,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import voloshyn.android.weather.renderResult.ErrorState
+import voloshyn.android.weather.renderResult.BaseUiEffects
 
 open class BaseViewModel : ViewModel() {
+
+
+    protected val baseUiEffects = MutableSharedFlow<BaseUiEffects>()
+
+    protected suspend fun emitErrorAndResetStatus(stringResource: Int) {
+        baseUiEffects.emit(
+            BaseUiEffects(
+                isError = true,
+                errorMessage = stringResource
+            )
+        )
+
+        delay(1000)
+        baseUiEffects.emit(
+            BaseUiEffects(
+                isError = false,
+                errorMessage = stringResource
+            )
+        )
+    }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.d("EXCEPTION_HANDLER", "$throwable,  ${throwable.message}")
@@ -19,24 +38,6 @@ open class BaseViewModel : ViewModel() {
 
     protected val viewModelScope = CoroutineScope(SupervisorJob() + exceptionHandler)
 
-    protected val baseErrorState = MutableSharedFlow<ErrorState>()
-
-    protected suspend fun emitErrorAndResetStatus(stringResource: Int) {
-        baseErrorState.emit(
-            ErrorState(
-                isError = true,
-                errorMessage = stringResource
-            )
-        )
-
-        delay(1000)
-        baseErrorState.emit(
-            ErrorState(
-                isError = false,
-                errorMessage = stringResource
-            )
-        )
-    }
 
     protected suspend fun onTryAgain(block: suspend () -> Unit) {
         block()

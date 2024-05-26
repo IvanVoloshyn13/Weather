@@ -1,6 +1,5 @@
 package voloshyn.android.weather.presentation.fragment.addSearchPlaces
 
-import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -27,7 +26,7 @@ class SearchViewModel @Inject constructor(
         MutableStateFlow(FragmentSearchState())
     val state = _state.asStateFlow()
 
-    val errorState = baseErrorState.asSharedFlow()
+    val errorState = baseUiEffects.asSharedFlow()
 
     fun search(query: String) {
         viewModelScope.launch {

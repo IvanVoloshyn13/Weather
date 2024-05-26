@@ -1,10 +1,9 @@
 package voloshyn.android.data.dataSource.remote
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.data.mappers.toWeatherComponents
+import voloshyn.android.data.nameLater.WeatherComponentsCreator
 import voloshyn.android.domain.model.weather.components.WeatherComponents
 import voloshyn.android.network.http.exceptions.ApiException
 import voloshyn.android.network.http.interceptors.connectivity.NoConnectivityException
@@ -16,6 +15,9 @@ class WeatherRepositoryImpl @Inject constructor(
     private val apiWeatherService: ApiWeatherService,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : WeatherRepository {
+
+    @Inject
+    lateinit var creator: WeatherComponentsCreator
 
     override suspend fun fetchWeather(
         latitude: Double,
@@ -29,7 +31,8 @@ class WeatherRepositoryImpl @Inject constructor(
                 )
             }
             )
-            return@wrapNetworkCallWithException networkResult.toWeatherComponents()
+            return@wrapNetworkCallWithException creator.toWeatherComponents(networkResult)
+
         }
 
     }
@@ -37,7 +40,7 @@ class WeatherRepositoryImpl @Inject constructor(
 
 }
 
- suspend fun <T> wrapNetworkCallWithException(call:suspend () -> T): T {
+suspend fun <T> wrapNetworkCallWithException(call: suspend () -> T): T {
     return try {
         call()
     } catch (e: NoConnectivityException) {

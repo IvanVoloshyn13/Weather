@@ -45,3 +45,12 @@ fun Array<Place>.toPlaceEntityArray(): List<PlaceEntity> {
         countryCode = countryCode
     )
 }
+
+fun Place.toPlaceEntity(): PlaceEntity {
+    return PlaceEntity(
+        id = id,
+        name = name,
+        latitude = latitude, longitude = longitude, timezone = timezone, country = country,
+        countryCode = countryCode
+    )
+}

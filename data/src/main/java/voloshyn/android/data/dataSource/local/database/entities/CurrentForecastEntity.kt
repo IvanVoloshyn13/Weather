@@ -27,7 +27,8 @@ data class CurrentForecastEntity(
     @ColumnInfo(name = "current_temperature") val currentTemperature: Int,
     @ColumnInfo(name = "max_temperature") val maxTemperature: Int,
     @ColumnInfo(name = "min_temperature") val minTemperature: Int,
-    @ColumnInfo(name = "weather_code") val weatherCode: Int
+    @ColumnInfo(name = "weather_code") val weatherCode: Int,
+    @ColumnInfo(name = "created_at", defaultValue = "0") val createdAt: Long
 ) {
 
     interface CurrentForecastTable {

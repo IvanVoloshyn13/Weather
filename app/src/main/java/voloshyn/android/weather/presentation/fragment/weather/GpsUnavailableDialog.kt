@@ -14,7 +14,7 @@ class GpsUnavailableDialog : DialogFragment(R.layout.dialog_no_gps) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val dialog = dialog
+        var dialog = dialog
         dialog?.apply {
             setCanceledOnTouchOutside(true)
             setCancelable(true)
