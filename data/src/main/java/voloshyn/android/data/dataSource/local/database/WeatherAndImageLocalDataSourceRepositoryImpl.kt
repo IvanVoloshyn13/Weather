@@ -7,7 +7,7 @@ import voloshyn.android.data.mappers.toCurrentForecast
 import voloshyn.android.data.mappers.toDailyForecast
 import voloshyn.android.data.mappers.toEntity
 import voloshyn.android.data.mappers.toHourlyForecast
-import voloshyn.android.data.mappers.toPlaceEntity
+import voloshyn.android.data.nameLater.DateTimeHelper
 import voloshyn.android.domain.model.place.Place
 import voloshyn.android.domain.model.unsplash.UnsplashImage
 import voloshyn.android.domain.model.weather.WeatherAndImage
@@ -20,22 +20,22 @@ class WeatherAndImageLocalDataSourceRepositoryImpl @Inject constructor(
     private val placeDao: PlaceDao
 ) : WeatherAndImageLocalDataSourceRepository {
 
+    @Inject
+    lateinit var dateTimeHelper: DateTimeHelper
 
     override suspend fun store(placeId: Int, weatherAndImage: WeatherAndImage, place: Place) {
         try {
-         //   placeDao.storePlace(place.toPlaceEntity())
+            //   placeDao.storePlace(place.toPlaceEntity())
             val current = weatherAndImage.weatherComponents.currentForecast.toEntity(placeId)
             val hourly = weatherAndImage.weatherComponents.hourlyForecast.toEntity(placeId)
             val daily = weatherAndImage.weatherComponents.dailyForecast.toEntity(placeId)
             val image = weatherAndImage.image.toEntity(placeId)
-
             weatherAndImageDao.store(
                 current, hourly, daily, image
             )
         } catch (e: SQLException) {
             throw e
         }
-
     }
 
     override suspend fun get(placeId: Int): WeatherAndImage {
@@ -44,24 +44,28 @@ class WeatherAndImageLocalDataSourceRepositoryImpl @Inject constructor(
         ) {
             throw CustomSqlException.NoSuchPlaceException
         }
-        val weather =
+        val weatherAndImage =
             weatherAndImageDao.get(placeId)
-        val currentForecast =
-            weather.current.toCurrentForecast()
-        val dailyForecast =
-            weather.daily.toDailyForecast()
-        val hourlyForecast =
-            weather.hourly.toHourlyForecast()
-        val image = weather.imageUrl.imageUrl
-
-        return WeatherAndImage(
-            weatherComponents = WeatherComponents(
-                currentForecast,
-                hourlyForecast,
-                dailyForecast
-            ), image = UnsplashImage(image)
-        )
+        weatherAndImage.let {
+            val currentForecast = it.current.toCurrentForecast()
+            val dailyForecast =
+                it.daily.toDailyForecast()
+            val hourlyForecast =
+                it.hourly.toHourlyForecast()
+            val image = it.imageUrl.imageUrl
+            val lastUpdate = dateTimeHelper.run {
+                lastUpdate(it.current.createdAt)
+            }
+            return WeatherAndImage(
+                weatherComponents = WeatherComponents(
+                    currentForecast,
+                    hourlyForecast,
+                    dailyForecast
+                ), image = UnsplashImage(image),
+                lastUpdate = dateTimeHelper.run { lastUpdate.toFormatHour() }
+            )
+        }
     }
-
-
 }
+
+

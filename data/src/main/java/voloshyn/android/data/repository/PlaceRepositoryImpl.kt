@@ -2,7 +2,6 @@ package voloshyn.android.data.repository
 
 import android.content.Context
 import android.database.SQLException
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import voloshyn.android.data.dataSource.local.database.dao.PlaceDao
 import voloshyn.android.data.di.IoDispatcher
-import voloshyn.android.data.logError
+import voloshyn.android.data.nameLater.logError
 import voloshyn.android.data.mappers.toDomainError
 import voloshyn.android.data.mappers.toPlace
 import voloshyn.android.data.mappers.toPlaceEntity

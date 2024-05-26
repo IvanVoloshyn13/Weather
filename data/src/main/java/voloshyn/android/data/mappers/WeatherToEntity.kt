@@ -10,6 +10,7 @@ import voloshyn.android.domain.model.unsplash.UnsplashImage
 import voloshyn.android.domain.model.weather.components.CurrentForecast
 import voloshyn.android.domain.model.weather.components.DailyForecast
 import voloshyn.android.domain.model.weather.components.HourlyForecast
+import java.time.Clock
 
 fun CurrentForecast.toEntity(placeId: Int): CurrentForecastEntity {
     return CurrentForecastEntity(
@@ -17,7 +18,8 @@ fun CurrentForecast.toEntity(placeId: Int): CurrentForecastEntity {
         currentTemperature = currentTemperature,
         maxTemperature = maxTemperature,
         minTemperature = minTemperature,
-        weatherCode = weatherCode
+        weatherCode = weatherCode,
+        createdAt = Clock.systemUTC().millis()
     )
 }
 
@@ -67,12 +69,5 @@ fun UnsplashImage.toEntity(placeId: Int): PlaceImageEntity {
     )
 }
 
-fun Place.toPlaceEntity(): PlaceEntity {
-    return PlaceEntity(
-        id = id,
-        name = name,
-        latitude = latitude, longitude = longitude, timezone = timezone, country = country,
-        countryCode = countryCode
-    )
-}
+
 

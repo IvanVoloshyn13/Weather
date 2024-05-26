@@ -61,7 +61,7 @@ class FusedLocationProviderImpl @Inject constructor(
                         latitude = location.latitude
                         longitude = location.longitude
                         @Suppress("DEPRECATION")
-                        val address = geocoder.getFromLocation(latitude, longitude, 1)
+                         val address = geocoder.getFromLocation(latitude, longitude, 1)
                         if (!address.isNullOrEmpty()) {
                             currentUserLocation = CurrentUserLocation(
                                 latitude = latitude,

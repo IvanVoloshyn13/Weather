@@ -10,6 +10,7 @@ import voloshyn.android.data.dataSource.remote.UnsplashRepository
 import voloshyn.android.data.dataSource.remote.WeatherRepository
 import voloshyn.android.data.di.IoDispatcher
 import voloshyn.android.data.mappers.toDomainError
+import voloshyn.android.data.nameLater.DateTimeHelper
 import voloshyn.android.domain.appError.AppResult
 import voloshyn.android.domain.appError.DataError
 import voloshyn.android.domain.model.place.Place
@@ -30,6 +31,8 @@ class WeatherAndImageRepositoryImpl @Inject constructor(
     private val logger: Logger
 ) : WeatherAndImageRepository {
 
+    @Inject
+    lateinit var dateTimeHelper: DateTimeHelper
 
     override suspend fun get(place: Place): AppResult<WeatherAndImage, DataError> {
         return try {
@@ -75,7 +78,8 @@ class WeatherAndImageRepositoryImpl @Inject constructor(
         e: Exception
     ): AppResult<WeatherAndImage, DataError> {
         return try {
-            AppResult.Error(data = localStorage.get(placeId = placeId), error = e.toDomainError())
+            val cachedData=localStorage.get(placeId = placeId)
+            AppResult.Error(data = cachedData, error = e.toDomainError())
         } catch (e: CustomSqlException.NoSuchPlaceException) {
             AppResult.Error(error = e.toDomainError())
         } catch (e: Exception) {

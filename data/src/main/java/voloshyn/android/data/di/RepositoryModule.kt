@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
-import dagger.hilt.components.SingletonComponent
 import voloshyn.android.data.dataSource.local.database.WeatherAndImageLocalDataSourceRepository
 import voloshyn.android.data.dataSource.local.database.WeatherAndImageLocalDataSourceRepositoryImpl
 import voloshyn.android.data.dataSource.popularPlacesStorage.PopularPlaceData
@@ -16,6 +15,10 @@ import voloshyn.android.data.dataSource.remote.UnsplashRepositoryImpl
 import voloshyn.android.data.dataSource.remote.WeatherRepository
 import voloshyn.android.data.dataSource.remote.WeatherRepositoryImpl
 import voloshyn.android.data.location.FusedLocationProviderImpl
+import voloshyn.android.data.nameLater.DateTimeHelper
+import voloshyn.android.data.nameLater.DateTimeHelperImpl
+import voloshyn.android.data.nameLater.WeatherComponentsCreator
+import voloshyn.android.data.nameLater.WeatherComponentsCreatorImpl
 import voloshyn.android.data.repository.OnBoardingRepositoryImpl
 import voloshyn.android.data.repository.PlaceRepositoryImpl
 import voloshyn.android.data.repository.PushNotificationRepositoryImpl
@@ -41,6 +44,7 @@ interface RepositoryModule {
     fun bindMultiChoiceHandler(
         multiChoice: MultiChoiceHandlerImpl
     ): MultiChoiceHandler<PopularPlaceData>
+
     @Binds
     @ViewModelScoped
     fun bindOnBoardingRepository(repository: OnBoardingRepositoryImpl): OnBoardingRepository
@@ -78,9 +82,18 @@ interface RepositoryModule {
     @Binds
     @ViewModelScoped
     fun bindFusedLocationProvider(fusedLocationProvider: FusedLocationProviderImpl): FusedLocationProvider
+
     @Binds
     @ViewModelScoped
     fun bindLocationTimeRepository(repository: TimeForCurrentPlaceRepositoryImpl): TimeForCurrentPlaceRepository
+
+    @Binds
+    @ViewModelScoped
+    fun bindDateTimeHelper(dateTimeHelper: DateTimeHelperImpl): DateTimeHelper
+
+    @Binds
+    @ViewModelScoped
+    fun bindWeatherComponentsCreator(creator: WeatherComponentsCreatorImpl): WeatherComponentsCreator
 }
 
 @Qualifier

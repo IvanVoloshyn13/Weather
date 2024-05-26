@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import voloshyn.android.data.dataSource.local.database.PlaceWithWeather
+import voloshyn.android.data.dataSource.local.database.WeatherAndImage
 import voloshyn.android.data.dataSource.local.database.entities.CurrentForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.DailyForecastEntity
 import voloshyn.android.data.dataSource.local.database.entities.HourlyForecastEntity
@@ -22,7 +22,7 @@ interface WeatherAndImageDao {
         image: PlaceImageEntity
     )
 
-
+    @Transaction
     @Query(
         "SELECT places.id \n" +
                 " FROM places \n" +
@@ -31,7 +31,7 @@ interface WeatherAndImageDao {
                 " LEFT JOIN current_forecast ON places.id = current_forecast.place_id \n" +
                 " WHERE places.id =:placeId "
     )
-    suspend fun get(placeId: Int): PlaceWithWeather
+    suspend fun get(placeId: Int): WeatherAndImage
 
     @Query("SELECT place_id FROM current_forecast WHERE place_id =:placeId")
     suspend fun weatherExist(placeId: Int): Int
